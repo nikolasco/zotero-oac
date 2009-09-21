@@ -41,6 +41,7 @@ var xpcomFiles = [
 	'data/relations',
 	'data/tag',
 	'data/tags',
+	'data/axedb',
 	'db',
 	'debug',
 	'duplicate',

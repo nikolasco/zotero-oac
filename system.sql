@@ -134,6 +134,27 @@ CREATE TABLE transactionLog (
     FOREIGN KEY (transactionID) REFERENCES transactions(transactionID)
 );
 
+-- AXE region annotation data tables
+
+DROP TABLE IF EXISTS axeRegionTypes;
+CREATE  TABLE axeRegionTypes (
+	regionTypeID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+	regionType TEXT
+);
+DROP INDEX IF EXISTS axeRegionTypes_ID;
+CREATE INDEX axeRegionTypes_ID ON axeRegionTypes(regionTypeID);
+
+
+DROP TABLE IF EXISTS axeRegionFields;
+CREATE  TABLE axeRegionFields (
+	regionFieldID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+	regionField TEXT
+);
+DROP INDEX IF EXISTS axeRegionFields_ID;
+CREATE INDEX axeRegionFields_ID ON axeRegionFields(regionFieldID);
+
+
+
 
 -- unused
 INSERT INTO "fieldFormats" VALUES(1, '.*', 0);
@@ -1256,3 +1277,14 @@ INSERT INTO "syncObjectTypes" VALUES(3, 'item');
 INSERT INTO "syncObjectTypes" VALUES(4, 'search');
 INSERT INTO "syncObjectTypes" VALUES(5, 'tag');
 INSERT INTO "syncObjectTypes" VALUES(6, 'relations');
+
+
+-- AXE region annotation data values
+
+INSERT INTO axeRegionTypes (regionType) VALUES ('rectangle');
+INSERT INTO axeRegionTypes (regionType) VALUES ('polygon');
+INSERT INTO axeRegionTypes (regionType) VALUES ('time');
+
+INSERT INTO axeRegionFields (regionField) VALUES ('X');
+INSERT INTO axeRegionFields (regionField) VALUES ('Y');
+INSERT INTO axeRegionFields (regionField) VALUES ('T');

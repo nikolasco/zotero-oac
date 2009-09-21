@@ -319,3 +319,26 @@ CREATE TABLE proxyHosts (
     FOREIGN KEY (proxyID) REFERENCES proxies(proxyID)
 );
 CREATE INDEX proxyHosts_proxyID ON proxyHosts(proxyID);
+
+
+-- AXE region annotation data tables
+
+CREATE  TABLE axeRegion (
+	regionID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+	sourceItemID INTEGER,
+	regionType INTEGER,
+	FOREIGN KEY (sourceItemID) REFERENCES items(itemID),
+	FOREIGN KEY (regionType) REFERENCES axeRegionTypes(regionTypeID)
+);
+CREATE INDEX axeRegion_ID ON axeRegion(regionID);
+
+
+CREATE  TABLE axeRegionPoints (
+	regionID INTEGER,
+	regionFieldID INTEGER,
+	regionFieldValue,
+	regionFieldOrder INTEGER,
+	FOREIGN KEY (regionID) REFERENCES axeRegion(regionID),
+	FOREIGN KEY (regionFieldID) REFERENCES axeRegionFields(regionFieldID)
+);
+CREATE INDEX axeRegionPoints_regionID ON axeRegionPoints(regionID);
