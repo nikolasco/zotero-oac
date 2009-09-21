@@ -1,0 +1,391 @@
+#zotero-status-bar-icon
+{
+	width: 55px;
+	margin: 0 0 -1px; /* For Fitts's law (on OS X, at least) */
+	padding: 0 0 1px;
+	list-style-image: url(chrome://zotero/skin/zotero_status_bar.png);
+}
+#zotero-status-bar-icon[compact="true"]
+{
+	width: 20px;
+	margin: 0 0 -1px;
+	padding: 0 0 1px;
+	list-style-image: url(chrome://zotero/skin/zotero_status_bar_compact.png);
+}
+#zotero-status-bar-icon[error="true"]
+{
+	list-style-image: url(chrome://zotero/skin/zotero_status_bar_error.png);
+}
+
+#zotero-pane
+{
+	min-height: 32px; /* must match value in ZoteroPane.updateTagSelectorSize() */
+	padding: 0 7px 4px;
+	overflow: hidden;
+}
+
+#zotero-collections-pane
+{
+	min-width: 150px;
+	width: 250px;
+}
+
+#zotero-collections-tree {
+	min-height: 5.2em;
+}
+
+#zotero-collections-tree treechildren::-moz-tree-image
+{
+	margin-right: 5px;
+}
+
+/* Set by setHighlightedRows() and getRowProperties() in collectionTreeView.js) */
+#zotero-collections-tree treechildren::-moz-tree-row(highlighted)
+{
+	background: #FFFF99;
+}
+
+#zotero-pane splitter
+{
+	border: 0;
+	width: 10px;
+	background-color: transparent;
+	background-image: none;
+}
+
+#zotero-items-tree treechildren::-moz-tree-image
+{
+	margin-right: 5px;
+}
+
+/* Style search results, display non-matches in gray */
+#zotero-items-tree treechildren::-moz-tree-cell-text(contextRow) {
+	color: gray;
+}
+
+#zotero-items-tree treechildren::-moz-tree-cell-text(contextRow, selected, focus) {
+	/* This is the default color, not the (platform-specific) highlight color, but at least it
+	   helps to differentiate when clicking on a context row. */
+	color: inherit;
+}
+
+#zotero-advanced-search-dialog #zotero-items-tree
+{
+	min-height: 250px;
+}
+
+#zotero-items-pane
+{
+	min-width: 290px;
+}
+
+#zotero-item-pane
+{
+	width: 335px;
+	min-width: 335px;
+}
+
+#zotero-pane .toolbar
+{
+	height: 32px !important; /* Hard-code this to fix toolbar icon compression on Linux */
+	margin: 0;
+	padding: 0;
+	min-width: 1px;
+}
+
+#zotero-pane toolbarseparator {
+	height:24px;
+}
+
+#zotero-tb-collection-add
+{
+	list-style-image: url('chrome://zotero/skin/toolbar-collection-add.png');
+}
+
+#zotero-tb-group-add
+{
+	list-style-image: url('chrome://zotero/skin/group_add.png');
+}
+
+
+#zotero-tb-tag-selector
+{
+	list-style-image: url(chrome://zotero/skin/tag-selector.png);
+}
+
+#zotero-collections-tree, #zotero-items-tree, #zotero-item-pane > groupbox
+{
+	margin: 0;
+	padding: 0;
+}
+
+
+#zotero-tb-actions-menu
+{
+	list-style-image: url('chrome://zotero/skin/cog.png');
+}
+
+#zotero-tb-add
+{
+	list-style-image: url('chrome://zotero/skin/toolbar-item-add.png');
+}
+
+#zotero-tb-lookup
+{
+	list-style-image: url('chrome://zotero/skin/toolbar-lookup.png');
+}
+
+#zotero-tb-item-from-page
+{
+	list-style-image: url('chrome://zotero/skin/toolbar-item-from-page.png');
+}
+
+/*
+#zotero-tb-link-page
+{
+	list-style-image: url('chrome://zotero/skin/toolbar-link-add.png');
+}
+
+#zotero-tb-snapshot-page
+{
+	list-style-image: url('chrome://zotero/skin/toolbar-snapshot-add.png');
+}
+*/
+
+#zotero-tb-attachment-add
+{
+	list-style-image: url('chrome://zotero/skin/attach.png');
+}
+
+#zotero-tb-note-add
+{
+	list-style-image: url('chrome://zotero/skin/toolbar-note-add.png');
+}
+
+#zotero-menuitem-note
+{
+	list-style-image: url('chrome://zotero/skin/treeitem-note.png');
+}
+
+.zotero-menuitem-attachments-file
+{
+	list-style-image: url('chrome://zotero/skin/treeitem-attachment-file.png');
+}
+
+.zotero-menuitem-attachments-link
+{
+	list-style-image: url('chrome://zotero/skin/treeitem-attachment-link.png');
+}
+
+.zotero-menuitem-attachments-snapshot
+{
+	list-style-image: url('chrome://zotero/skin/treeitem-attachment-snapshot.png');
+}
+
+.zotero-menuitem-attachments-web-link
+{
+	list-style-image: url('chrome://zotero/skin/treeitem-attachment-web-link.png');
+}
+
+#zotero-tb-advanced-search
+{
+	list-style-image: url('chrome://zotero/skin/toolbar-advanced-search.png');
+}
+
+#zotero-tb-sync-storage-cancel
+{
+	list-style-image: url(chrome://zotero/skin/control_stop_blue.png);
+	margin-right: 0;
+}
+
+#zotero-tb-sync-progress
+{
+	min-width: 50px;
+	width: 50px;
+	height: 10px;
+	margin-left: 0;
+}
+
+#zotero-tb-sync-progress-tooltip row label:first-child
+{
+	text-align: right;
+	font-weight: bold;
+}
+
+#zotero-tb-sync-warning
+{
+	list-style-image: url(chrome://zotero/skin/error.png);
+	margin-right: -5px;
+}
+
+#zotero-tb-sync-warning[error=true]
+{
+	list-style-image: url(chrome://zotero/skin/exclamation.png);
+}
+
+#zotero-tb-sync {
+	list-style-image: url(chrome://zotero/skin/arrow_rotate_static.png);
+	margin-left: -2px;
+	margin-right: -2px;
+}
+
+#zotero-tb-sync[status=animate] {
+	list-style-image: url(chrome://zotero/skin/arrow_rotate_animated.png);
+}
+
+#zotero-tb-sync #zotero-last-sync-time
+{
+	color: gray;
+}
+
+#zotero-tb-fullscreen
+{
+	list-style-image: url('chrome://zotero/skin/toolbar-fullscreen-bottom.png');
+}
+
+#zotero-pane-stack[fullscreenmode="true"] #zotero-tb-fullscreen
+{
+	list-style-image: url('chrome://zotero/skin/toolbar-fullscreen-top.png');
+	background: #666666;
+	-moz-border-radius: 6px;
+}
+
+#zotero-tb-search
+{
+	font-size: 11px !important; /* Keep font size in Linux within reason */
+	width: 150px;
+}
+
+#zotero-tb-search[type=conditional-timed] > #zotero-tb-search-cancel
+{
+	width: 10px;
+	height: 10px;
+	margin: 0;
+	padding: 0;
+	cursor: default;
+	list-style-image: url('chrome://zotero/skin/search-cancel.png');
+	-moz-appearance: none !important; /* Fix rendering problems on Linux */
+}
+
+#zotero-tb-search[type=conditional-timed] > #zotero-tb-search-cancel:hover:active
+{
+	list-style-image: url('chrome://zotero/skin/search-cancel-active.png');
+}
+
+#zotero-view-tabbox, #zotero-item-pane-content > groupbox
+{
+	margin: 0;
+}
+
+#zotero-view-tabbox tabs tab
+{
+	margin-top: 0 !important;
+	margin-bottom: 0 !important;
+}
+
+#zotero-view-tabbox tabs tab .tab-text
+{
+	margin-top: .2em !important;
+	margin-bottom: .25em !important;
+}
+
+#zotero-view-item
+{
+	padding: 1.5em .25em .25em;
+}
+
+#zotero-view-item > vbox
+{
+	overflow: auto;
+	margin-left: 5px;
+}
+
+#zotero-splitter
+{
+	border-top: none;
+	border-bottom: 1px solid #A3A3A3;
+	min-height: 4px;
+	max-height: 4px;
+	background-image: none;
+}
+
+#zotero-items-pane-message-box
+{
+	-moz-appearance: listbox;
+}
+
+#zotero-items-pane-message-box description:not(:first-child) {
+	margin-top: .75em;
+}
+
+
+#zotero-annotate-tb-add
+{
+	list-style-image: url('chrome://zotero/skin/annotate-add.png');
+}
+
+#zotero-annotate-tb-collapse
+{
+	list-style-image: url('chrome://zotero/skin/annotate-collapse.png');
+}
+
+#zotero-annotate-tb-highlight
+{
+	list-style-image: url('chrome://zotero/skin/annotate-highlight.png');
+}
+
+#zotero-annotate-tb-unhighlight
+{
+	list-style-image: url('chrome://zotero/skin/annotate-unhighlight.png');
+}
+
+#zotero-annotate-tb-add[tool-active=true]
+{
+	list-style-image: url('chrome://zotero/skin/annotate-add-selected.png');
+}
+
+#zotero-annotate-tb-highlight[tool-active=true]
+{
+	list-style-image: url('chrome://zotero/skin/annotate-highlight-selected.png');
+}
+
+#zotero-annotate-tb-unhighlight[tool-active=true]
+{
+	list-style-image: url('chrome://zotero/skin/annotate-unhighlight-selected.png');
+}
+#zotero-annotate-image-tb-rectangle
+{
+	list-style-image: url('chrome://zotero/skin/icon_rectangle.png');
+}
+
+#zotero-annotate-image-tb-rectangle[tool-active=true]
+{
+	list-style-image: url('chrome://zotero/skin/icon_rectangle_selected.png');
+}
+
+#zotero-annotate-image-tb-polygon
+{
+	list-style-image: url('chrome://zotero/skin/icon_polygon.png');
+	
+}
+
+#zotero-annotate-image-tb-polygon[tool-active=true]
+{
+	list-style-image: url('chrome://zotero/skin/icon_polygon_selected.png');
+}
+#zotero-annotate-image-tb-zoomIn
+{
+	list-style-image: url('chrome://zotero/skin/icon_zoom_in.png');
+}
+#zotero-annotate-image-tb-zoomIn[tool-active=true]
+{
+	list-style-image: url('chrome://zotero/skin/icon_zoom_in.png');
+}
+#zotero-annotate-image-tb-zoomOut
+{
+	list-style-image: url('chrome://zotero/skin/icon_zoom_out.png');
+}
+#zotero-annotate-image-tb-zoomOut[tool-active=true]
+{
+	list-style-image: url('chrome://zotero/skin/icon_zoom_out.png');
+}

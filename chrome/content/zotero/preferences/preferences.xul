@@ -1,0 +1,852 @@
+<?xml version="1.0"?>
+<!--
+    ***** BEGIN LICENSE BLOCK *****
+    
+    Copyright (c) 2006  Center for History and New Media
+                        George Mason University, Fairfax, Virginia, USA
+                        http://chnm.gmu.edu
+    
+    Licensed under the Educational Community License, Version 1.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+    
+    http://www.opensource.org/licenses/ecl1.php
+    
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+    
+    ***** END LICENSE BLOCK *****
+-->
+<!DOCTYPE prefwindow SYSTEM "chrome://zotero/locale/preferences.dtd">
+
+<?xml-stylesheet href="chrome://global/skin/global.css"?>
+<?xml-stylesheet href="chrome://browser/skin/preferences/preferences.css"?>
+<?xml-stylesheet href="chrome://zotero/skin/preferences.css"?>
+
+<!--
+
+To add a new preference:
+	1) Add a new <preference> to <preferences>
+	2) Add a XUL control with a 'preference' attribute
+	3) (Optional) Add additional setup/change logic to preferences.js
+	4) (Optional) To add an observer for a preference change,
+		add an appropriate case in the switch statement
+		in Zotero.Prefs.observe()
+
+-->
+<prefwindow id="zotero-prefs" title="&zotero.preferences.title;" onload="moveToAlertPosition(); init()" onunload="Zotero_Preferences.onUnload()"
+		windowtype="zotero:pref" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+		style="min-height: 600px">
+	
+	<prefpane id="zotero-prefpane-general"
+						label="&zotero.preferences.prefpane.general;"
+						image="chrome://zotero/skin/prefs-general.png">
+		<preferences>
+			<preference id="pref-fontSize" name="extensions.zotero.fontSize" type="string"/>
+			<preference id="pref-noteFontSize" name="extensions.zotero.note.fontSize" type="string"/>
+			<preference id="pref-statusBarIcon" name="extensions.zotero.statusBarIcon" type="int"/>
+			<preference id="pref-automaticScraperUpdates" name="extensions.zotero.automaticScraperUpdates" type="bool"/>
+			<preference id="pref-reportTranslationFailure" name="extensions.zotero.reportTranslationFailure" type="bool"/>
+			<preference id="pref-zoteroDotOrgVersionHeader" name="extensions.zotero.zoteroDotOrgVersionHeader" type="bool"/>
+			<preference id="pref-parseEndNoteMIMETypes" name="extensions.zotero.parseEndNoteMIMETypes" type="bool" onchange="Zotero.MIMETypeHandler.init()"/>
+			<preference id="pref-automaticSnapshots" name="extensions.zotero.automaticSnapshots" type="bool"/>
+			<preference id="pref-downloadAssociatedFiles" name="extensions.zotero.downloadAssociatedFiles" type="bool"/>
+			<preference id="pref-automaticTags" name="extensions.zotero.automaticTags" type="bool"/>
+			
+			<preference id="pref-groups-copyChildNotes" name="extensions.zotero.groups.copyChildNotes" type="bool"/>
+			<preference id="pref-groups-copyChildFileAttachments" name="extensions.zotero.groups.copyChildFileAttachments" type="bool"/>
+			<preference id="pref-groups-copyChildLinks" name="extensions.zotero.groups.copyChildLinks" type="bool"/>
+		</preferences>
+		
+		<groupbox>
+			<caption label="&zotero.preferences.userInterface;"/>
+			
+			<grid>
+				<columns>
+					<column/>
+					<column flex="1"/>
+				</columns>
+			
+				<rows>
+					<row>
+						<hbox align="center">
+							<label value="&zotero.preferences.statusBarIcon;" control="statusBarIcon"/>
+						</hbox>
+						<radiogroup id="statusBarIcon" orient="horizontal" preference="pref-statusBarIcon">
+							<radio src="chrome://zotero/skin/zotero_status_bar.png" value="2"/>
+							<radio src="chrome://zotero/skin/zotero_status_bar_compact.png" value="1"/>
+							<radio label="&zotero.preferences.statusBarIcon.none;" value="0"/>
+						</radiogroup>
+					</row>
+					
+					<row>
+						<hbox align="center">
+							<label value="&zotero.preferences.fontSize;" control="fontSize"/>
+						</hbox>
+						<radiogroup id="fontSize" orient="horizontal" preference="pref-fontSize">
+							<radio id="fontSize1" label="&zotero.preferences.fontSize.small;" value="1.0"/>
+							<radio id="fontSize2" label="&zotero.preferences.fontSize.medium;" value="1.25"/>
+							<radio id="fontSize3" label="&zotero.preferences.fontSize.large;" value="1.5"/>
+						</radiogroup>
+					</row>
+					
+					<row>
+						<!-- TODO: localize -->
+						<hbox align="center">
+							<label value="Note font size:" control="noteFontSize"/>
+						</hbox>
+						<hbox>
+							<menulist id="noteFontSize" preference="pref-noteFontSize" editable="true">
+								<menupopup>
+									<menuitem label="11"/>
+									<menuitem label="12"/>
+									<menuitem label="13"/>
+									<menuitem label="14"/>
+									<menuitem label="18"/>
+									<menuitem label="24"/>
+									<menuitem label="36"/>
+									<menuitem label="48"/>
+									<menuitem label="64"/>
+									<menuitem label="72"/>
+									<menuitem label="96"/>
+								</menupopup>
+							</menulist>
+						</hbox>
+					</row>
+				</rows>
+			</grid>
+			
+			<label class="statusLine" value="&zotero.preferences.keys.changesTakeEffect;"/>
+		</groupbox>
+		
+		<groupbox>
+			<caption label="&zotero.preferences.miscellaneous;"/>
+			
+			<hbox align="center">
+				<checkbox label="&zotero.preferences.autoUpdate;" preference="pref-automaticScraperUpdates"/>
+				<button id="updateButton" style="margin-top:0" label="&zotero.preferences.updateNow;" oncommand="updateTranslators()"/>
+			</hbox>
+			
+			<checkbox label="&zotero.preferences.reportTranslationFailure;" preference="pref-reportTranslationFailure"/>
+			<checkbox label="&zotero.preferences.zoteroDotOrgVersionHeader;"
+				tooltiptext="&zotero.preferences.zoteroDotOrgVersionHeader.tooltip;"
+				preference="pref-zoteroDotOrgVersionHeader"/>
+			<checkbox label="&zotero.preferences.parseRISRefer;" preference="pref-parseEndNoteMIMETypes"/>
+			<checkbox label="&zotero.preferences.automaticSnapshots;" preference="pref-automaticSnapshots"/>
+			<checkbox label="&zotero.preferences.downloadAssociatedFiles;" preference="pref-downloadAssociatedFiles"/>
+			<checkbox label="&zotero.preferences.automaticTags;" preference="pref-automaticTags"/>
+		</groupbox>
+		
+		<groupbox>
+			<caption label="Groups"/>
+			
+			<!-- TODO: localize -->
+			<label value="When copying items between libraries, include:"/>
+			<vbox style="margin-left: 2em">
+				<checkbox label="child notes" preference="pref-groups-copyChildNotes"/>
+				<checkbox label="child snapshots and imported files" preference="pref-groups-copyChildFileAttachments"/>
+				<checkbox label="child links" preference="pref-groups-copyChildLinks"/>
+			</vbox>
+		</groupbox>
+		
+		<separator/>
+	</prefpane>
+	
+	
+	<!-- localize -->
+	<prefpane id="zotero-prefpane-sync"
+						label="Sync"
+						onpaneload="document.getElementById('sync-password').value = Zotero.Sync.Server.password; document.getElementById('storage-password').value = Zotero.Sync.Storage.password;"
+						image="chrome://zotero/skin/prefs-sync.png">
+		<preferences>
+			<preference id="pref-sync-autosync" name="extensions.zotero.sync.autoSync" type="bool"/>
+			<preference id="pref-sync-username" name="extensions.zotero.sync.server.username" type="string" instantApply="true"/>
+			<preference id="pref-storage-enabled" name="extensions.zotero.sync.storage.enabled" type="bool"/>
+			<preference id="pref-storage-protocol" name="extensions.zotero.sync.storage.protocol" type="string" onchange="unverifyStorageServer()"/>
+			<preference id="pref-storage-scheme" name="extensions.zotero.sync.storage.scheme" type="string"/>
+			<preference id="pref-storage-url" name="extensions.zotero.sync.storage.url" type="string" instantApply="true"/>
+			<preference id="pref-storage-username" name="extensions.zotero.sync.storage.username" type="string" instantApply="true"/>
+			<preference id="pref-group-storage-enabled" name="extensions.zotero.sync.storage.groups.enabled" type="bool"/>
+		</preferences>
+		
+		<!-- This doesn't wrap without an explicit width, for some reason -->
+		<vbox style="margin-top: .75em; margin-bottom: 1.25em">
+			<description width="45em" style="font-size: 12px">
+				<label class="text-link" href="http://www.zotero.org/support/sync"
+					value="Sync functionality"/> is under active development.
+				We welcome you to participate in our testing by using Zotero Sync,
+				but we encourage you to
+				<label class="text-link" href="http://www.zotero.org/support/zotero_data"
+					value="back up your Zotero data"/> daily.
+			</description>
+		</vbox>
+		
+		<tabbox>
+			<tabs>
+				<tab label="Settings"/>
+				<tab label="Reset"/>
+			</tabs>
+			
+			<tabpanels>
+				<tabpanel orient="vertical">
+					<groupbox>
+						<caption label="Zotero Sync Server"/>
+						
+						<hbox>
+							<grid>
+								<columns>
+									<column/>
+									<column/>
+								</columns>
+								
+								<rows>
+									<row>
+										<label value="Username:"/>
+										<textbox preference="pref-sync-username"
+											onchange="Zotero.Prefs.set('sync.server.username', this.value); var pass = document.getElementById('sync-password'); if (pass.value) { Zotero.Sync.Server.password = pass.value; }"/>
+									</row>
+									<row>
+										<label value="Password:"/>
+										<textbox id="sync-password" type="password"
+											onchange="Zotero.Sync.Server.password = this.value"/>
+									</row>
+									<!--
+									<row>
+										<box/>
+										<hbox>
+											<button label="Verify login"
+												oncommand="alert('Unimplemented')"/>
+										</hbox>
+									</row>
+									-->
+								</rows>
+							</grid>
+							
+							<hbox style="width:2em"/>
+							
+							<vbox>
+								<label class="text-link" value="Create Account" href="http://zotero.org/user/register"/>
+								<separator class="thin"/>
+								<label class="text-link" value="Lost Password?" href="http://zotero.org/user/lostpassword"/>
+							</vbox>
+						</hbox>
+						
+						<separator class="thin"/>
+						
+						<hbox>
+							<checkbox label="Sync automatically" preference="pref-sync-autosync"/>
+						</hbox>
+					</groupbox>
+					
+					
+					<!-- TODO: localize -->
+					<groupbox>
+						<caption label="File Syncing"/>
+						
+						<!-- My Library -->
+						<hbox style="margin: 0">
+							<checkbox label="Sync attachment files in My Library using" preference="pref-storage-enabled" oncommand="updateStorageSettings(this.checked, null)"/>
+							<menulist id="storage-protocol" style="margin-left: .5em" preference="pref-storage-protocol" oncommand="updateStorageSettings(null, this.value)">
+								<menupopup>
+									<menuitem label="Zotero" value="zotero"/>
+									<menuitem label="WebDAV" value="webdav"/>
+								</menupopup>
+							</menulist>
+						</hbox>
+						
+						<stack id="storage-webdav-settings" style="margin-top: .5em; margin-bottom: .8em; border: 1px gray solid; -moz-border-radius: 3px">
+						<!-- Background shading -->
+						<box style="background: black; opacity:.03"/>
+						
+						<grid style="padding: .7em .4em .7em 0">
+							<columns>
+								<column/>
+								<column flex="1"/>
+							</columns>
+							
+							<rows>
+								<row>
+									<label value="URL:"/>
+									<hbox>
+										<menulist id="storage-url-prefix"
+												preference="pref-storage-scheme"
+												onsynctopreference="unverifyStorageServer()" style="padding: 0; width: 7em">
+											<menupopup>
+												<menuitem label="http" value="http" style="padding: 0"/>
+												<menuitem label="https" value="https" style="padding: 0"/>
+											</menupopup>
+										</menulist>
+										<label value="://"/>
+										<textbox id="storage-url" flex="1"
+											preference="pref-storage-url"
+											onkeypress="if (Zotero.isMac &amp;&amp; event.keyCode == 13) { this.blur(); verifyStorageServer(); }"
+											onsynctopreference="unverifyStorageServer();"
+											onchange="this.value = this.value.replace(/(^https?:\/\/|\/zotero\/?$|\/$)/g, '')"/>
+										<label value="/zotero/"/>
+									</hbox>
+								</row>
+								<row>
+									<label value="Username:"/>
+									<hbox>
+										<textbox id="storage-username"
+											preference="pref-storage-username"
+											onkeypress="if (Zotero.isMac &amp;&amp; event.keyCode == 13) { this.blur(); setTimeout('verifyStorageServer();', 1); }"
+											onsynctopreference="unverifyStorageServer();"
+											onchange="var pass = document.getElementById('storage-password'); if (pass.value) { Zotero.Sync.Storage.Session.WebDAV.prototype.password = pass.value; }"/>
+									</hbox>
+								</row>
+								<row>
+									<label value="Password:"/>
+									<hbox>
+										<textbox id="storage-password" flex="0" type="password"
+											onkeypress="if (Zotero.isMac &amp;&amp; event.keyCode == 13) { this.blur(); setTimeout('verifyStorageServer();', 1); }"
+											oninput="unverifyStorageServer()"
+											onchange="Zotero.Sync.Storage.Session.WebDAV.prototype.password = this.value"/>
+									</hbox>
+								</row>
+								<row>
+									<box/>
+									<hbox>
+										<button id="storage-verify" label="Verify Server"
+											oncommand="verifyStorageServer()"/>
+										<button id="storage-abort" label="Stop" hidden="true"/>
+										<progressmeter id="storage-progress" hidden="true"
+											mode="undetermined"/>
+									</hbox>
+								</row>
+							</rows>
+						</grid>
+						
+						</stack>
+						
+						<separator id="storage-separator" class="thin"/>
+						
+						<!-- Group Libraries -->
+						<checkbox label="Sync attachment files in group libraries using Zotero File Storage"
+								preference="pref-group-storage-enabled"/>
+						
+						<separator class="thin"/>
+						
+						<hbox style="margin-top:.3em">
+							<label class="text-link" style="margin-left: 0" value="About File Syncing" href="http://zotero.org/support/file_sync"/>
+						</hbox>
+					</groupbox>
+				</tabpanel>
+				
+				<tabpanel id="zotero-reset" orient="vertical">
+					<radiogroup id="zotero-reset-sync-group" oncommand="handleSyncResetSelect(this)">
+						<groupbox>
+							<!-- TODO: localize -->
+							<caption label="Zotero Sync Server"/>
+							
+							<grid>
+								<columns>
+									<column/>
+									<column align="start" pack="start" flex="1"/>
+								</columns>
+								
+								<rows>
+									<row id="zotero-full-sync">
+									<radio/>
+										<vbox onclick="this.previousSibling.click()">
+											<label value="Full Sync with Zotero Server"/>
+											<description>Merge local Zotero data with data from the sync server, ignoring sync history.</description>
+										</vbox>
+									</row>
+									
+									<row id="zotero-restore-from-server" selected="true">
+										<radio/>
+										<vbox onclick="this.previousSibling.click()">
+											<label value="Restore from Zotero Server"/>
+											<description>Erase all local Zotero data and restore from the sync server.</description>
+										</vbox>
+									</row>
+									
+									<row id="zotero-restore-to-server">
+										<radio/>
+										<vbox onclick="this.previousSibling.click()">
+											<label value="Restore to Zotero Server"/>
+											<description>Erase all server data and overwrite with local Zotero data.</description>
+										</vbox>
+									</row>
+								</rows>
+							</grid>
+						</groupbox>
+						
+						<groupbox>
+							<caption label="File Syncing"/>
+							
+							<grid>
+								<columns>
+									<column/>
+									<column align="start" pack="start" flex="1"/>
+								</columns>
+								
+								<rows>
+									<row id="zotero-reset-storage-history">
+									<radio/>
+										<vbox onclick="this.previousSibling.click()">
+											<label value="Reset File Sync History"/>
+											<description>Force checking of the storage server for all local attachment files.</description>
+										</vbox>
+									</row>
+								</rows>
+							</grid>
+						</groupbox>
+					</radiogroup>
+					
+					<hbox>
+						<button id="zotero-reset-button" label="Reset..." oncommand="handleSyncReset(document.getElementById('zotero-reset-sync-group').selectedItem.parentNode.id.substr(7))"/>
+					</hbox>
+				</tabpanel>
+			</tabpanels>
+		</tabbox>
+		
+		<separator/>
+	</prefpane>
+	
+	
+	<prefpane id="zotero-prefpane-search"
+						label="&zotero.preferences.prefpane.search;"
+						onpaneload="updateIndexStats()"
+						image="chrome://zotero/skin/prefs-search.png">
+		<preferences>
+			<preference id="pref-fulltext-textMaxLength" name="extensions.zotero.fulltext.textMaxLength" type="int"/>
+			<preference id="pref-fulltext-pdfmaxpages" name="extensions.zotero.fulltext.pdfMaxPages" type="int"/>
+		</preferences>
+		
+		<groupbox>
+			<caption label="&zotero.preferences.search.fulltextCache;"/>
+			
+			<hbox>
+				<button id="fulltext-rebuildIndex" flex="1" oncommand="rebuildIndexPrompt()"/>
+				<button id="fulltext-clearIndex" flex="1" oncommand="clearIndexPrompt()"/>
+			</hbox>
+			
+			<separator/>
+			
+			<hbox align="center">
+				<label value="&zotero.preferences.fulltext.textMaxLength;"/>
+				<textbox size="10" preference="pref-fulltext-textMaxLength"/>
+				<label value="(&zotero.preferences.default; 500000)"/>
+			</hbox>
+		</groupbox>
+		
+		<groupbox id="pdftools-box">
+			<caption label="&zotero.preferences.search.pdfIndexing;"/>
+			
+			<label id="pdfconverter-status"/>
+			<separator class="thin"/>
+			<label id="pdfinfo-status"/>
+			
+			<separator class="thin"/>
+			
+			<label id="pdftools-required" hidden="true"/>
+			
+			<separator class="thin"/>
+			
+			<hbox>
+				<button id="pdftools-update-button" flex="1" oncommand="checkPDFToolsDownloadVersion()"/>
+			</hbox>
+			
+			<separator class="thin"/>
+			
+			<label id="pdftools-documentation-link" hidden="true"/>
+			
+			<separator class="thin"/>
+			
+			<hbox id="pdftools-settings" align="center" hidden="true">
+				<label value="&zotero.preferences.fulltext.pdfMaxPages;"/>
+				<textbox size="5" preference="pref-fulltext-pdfmaxpages"/>
+				<label value="(&zotero.preferences.default; 100)"/>
+			</hbox>
+		</groupbox>
+		
+		<groupbox id="fulltext-stats">
+			<caption label="&zotero.preferences.search.indexStats;"/>
+			
+			<grid>
+				<columns>
+					<column/>
+					<column/>
+				</columns>
+				
+				<rows>
+					<row id="fulltext-stats-indexed">
+						<label value="&zotero.preferences.search.indexStats.indexed;"/>
+						<label/>
+					</row>
+					<row id="fulltext-stats-partial">
+						<label value="&zotero.preferences.search.indexStats.partial;"/>
+						<label/>
+					</row>
+					<row id="fulltext-stats-unindexed">
+						<label value="&zotero.preferences.search.indexStats.unindexed;"/>
+						<label/>
+					</row>
+					<row id="fulltext-stats-words">
+						<label value="&zotero.preferences.search.indexStats.words;"/>
+						<label/>
+					</row>
+				</rows>
+			</grid>
+		</groupbox>
+		
+		<separator/>
+	</prefpane>
+	
+	
+	<prefpane id="zotero-prefpane-export"
+						label="&zotero.preferences.prefpane.export;"
+						image="chrome://zotero/skin/prefs-export.png">
+		<preferences>
+			<preference id="pref-quickCopy-setting" name="extensions.zotero.export.quickCopy.setting" type="string"/>
+			<preference id="pref-quickCopy-dragLimit" name="extensions.zotero.export.quickCopy.dragLimit" type="int"/>
+		</preferences>
+		
+		<groupbox>
+			<caption label="&zotero.preferences.quickCopy.caption;"/>
+			
+			<label id="quickCopy-instructions"/>
+			
+			<separator/>
+			
+			<label value="&zotero.preferences.quickCopy.defaultOutputFormat;" control="quickCopy-menu"/>
+			<menulist id="zotero-quickCopy-menu"/>
+			
+			<separator/>
+			
+			<checkbox id="zotero-quickCopy-copyAsHTML" label="&zotero.preferences.quickCopy.copyAsHTML;"
+				oncommand="buildQuickCopyFormatDropDown(document.getElementById('zotero-quickCopy-menu'), this.checked ? 'html' : '');"/>
+			
+			<separator/>
+			
+			<label value="&zotero.preferences.quickCopy.siteEditor.setings;" control="quickCopy-siteSettings"/>
+			<tree flex="1" id="quickCopy-siteSettings" hidecolumnpicker="true" rows="6" seltype="single"
+					ondblclick="showQuickCopySiteEditor(this.currentIndex)"
+					onkeypress="if (event.keyCode == event.DOM_VK_DELETE) { deleteSelectedQuickCopySite(); }">
+				<treecols>
+					<treecol id="quickCopy-urlColumn" label="&zotero.preferences.quickCopy.siteEditor.domainPath;" flex="1"/>
+					<treecol id="quickCopy-formatColumn" label="&zotero.preferences.quickCopy.siteEditor.outputFormat;" flex="2"/>
+					<treecol id="quickCopy-copyAsHTML" label="HTML"/>
+				</treecols>
+				<treechildren id="quickCopy-siteSettings-rows"/>
+			</tree>
+			<separator class="thin"/>
+			<hbox pack="end">
+				<button label="-" onclick="deleteSelectedQuickCopySite()"/>
+				<button label="+" onclick="showQuickCopySiteEditor()"/>
+			</hbox>
+			
+			<!-- TODO: localize -->
+			<hbox align="center">
+				<label value="Disable Quick Copy when dragging more than"/>
+				<textbox preference="pref-quickCopy-dragLimit" size="3"/>
+				<label value="items" flex="1"/>
+			</hbox>
+		</groupbox>
+		
+		<groupbox>
+			<caption label="&zotero.preferences.charset;"/>
+			
+			<checkbox id="zotero-export-displayCharsetOption" label="&zotero.preferences.charset.displayExportOption;"
+				preference="pref-export-displayCharsetOption"/>
+			
+			<hbox align="center">
+				<label value="&zotero.preferences.charset.importCharset;:" control="zotero-import-charsetMenu"/>
+				<menulist id="zotero-import-charsetMenu" preference="pref-import-charset"/>
+			</hbox>
+		</groupbox>
+		
+		<separator/>
+	</prefpane>
+	
+	
+	<prefpane id="zotero-prefpane-styles"
+						label="&zotero.preferences.prefpane.styles;"
+						image="chrome://zotero/skin/prefs-styles.png">
+		
+		<preferences>
+			<preference id="pref-styles-citePaperJournalArticleURL" name="extensions.zotero.export.citePaperJournalArticleURL" type="bool"/>
+		</preferences>
+		
+		<groupbox flex="1">
+			<caption label="&zotero.preferences.styles.styleManager;"/>
+			
+			<tree flex="1" id="styleManager" hidecolumnpicker="true" rows="6"
+					onselect="document.getElementById('styleManager-delete').disabled = undefined"
+					onkeypress="if (event.keyCode == event.DOM_VK_DELETE) { deleteSelectedStyle(); }">
+				<treecols>
+					<treecol id="styleManager-title" label="&zotero.preferences.styles.styleManager.title;" flex="3"/>
+					<treecol id="styleManager-updated" label="&zotero.preferences.styles.styleManager.updated;" flex="1"/>
+					<treecol id="styleManager-csl" label="&zotero.preferences.styles.styleManager.csl;"/>
+				</treecols>
+				<treechildren id="styleManager-rows"/>
+			</tree>
+			<separator class="thin"/>
+			<hbox align="center" flex="1">
+				<label class="text-link" href="http://www.zotero.org/styles/" value="&zotero.preferences.export.getAdditionalStyles;" flex="1"/>
+				<button disabled="true" id="styleManager-delete" label="-" onclick="deleteStyle()"/>
+				<button label="+" onclick="addStyle()"/>
+			</hbox>
+		</groupbox>
+		
+		<groupbox>
+			<caption label="&zotero.preferences.citationOptions.caption;"/>
+			
+			<checkbox label="&zotero.preferences.export.citePaperJournalArticleURL;" preference="pref-styles-citePaperJournalArticleURL"/>
+			<!-- This doesn't wrap without an explicit width, for some reason -->
+			<label id="export-citePaperJournalArticleURL" width="45em">
+				&zotero.preferences.export.citePaperJournalArticleURL.description;
+			</label>
+		</groupbox>
+		
+		<separator/>
+	</prefpane>
+	
+	
+	<prefpane id="zotero-prefpane-proxies"
+						label="&zotero.preferences.prefpane.proxies;"
+						image="chrome://zotero/skin/prefs-proxies.png">
+		<description width="45em" style="font-size: 12px">
+			&zotero.preferences.proxies.desc_before_link;
+			<label class="text-link" href="http://www.zotero.org/support/proxies"
+				value="&zotero.preferences.proxies.desc_link;"/>
+			&zotero.preferences.proxies.desc_after_link;
+		</description>
+		
+		<command id="zotero-proxies-update" oncommand="updateProxyPrefs()"/>
+		<checkbox id="zotero-proxies-transparent" label="&zotero.preferences.proxies.transparent;"
+			command="zotero-proxies-update"/>
+		
+		<groupbox flex="1">
+			<caption label="&zotero.preferences.proxies.configured;"/>
+			
+			<tree flex="1" id="proxyTree" hidecolumnpicker="true" rows="6" seltype="single"
+					ondblclick="showProxyEditor(this.currentIndex)" onselect="document.getElementById('proxyTree-delete').disabled = undefined"
+					onkeypress="if (event.keyCode == event.DOM_VK_DELETE) { deleteProxy(); }">
+				<treecols>
+					<treecol id="proxyTree-hostname" label="&zotero.preferences.proxies.hostname;" flex="1"/>
+					<treecol id="proxyTree-scheme" label="&zotero.preferences.proxies.scheme;" flex="3"/>
+				</treecols>
+				<treechildren id="proxyTree-rows"/>
+			</tree>
+			<separator class="thin"/>
+			<hbox pack="end">
+				<button disabled="true" id="proxyTree-delete" label="-" onclick="deleteProxy()"/>
+				<button label="+" onclick="showProxyEditor()"/>
+			</hbox>
+		</groupbox>
+		
+		<separator/>
+	</prefpane>
+	
+	
+	<prefpane id="zotero-prefpane-keys"
+						label="&zotero.preferences.prefpane.keys;"
+						image="chrome://zotero/skin/prefs-keys.png">
+		<preferences>
+			<preference id="pref-keys-openZotero" name="extensions.zotero.keys.openZotero" type="string"/>
+			<preference id="pref-keys-toggleFullscreen" name="extensions.zotero.keys.toggleFullscreen" type="string"/>
+			<preference id="pref-keys-library" name="extensions.zotero.keys.library" type="string"/>
+			<preference id="pref-keys-quicksearch" name="extensions.zotero.keys.quicksearch" type="string"/>
+			<preference id="pref-keys-newItem" name="extensions.zotero.keys.newItem" type="string"/>
+			<preference id="pref-keys-newNote" name="extensions.zotero.keys.newNote" type="string"/>
+			<preference id="pref-keys-toggleTagSelector" name="extensions.zotero.keys.toggleTagSelector" type="string"/>
+			<preference id="pref-keys-copySelectedItemCitationsToClipboard" name="extensions.zotero.keys.copySelectedItemCitationsToClipboard" type="string"/>
+			<preference id="pref-keys-copySelectedItemsToClipboard" name="extensions.zotero.keys.copySelectedItemsToClipboard" type="string"/>
+			<preference id="pref-keys-importFromClipboard" name="extensions.zotero.keys.importFromClipboard" type="string"/>
+			<preference id="pref-keys-overrideGlobal" name="extensions.zotero.keys.overrideGlobal" type="bool"/>
+		</preferences>
+		
+		<grid>
+			<columns>
+				<column flex="1"/>
+				<column/>
+				<column/>
+			</columns>
+			
+			<rows>
+				<row>
+					<label value="&zotero.preferences.keys.openZotero;" control="key-textbox-openZotero"/>
+					<label/>
+					<textbox id="textbox-openZotero" maxlength="1" size="1" preference="pref-keys-openZotero"/>
+				</row>
+				
+				<row>
+					<label value="&zotero.preferences.keys.toggleFullscreen;" control="textbox-toggleFullscreen"/>
+					<label/>
+					<textbox id="textbox-toggleFullscreen" maxlength="1" size="1" preference="pref-keys-toggleFullscreen"/>
+				</row>
+				
+				<row>
+					<label value="&zotero.preferences.keys.library;" control="textbox-library"/>
+					<label/>
+					<textbox id="textbox-library" maxlength="1" size="1" preference="pref-keys-library"/>
+				</row>
+				
+				<row>
+					<label value="&zotero.preferences.keys.quicksearch;" control="textbox-quicksearch"/>
+					<label/>
+					<textbox id="textbox-quicksearch" maxlength="1" size="1" preference="pref-keys-quicksearch"/>
+				</row>
+				
+				<row>
+					<label value="&zotero.preferences.keys.newItem;" control="textbox-newItem"/>
+					<label/>
+					<textbox id="textbox-newItem" maxlength="1" size="1" preference="pref-keys-newItem"/>
+				</row>
+				
+				<row>
+					<label value="&zotero.preferences.keys.newNote;" control="textbox-newNote"/>
+					<label/>
+					<textbox id="textbox-newNote" maxlength="1" size="1" preference="pref-keys-newNote"/>
+				</row>
+				
+				<row>
+					<label value="&zotero.preferences.keys.toggleTagSelector;" control="textbox-toggleTagSelector"/>
+					<label/>
+					<textbox id="textbox-toggleTagSelector" maxlength="1" size="1" preference="pref-keys-toggleTagSelector"/>
+				</row>
+				
+				<row>
+					<label value="&zotero.preferences.keys.copySelectedItemCitationsToClipboard;" control="textbox-copySelectedItemCitationsToClipboard"/>
+					<label/>
+					<textbox id="textbox-copySelectedItemCitationsToClipboard" maxlength="1" size="1" preference="pref-keys-copySelectedItemCitationsToClipboard"/>
+				</row>
+				
+				<row>
+					<label value="&zotero.preferences.keys.copySelectedItemsToClipboard;" control="textbox-copySelectedItemsToClipboard"/>
+					<label/>
+					<textbox id="textbox-copySelectedItemsToClipboard" maxlength="1" size="1" preference="pref-keys-copySelectedItemsToClipboard" onchange="updateQuickCopyInstructions()"/>
+				</row>
+				
+				<row>
+					<label value="&zotero.preferences.keys.importFromClipboard;" control="textbox-importFromClipboard"/>
+					<label/>
+					<textbox id="textbox-importFromClipboard" maxlength="1" size="1" preference="pref-keys-importFromClipboard"/>
+				</row>
+			</rows>
+		</grid>
+		
+		<checkbox label="&zotero.preferences.keys.overrideGlobal;" preference="pref-keys-overrideGlobal"/>
+		
+		<label class="statusLine" value="&zotero.preferences.keys.changesTakeEffect;"/>
+		
+		<separator/>
+	</prefpane>
+	
+	
+	<prefpane id="zotero-prefpane-advanced"
+						label="&zotero.preferences.prefpane.advanced;"
+						image="chrome://zotero/skin/prefs-advanced.png">
+		<preferences>
+			<preference id="pref-useDataDir" name="extensions.zotero.useDataDir" type="bool"/>
+			<preference id="pref-dataDir" name="extensions.zotero.dataDir" type="string"/>
+			<preference id="pref-export-displayCharsetOption" name="extensions.zotero.export.displayCharsetOption" type="bool"/>
+			<preference id="pref-debug-output-enableAfterRestart" name="extensions.zotero.debug.store" type="bool"/>
+			<preference id="pref-import-charset" name="extensions.zotero.import.charset" type="string"/>
+			<preference id="pref-openURL-resolver" name="extensions.zotero.openURL.resolver" type="string"/>
+			<preference id="pref-openURL-version" name="extensions.zotero.openURL.version" type="string"/>
+		</preferences>
+		
+		<groupbox>
+			<caption label="&zotero.preferences.dataDir;"/>
+			
+			<radiogroup id="dataDir" preference="pref-useDataDir" onsyncfrompreference="onDataDirLoad();" onsynctopreference="return onDataDirUpdate(event);">
+				<radio label="&zotero.preferences.dataDir.useProfile;" value="false"/>
+				<hbox>
+					<radio label="&zotero.preferences.dataDir.custom;" value="true"/>
+					<textbox id="dataDirPath" preference="pref-dataDir" onsyncfrompreference="return getDataDirPath();" readonly="true" flex="1"/>
+					<button label="&zotero.preferences.dataDir.choose;" oncommand="var file = Zotero.chooseZoteroDirectory(true); if (!file) { event.stopPropagation(); }"/>
+				</hbox>
+			</radiogroup>
+			
+			<hbox>
+				<button label="&zotero.preferences.dataDir.reveal;" oncommand="revealDataDirectory()"/>
+			</hbox>
+		</groupbox>
+		
+		<groupbox>
+			<caption label="&zotero.preferences.dbMaintenance;"/>
+			
+			<hbox>
+				<button label="&zotero.preferences.dbMaintenance.integrityCheck;" oncommand="runIntegrityCheck()"/>
+				<button label="&zotero.preferences.dbMaintenance.resetTranslatorsAndStyles;" oncommand="resetTranslatorsAndStyles()"/>
+			</hbox>
+		</groupbox>
+		
+		<groupbox>
+			<!-- TODO: localize -->
+			<caption label="Debug Output Logging"/>
+			
+			<!-- This doesn't wrap without an explicit width -->
+			<vbox>
+				<description width="45em">Debug output can help Zotero developers diagnose problems in Zotero. Debug logging will slow down Zotero, so you should generally leave it disabled unless a Zotero developer requests debug output.</description>
+			</vbox>
+			
+			<hbox align="center">
+				<button id="debug-output-enable" oncommand="Zotero_Preferences.Debug_Output.toggleStore()"/>
+				<label id="debug-output-lines" style="margin-right: 0"/>
+				<label value="lines logged"/>
+				<checkbox preference="pref-debug-output-enableAfterRestart" label="Enable after restart" style="margin-left: 1.5em"/>
+			</hbox>
+			
+			<hbox align="center">
+				<button id="debug-output-view" label="View Output" oncommand="Zotero_Preferences.Debug_Output.view()"/>
+				<button id="debug-output-clear" label="Clear Output" oncommand="Zotero_Preferences.Debug_Output.clear()"/>
+				<button id="debug-output-submit" label="Submit to Zotero Server" oncommand="Zotero_Preferences.Debug_Output.submit()"/>
+				<progressmeter id="debug-output-submit-progress" mode="undetermined" hidden="true"/>
+			</hbox>
+		</groupbox>
+		
+		<groupbox>
+			<caption label="&zotero.preferences.openurl.caption;"/>
+			
+			<hbox align="center">
+				<!-- vbox prevents some weird vertical stretching of the menulist -->
+				<vbox flex="1">
+					<menulist id="openURLMenu" oncommand="onOpenURLSelected();">
+						<menupopup>
+							<menuseparator/>
+							<menuitem label="&zotero.preferences.openurl.custom;" value="custom" selected="true"/>
+						</menupopup>
+					</menulist>
+				</vbox>
+				<button id="openURLSearchButton" label="&zotero.preferences.openurl.search;" oncommand="populateOpenURLResolvers()"/>
+			</hbox>
+			
+			<hbox align="center">
+				<label value="&zotero.preferences.openurl.server;"/>
+				<textbox id="openURLServerField" flex="1" oninput="onOpenURLCustomized();" preference="pref-openURL-resolver"/>
+			</hbox>
+		
+			<hbox align="center">
+				<label value="&zotero.preferences.openurl.version;" control="openURLVersionMenu"/>
+				<menulist id="openURLVersionMenu" oncommand="onOpenURLCustomized();" preference="pref-openURL-version">
+					<menupopup>
+						<menuitem label="0.1" value="0.1"/>
+						<menuitem label="1.0" value="1.0"/>
+					</menupopup>
+				</menulist>
+			</hbox>
+		</groupbox>
+		
+		<separator/>
+	</prefpane>
+	
+	<!-- These mess up the prefwindow (more) if they come before the prefpanes
+	 https://bugzilla.mozilla.org/show_bug.cgi?id=296418 -->
+	<script src="chrome://zotero/content/include.js"></script>
+	<script src="chrome://zotero/content/charsetMenu.js"></script>
+	<script type="application/javascript">
+	<![CDATA[
+		var observerService = Components.classes["@mozilla.org/observer-service;1"].getService(Components.interfaces.nsIObserverService);
+		observerService.notifyObservers(null, "charsetmenu-selected", "other");
+	]]>
+	</script>
+	<script src="preferences.js"/>
+</prefwindow>

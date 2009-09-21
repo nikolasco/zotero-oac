@@ -1,0 +1,18 @@
+row > hbox,
+row > vbox
+{
+	margin-top: 0 !important;
+	margin-bottom: 0 !important;
+	padding-top: 0 !important;
+	padding-bottom: 0 !important;
+}
+
+row vbox[fieldname=abstractNote],
+row vbox[fieldname=extra]
+{
+	margin-left: 1px;
+}
+
+.creator-type-label image {
+	margin-bottom: 0;
+}

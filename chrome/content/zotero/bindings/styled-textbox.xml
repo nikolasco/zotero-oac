@@ -1,0 +1,343 @@
+<?xml version="1.0"?>
+<!--
+    ***** BEGIN LICENSE BLOCK *****
+    
+    Copyright (c) 2006  Center for History and New Media
+                        George Mason University, Fairfax, Virginia, USA
+                        http://chnm.gmu.edu
+    
+    Licensed under the Educational Community License, Version 1.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+    
+    http://www.opensource.org/licenses/ecl1.php
+    
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+    
+    ***** END LICENSE BLOCK *****
+-->
+
+<!DOCTYPE bindings SYSTEM "chrome://zotero/locale/zotero.dtd">
+<bindings xmlns="http://www.mozilla.org/xbl"
+          xmlns:html="http://www.w3.org/1999/xhtml"
+		  xmlns:xbl="http://www.mozilla.org/xbl"
+		  xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<binding id="styled-textbox">
+		<implementation>
+			<field name="_editable"/>
+			<field name="_mode"/>
+			<field name="_format"/>
+			<field name="_loadHandler"/>
+			<field name="_commandString"/>
+			<field name="_eventHandler"/>
+			<field name="_editor"/>
+			<field name="_value"/>
+			<field name="_timer"/>
+			<field name="_focus"/>
+			<field name="_constructed"/>
+			<field name="_loadOnConstruct"/>
+			
+			<constructor><![CDATA[
+				this.mode = this.getAttribute('mode');
+				
+				this._iframe = document.getAnonymousElementByAttribute(this, "anonid", "rt-view");
+				
+				this._rtfMap = {
+					"\\":"\\\\",
+					"<em>":"\\i ",
+					"</em>":"\\i0 ",
+					"<i>":"\\i ",
+					"</i>":"\\i0 ",
+					"<strong>":"\\b ",
+					"</strong>":"\\b0 ",
+					"<b>":"\\b ",
+					"</b>":"\\b0 ",
+					"<u>":"\\ul ",
+					"</u>":"\\ul0 ",
+					"<br />":"\x0B",
+					"<sup>":"\\super ",
+					"</sup>":"\\super0 ",
+					"<sub>":"\\sub ",
+					"</sub>":"\\sub0 ",
+					// there's no way to mimic a tab stop in CSS without
+					// tables, which wouldn't work here.
+					'<span class="tab">&nbsp;</span>':"\t"
+				};
+				
+				this._constructed = true;
+				
+				if (this._loadOnConstruct) {
+					this._load();
+				}
+			]]></constructor>
+			
+			<property name="mode">
+				<getter><![CDATA[
+					if (!this._mode) {
+						throw ("mode is not defined in styled-textbox.xml");
+					}
+					return this._mode;
+				]]></getter>
+				<setter><![CDATA[
+					Zotero.debug("Setting mode to " + val);
+					switch (val) {
+						case 'note':
+							var self = this;
+							
+							this._eventHandler = function (event) {
+								//Zotero.debug(event.type);
+								switch (event.type) {
+									case 'keypress':
+										// Ignore keypresses that don't change
+										// any text
+										if (!event.which &&
+												event.keyCode != event.DOM_VK_DELETE &&
+												event.keyCode != event.DOM_VK_BACK_SPACE) {
+											//Zotero.debug("Not a char");
+											return;
+										}
+										break;
+									
+									case 'change':
+										Zotero.debug("Event type is " + event.type);
+										break;
+									
+									default:
+										return;
+								}
+								
+								if (self._timer) {
+									clearTimeout(self._timer);
+								}
+								
+								// Get the command event
+								self._timer = self.timeout && setTimeout(function () {
+									var attr = self.getAttribute('oncommand');
+									attr = attr.replace('this', 'thisObj');
+									var func = new Function('thisObj', 'event', attr);
+									func(self, event);
+								}, self.timeout);
+								
+								return true;
+							};
+							break;
+						
+						case 'integration':
+							break;
+							
+						default:
+							throw ("Invalid mode '" + val + "' in styled-textbox.xml");
+					}
+					return this._mode = val;
+				]]></setter>
+			</property>
+			
+			<!-- Sets or returns formatting (currently, HTML or Integration) of rich text box -->
+			<property name="format">
+				<getter><![CDATA[
+					return this._format;
+				]]></getter>
+				<setter><![CDATA[
+					return this._format = val;
+				]]></setter>
+			</property>
+			
+			<!-- Sets or returns contents of rich text box -->
+			<property name="value">
+				<getter><![CDATA[
+					var output = this._editor.getBody();
+					output = output.innerHTML;
+					Zotero.debug("RAW");
+					Zotero.debug(output);
+					
+					var output = this._editor.getContent();
+					Zotero.debug("XHTML");
+					Zotero.debug(output);
+					
+					if(this._format == "Integration" || this._format == "RTF") {
+						// do appropriate replacement operations
+						for(var needle in this._rtfMap) {
+							output = output.replace(needle, this._rtfMap[needle], "g"); 
+						}
+						
+						output = output.replace("<p>", "", "g");
+						output = output.replace("</p>", "\\par ", "g");
+						output = output.replace(/<\/?div[^>]*>/g, "");
+						output = Zotero.Utilities.prototype.trim(output);
+						output = output.replace(" ", "&nbsp;", "g");
+						output = Zotero.Utilities.prototype.unescapeHTML(output);
+						if(output.substr(-4) == "\\par") output = output.substr(0, output.length-4);
+					}
+					
+					return output;
+				]]></getter>
+				<setter><![CDATA[
+					Zotero.debug("Setting value!");
+					
+					if (self._timer) {
+						clearTimeout(self._timer);
+					}
+					
+					if(!this._editor) {
+						Zotero.debug('No editor yet');
+						
+						this._value = val;
+						if (!this._constructed) {
+							Zotero.debug('Styled textbox not yet constructed', 2);
+							this._loadOnConstruct = true;
+						}
+						else if (!this._loaded) {
+							this._load();
+						}
+						return ;
+					}
+					
+					if (this.value == val) {
+						Zotero.debug("Value hasn't changed!");
+						return;
+					}
+					
+					Zotero.debug("Value has changed");
+					
+					var html = val;
+					
+					if(this._format == "Integration" || this._format == "RTF") {
+						var bodyStyle = "";
+						if(html.substr(0, 3) == "\\li") {
+							// try to show paragraph formatting
+							var returnIndex = html.indexOf("\r\n");
+							
+							var tags = html.substr(1, returnIndex).split("\\");
+							html = html.substr(returnIndex+2);
+							
+							for(var i=0; i<tags.length; i++) {
+								var tagName = tags[i].substr(0, 2);
+								var tagValue = tags[i].substring(2, tags[i].length-1);
+								if(tagName == "li") {
+									var li = parseInt(tagValue, 10);
+								} else if(tagName == "fi") {
+									var fi = parseInt(tagValue, 10);
+								}
+							}
+							
+							// don't negatively indent
+							if(fi < 0 && li == 0) li = -fi;
+							
+							bodyStyle = "margin-left:"+(li/20+6)+"pt;text-indent:"+(fi/20)+"pt;";
+						}
+						
+						// do appropriate replacement operations
+						for(var needle in this._rtfMap) {
+							if(this._rtfMap[needle]) {
+								html = html.replace(this._rtfMap[needle], needle, "g");
+							}
+						}
+						html = '<div style="'+bodyStyle+'"><p>'+html.replace("\par ", "</p><p>")+"</p></div>";
+						Zotero.debug("setting content to "+html);
+					}
+					
+					this._editor.setContent(html);
+					return val;
+				]]></setter>
+			</property>
+			
+			<property name="timeout"
+					onset="this.setAttribute('timeout', val); return val;"
+					onget="return parseInt(this.getAttribute('timeout')) || 0;"/>
+			
+			<method name="focus">
+				<body>
+				<![CDATA[
+					if (this._editor) {
+						this._editor.focus();
+						this._focus = false;
+					}
+					else {
+						this._focus = true;
+					}
+				]]>
+				</body>
+			</method>
+			
+			<field name="_loaded"/>
+			<method name="_load">
+				<body>
+				<![CDATA[
+					this._loaded = true;
+					
+					// Unless we find a better way, use a separate HTML file
+					// for read-only mode
+					var htmlFile = this.mode + (this.getAttribute('readonly') != 'true' ? "" : "view");
+					
+					var ios = Components.classes["@mozilla.org/network/io-service;1"].
+						getService(Components.interfaces.nsIIOService);
+					var uri = ios.newURI("chrome://zotero/content/tinymce/" + htmlFile + ".html", null, null);
+					
+					Zotero.debug("Loading " + uri.spec);
+					
+					// Register handler for deferred setting of content
+					var self = this;
+					var listener = function() {
+						self._iframe.removeEventListener("DOMContentLoaded", listener, false);
+						var editor = self._iframe.contentWindow.tinyMCE.get("tinymce");
+						
+						editor.onInit.add(function() {
+							self._editor = editor;
+							if (self._value) {
+								self.value = self._value;
+							}
+							if (self._focus) {
+								self._editor.focus();
+								self._focus = false;
+							}
+							
+							// Add CSS rules to notes
+							if (self.mode == 'note') {
+								var css = "body#zotero-tinymce-note.mceContentBody, "
+									+ "body#zotero-tinymce-note.mceContentBody p, "
+									+ "body#zotero-tinymce-note.mceContentBody th, "
+									+ "body#zotero-tinymce-note.mceContentBody td, "
+									+ "body#zotero-tinymce-note.mceContentBody pre { "
+										+ "font-size: "
+										+ Zotero.Prefs.get('note.fontSize') + "px; "
+									+ "} "
+									+ "body#zotero-tinymce-note.mceContentBody, "
+									+ "body#zotero-tinymce-note.mceContentBody p { "
+										+ "font-family: "
+										+ Zotero.Prefs.get('note.fontFamily') + "; "
+									+ "}"
+									+ Zotero.Prefs.get('note.css');
+								
+								var doc = editor.contentDocument;
+								var head = doc.getElementsByTagName("head")[0];
+								var style = doc.createElement("style");
+								style.innerHTML = css;
+								head.appendChild(style);
+							}
+						});
+						
+						if (self._eventHandler) {
+							self._iframe.contentWindow.handleEvent = self._eventHandler;
+						}
+					};
+					this._iframe.addEventListener("DOMContentLoaded", listener, false);
+					
+					this._iframe.webNavigation.loadURI(uri.spec,
+						Components.interfaces.nsIWebNavigation.LOAD_FLAGS_BYPASS_HISTORY, null, null, null);
+				]]>
+				</body>
+			</method>
+			
+		</implementation>
+		
+		<content>
+			<xul:iframe flex="1" anonid="rt-view" class="rt-view"
+				xbl:inherits="onfocus,onblur,flex,width,height,hidden"
+				style="overflow: hidden"/>
+		</content>
+	</binding>
+</bindings>

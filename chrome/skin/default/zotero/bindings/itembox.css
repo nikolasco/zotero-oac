@@ -1,0 +1,167 @@
+scrollbox
+{
+	overflow: visible;
+}
+
+row, tagsbox row
+{
+	min-height: 1em;
+}
+
+textbox, tagsbox textbox
+{
+	margin-top: 0;
+	margin-bottom: -1px;
+}
+
+#go-buttons button
+{
+	list-style-image: url('chrome://zotero/skin/toolbar-go-arrow.png');
+	-moz-box-direction: reverse;
+	-moz-box-flex: 1;
+}
+
+#go-buttons button#locate-button
+{
+	-moz-box-direction: normal;
+}
+
+
+#go-buttons button[disabled=true]
+{
+	list-style-image: url('chrome://zotero/skin/toolbar-go-arrow-disabled.png');
+}
+
+
+/* DEBUG: this doesn't seem to work, unfortunately
+label[singleField=false]:after
+{
+	content:",";
+}
+*/
+
+/* metadata field names */
+row > label:first-child, .creator-type-label
+{
+	text-align: right;
+	font-weight: bold;
+	margin-left: 5px !important;
+	margin-right: 0 !important;
+}
+
+row > label
+{
+	border: 1px solid transparent;
+}
+
+row label:first-child[isButton=true]:hover
+{
+	cursor: pointer !important;
+}
+
+row label
+{
+	-moz-user-focus: ignore;
+}
+
+/* creator type menu */
+.creator-type-label, .creator-type-value {
+	-moz-box-align: center;
+	-moz-box-pack: end;
+	height: 18px !important;
+	min-height: none !important;
+	max-height: 18px !important;
+	padding-right: 2px;
+}
+
+.creator-type-label > label
+{
+	margin-right: 0 !important;
+	padding-right: 0 !important;
+}
+ 
+.creator-type-label > image {
+	margin: 0 1em 1px;
+	list-style-image: url('chrome://zotero/skin/arrow-down.gif');
+}
+
+/* no space between last name and comma */
+row hbox label:first-child
+{
+	margin-right: 1px;
+}
+
+row label,
+row > vbox[fieldname=abstractNote],
+row > vbox[fieldname=extra]
+{
+	margin-top: 1px !important;
+	margin-bottom: 1px !important;
+	-moz-box-pack: start;
+	-moz-margin-start: 1px !important;
+	-moz-margin-end: 5px !important;
+	padding: 0 2px 0 2px;
+}
+
+row > vbox > description
+{
+	margin: 0 !important;
+}
+
+hbox.zotero-date-field-status
+{
+	margin-right: 5px;
+}
+
+hbox.zotero-date-field-status label
+{
+	font-weight: bold;
+	color: #666;
+	margin: 0 0 0 1px;
+}
+
+#item-type-menu
+{
+	-moz-appearance: none;
+	color: black;
+	height: 1.5em !important;
+	min-height: 1.5em !important;
+	padding: 0 0 0 2px !important;
+	margin: 1px 5px 0 1px !important;
+	max-height: 1.5em !important;
+	border: 1px solid transparent;	
+	-moz-border-top-colors: none;
+	-moz-border-right-colors: none;
+	-moz-border-bottom-colors: none;
+	-moz-border-left-colors: none;
+	background-color: transparent;
+}
+
+#item-type-menu > .menulist-label-box
+{
+	-moz-box-flex: 0 !important;
+}
+
+#item-type-menu > .menulist-label-box, #item-type-menu > .menulist-label-box > .menulist-label
+{
+	margin: 0 !important;
+	padding: 0 !important;
+}
+
+#item-type-menu > .menulist-dropmarker
+{
+	display: none;
+}
+
+.zotero-field-toggle
+{
+	width: 27px !important;
+	max-width: 27px !important;
+	min-width: 27px !important;
+	height: 14px;
+	margin: 0 5px 0 0 !important;
+	background-repeat: no-repeat !important;
+	background-position: center !important;
+	border-width: 0 !important;
+	-moz-border-radius: 4px !important;
+}

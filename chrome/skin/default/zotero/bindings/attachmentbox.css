@@ -1,0 +1,59 @@
+/* Don't collapse blank attachment titles, since it prevents renaming */
+#title
+{
+	min-height: 1.25em;
+}
+
+#view, #show
+{
+	list-style-image: url('chrome://zotero/skin/toolbar-go-arrow.png');
+	-moz-box-direction: reverse;
+	-moz-box-flex: 1;
+}
+
+#index-box
+{
+	-moz-box-align: center;
+}
+
+#reindex
+{
+	margin: 0;
+	padding: 0;
+	list-style-image: url(chrome://zotero/skin/arrow_refresh.png);
+}
+
+#reindex .toolbarbutton-icon
+{
+	margin: 0;
+	padding: 0;
+}
+
+#index-box > button
+{
+	font-size: .95em;
+	padding: 0;
+}
+
+row > label:first-child
+{
+	font-weight: bold;
+}
+
+label
+{
+	-moz-margin-start: 1px !important;
+	-moz-margin-end: 5px !important;
+	padding: 1px 1px 0 2px;
+}
+
+zoteronoteeditor
+{
+	margin: 2px 2px 0 2px;
+}
+
+#title
+{
+	font-size: 12px;
+	font-weight: bold;
+}

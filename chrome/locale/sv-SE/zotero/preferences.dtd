@@ -1,0 +1,120 @@
+<!ENTITY zotero.preferences.title "Inställningar i Zotero">
+
+<!ENTITY zotero.preferences.default "Standard:">
+
+<!ENTITY zotero.preferences.prefpane.general "Allmänt">
+
+<!ENTITY zotero.preferences.userInterface "Användargränssnitt">
+<!ENTITY zotero.preferences.statusBarIcon "Ikon i statusfält:">
+<!ENTITY zotero.preferences.statusBarIcon.none "Ingen">
+<!ENTITY zotero.preferences.fontSize "Teckenstorlek:">
+<!ENTITY zotero.preferences.fontSize.small "Liten">
+<!ENTITY zotero.preferences.fontSize.medium "Medium">
+<!ENTITY zotero.preferences.fontSize.large "Stor">
+
+<!ENTITY zotero.preferences.miscellaneous "Blandat">
+<!ENTITY zotero.preferences.autoUpdate "Kolla automatiskt efter uppdaterade översättare">
+<!ENTITY zotero.preferences.updateNow "Uppdatera nu">
+<!ENTITY zotero.preferences.reportTranslationFailure "Rapportera felaktiga översättare">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Allow zotero.org to customize content based on current Zotero version">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "If enabled, the current Zotero version will be added to HTTP requests to zotero.org.">
+<!ENTITY zotero.preferences.parseRISRefer "Använd Zotero för nedladdade RIS/Refer-filer">
+<!ENTITY zotero.preferences.automaticSnapshots "Ta automatiskt snapshots när poster skapas av webbsidor">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Bifoga automatiskt associerade PDF- och andra filer när poster sparas">
+<!ENTITY zotero.preferences.automaticTags "Etiketter automatiskt poster med nyckelord och ämnesord">
+
+<!ENTITY zotero.preferences.openurl.caption "OpenURL">
+
+<!ENTITY zotero.preferences.openurl.search "Sök efter länkservrar">
+<!ENTITY zotero.preferences.openurl.custom "Anpassat...">
+<!ENTITY zotero.preferences.openurl.server "Resolver:">
+<!ENTITY zotero.preferences.openurl.version "Version:">
+
+<!ENTITY zotero.preferences.prefpane.search "Sök">
+<!ENTITY zotero.preferences.search.fulltextCache "Fulltext-cache">
+<!ENTITY zotero.preferences.search.pdfIndexing "PDF-indexering">
+<!ENTITY zotero.preferences.search.indexStats "Index-statistik">
+
+<!ENTITY zotero.preferences.search.indexStats.indexed "Indexerat:">
+<!ENTITY zotero.preferences.search.indexStats.partial "Ofullständigt:">
+<!ENTITY zotero.preferences.search.indexStats.unindexed "Ej indexerat:">
+<!ENTITY zotero.preferences.search.indexStats.words "Ord:">
+
+<!ENTITY zotero.preferences.fulltext.textMaxLength "Maximalt antal tecken att indexera per fil:">
+<!ENTITY zotero.preferences.fulltext.pdfMaxPages "Maximalt antal sidor att indexera per fil:">
+
+<!ENTITY zotero.preferences.prefpane.export "Exportera">
+
+<!ENTITY zotero.preferences.citationOptions.caption "Inställningar för citeringar">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Inkludera webbadresser för pappersartiklar i referenser">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "När detta är bortvalt inkluderar Zotero webbadresser när tidskrifts- eller tidningsartiklar citerar, bara om artikel inte har ett sidintervall specificerat.">
+
+<!ENTITY zotero.preferences.quickCopy.caption "Snabbkopiera">
+<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Utdataformat som standard">
+<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Kopiera som HTML">
+<!ENTITY zotero.preferences.quickCopy.macWarning "Not: Rich-textformatting går förlorat i Mac OS X.">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Webbplats-specifika inställningar:">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domän/sökväg">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(t.ex. wikipedia.org)">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Utdataformat">
+
+<!ENTITY zotero.preferences.prefpane.styles "Styles">
+
+<!ENTITY zotero.preferences.styles.styleManager "Style Manager">
+<!ENTITY zotero.preferences.styles.styleManager.title "Title">
+<!ENTITY zotero.preferences.styles.styleManager.updated "Updated">
+<!ENTITY zotero.preferences.styles.styleManager.csl "CSL">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Skaffa ytterligare stilar...">
+
+<!ENTITY zotero.preferences.prefpane.keys "Genvägsknappar">
+
+<!ENTITY zotero.preferences.keys.openZotero "Öppns/Stäng Zotero-rutan">
+<!ENTITY zotero.preferences.keys.toggleFullscreen "Växla fullskärmsläge">
+<!ENTITY zotero.preferences.keys.library "Bibliotek">
+<!ENTITY zotero.preferences.keys.quicksearch "Snabbsökning">
+<!ENTITY zotero.preferences.keys.newItem "Skapa en ny post">
+<!ENTITY zotero.preferences.keys.newNote "Skapa en ny anteckning">
+<!ENTITY zotero.preferences.keys.toggleTagSelector "Växla etikettväljare">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopiera valda citeringsposter till klippbordet">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopiera valda poster till klippbordet">
+<!ENTITY zotero.preferences.keys.importFromClipboard "Import from Clipboard">
+<!ENTITY zotero.preferences.keys.overrideGlobal "Försök överskrida genvägar i konflikt">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Ändringar gäller bara i nya fönster">
+
+<!ENTITY zotero.preferences.prefpane.proxies "Proxies">
+
+<!ENTITY zotero.preferences.proxies.proxyOptions "Proxy Options">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero will transparently redirect requests through saved proxies. See the">
+<!ENTITY zotero.preferences.proxies.desc_link "proxy documentation">
+<!ENTITY zotero.preferences.proxies.desc_after_link "for more information.">
+<!ENTITY zotero.preferences.proxies.transparent "Transparently redirect requests through previously used proxies">
+<!ENTITY zotero.preferences.proxies.configured "Configured Proxies">
+<!ENTITY zotero.preferences.proxies.hostname "Hostname">
+<!ENTITY zotero.preferences.proxies.scheme "Scheme">
+
+<!ENTITY zotero.preferences.proxies.multiSite "Multi-Site">
+<!ENTITY zotero.preferences.proxies.autoAssociate "Automatically associate new hosts">
+<!ENTITY zotero.preferences.proxies.variables "You may use the following variables in your proxy scheme:">
+<!ENTITY zotero.preferences.proxies.h_variable "&#37;h - The hostname of the proxied site (e.g., www.zotero.org)">
+<!ENTITY zotero.preferences.proxies.p_variable "&#37;p - The path of the proxied page excluding the leading slash (e.g., about/index.html)">
+<!ENTITY zotero.preferences.proxies.d_variable "&#37;d - The directory path (e.g., about/)">
+<!ENTITY zotero.preferences.proxies.f_variable "&#37;f - The filename (e.g., index.html)">
+<!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Any string">
+
+<!ENTITY zotero.preferences.prefpane.advanced "Avancerat">
+
+<!ENTITY zotero.preferences.charset "Character Encoding">
+<!ENTITY zotero.preferences.charset.importCharset "Import Character Encoding">
+<!ENTITY zotero.preferences.charset.displayExportOption "Display character encoding option on export">
+
+<!ENTITY zotero.preferences.dataDir "Lagringsplats">
+<!ENTITY zotero.preferences.dataDir.useProfile "Använda profilkatalogen för Firefox">
+<!ENTITY zotero.preferences.dataDir.custom "Egen:">
+<!ENTITY zotero.preferences.dataDir.choose "Välj...">
+<!ENTITY zotero.preferences.dataDir.reveal "Visa datakatalog">
+
+<!ENTITY zotero.preferences.dbMaintenance "Databasunderhåll">
+<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Undersök databasintegritet">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Återställ översättare och stilar...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Återställ översättare...">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Återställ stilar...">

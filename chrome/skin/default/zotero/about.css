@@ -1,0 +1,54 @@
+dialog
+{
+	padding-top: 0px;
+	padding-left: 0px;
+	padding-right: 0px;
+}
+
+#aboutcontent
+{
+	background: white;
+	padding: 10px;
+}
+
+#name
+{
+	font-size: large;
+	font-weight: bold;
+}
+
+#version
+{
+	color: gray;
+	margin-bottom: 5px;
+}
+
+.subhead
+{
+	margin-top: 5px;
+	font-weight: bold;
+}
+
+.subcontent
+{
+	margin-left: 10px;
+}
+
+#zotero-translators-list {
+	margin: .3em 0;
+	height: 6.5em;
+	overflow: -moz-scrollbars-vertical;
+}
+
+#zotero-translators-list label.locale {
+	font-weight: bold;
+	margin-top: .5em;
+}
+
+#zotero-translators-list label.locale:first-child {
+	margin-top: 0;
+}
+
+#zotero-translators-list label:not(.locale) {
+	margin-left: 1.25em;
+}

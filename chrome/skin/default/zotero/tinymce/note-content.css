@@ -1,0 +1,16 @@
+pre {
+	font-family: -moz-fixed;
+}
+
+blockquote {
+	margin-left: 2em;
+}
+
+/* Add quotation marks around blockquote */
+blockquote p:not(:empty):before {
+	content: '“';
+}
+
+blockquote p:not(:empty):last-child:after {
+	content: '”';
+}

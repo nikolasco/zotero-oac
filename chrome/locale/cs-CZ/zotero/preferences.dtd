@@ -1,0 +1,120 @@
+<!ENTITY zotero.preferences.title "Nastavení Zotera">
+
+<!ENTITY zotero.preferences.default "Původní:">
+
+<!ENTITY zotero.preferences.prefpane.general "Obecné">
+
+<!ENTITY zotero.preferences.userInterface "Uživatelské rozhraní">
+<!ENTITY zotero.preferences.statusBarIcon "Ikona stavu v liště:">
+<!ENTITY zotero.preferences.statusBarIcon.none "Žádný">
+<!ENTITY zotero.preferences.fontSize "Velikost písma:">
+<!ENTITY zotero.preferences.fontSize.small "Malá">
+<!ENTITY zotero.preferences.fontSize.medium "Střední">
+<!ENTITY zotero.preferences.fontSize.large "Velká">
+
+<!ENTITY zotero.preferences.miscellaneous "Různé">
+<!ENTITY zotero.preferences.autoUpdate "Automaticky kontroluj aktualizace překladačů">
+<!ENTITY zotero.preferences.updateNow "Aktualizuj nyní">
+<!ENTITY zotero.preferences.reportTranslationFailure "Oznam poškozené překladače">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Allow zotero.org to customize content based on current Zotero version">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "If enabled, the current Zotero version will be added to HTTP requests to zotero.org.">
+<!ENTITY zotero.preferences.parseRISRefer "Použij Zotero pro stažené RIS/Refer soubory">
+<!ENTITY zotero.preferences.automaticSnapshots "Automaticky udělej snapshot při vytváření položky z internetových stránek">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Automaticky připoj propojené PDF a ostatní soubory při ukládání položek">
+<!ENTITY zotero.preferences.automaticTags "Automaticky oštítkuj položky na základě klíčových slov a nadpisu subjektu">
+
+<!ENTITY zotero.preferences.openurl.caption "OpenURL">
+
+<!ENTITY zotero.preferences.openurl.search "Hledat resolvery">
+<!ENTITY zotero.preferences.openurl.custom "Vlastní...">
+<!ENTITY zotero.preferences.openurl.server "Resolver:">
+<!ENTITY zotero.preferences.openurl.version "Verze">
+
+<!ENTITY zotero.preferences.prefpane.search "Hledání">
+<!ENTITY zotero.preferences.search.fulltextCache "Full-text cache">
+<!ENTITY zotero.preferences.search.pdfIndexing "Indexování PDF">
+<!ENTITY zotero.preferences.search.indexStats "Statistika indexování">
+
+<!ENTITY zotero.preferences.search.indexStats.indexed "Indexováno:">
+<!ENTITY zotero.preferences.search.indexStats.partial "Částečně:">
+<!ENTITY zotero.preferences.search.indexStats.unindexed "Neindexováno:">
+<!ENTITY zotero.preferences.search.indexStats.words "Slov:">
+
+<!ENTITY zotero.preferences.fulltext.textMaxLength "Maximální počet znaků pro indexování na soubor:">
+<!ENTITY zotero.preferences.fulltext.pdfMaxPages "Maximální počet stran pro indexování na soubor:">
+
+<!ENTITY zotero.preferences.prefpane.export "Export">
+
+<!ENTITY zotero.preferences.citationOptions.caption "Možnosti citování">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Zahrň URL článků v referencích">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Pokud je tato volba neaktivní, Zotero zahrne URL v případě citování článku (z časopisu, magazínu nebo novin) pouze když článek nemá specifikovaný rozsah stran.">
+
+<!ENTITY zotero.preferences.quickCopy.caption "Rychlá kopírování">
+<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Základní výstupní formát:">
+<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Kopírovat jako HTML">
+<!ENTITY zotero.preferences.quickCopy.macWarning "Poznámka: Rich-text formátování bude ztraceno na Mac OS X.">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Nastavení dle stránky:">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Doména/Cesta">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(např. wikipedia.org)">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Výstupní formát">
+
+<!ENTITY zotero.preferences.prefpane.styles "Styles">
+
+<!ENTITY zotero.preferences.styles.styleManager "Style Manager">
+<!ENTITY zotero.preferences.styles.styleManager.title "Title">
+<!ENTITY zotero.preferences.styles.styleManager.updated "Updated">
+<!ENTITY zotero.preferences.styles.styleManager.csl "CSL">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Získej dodatečné styly...">
+
+<!ENTITY zotero.preferences.prefpane.keys "Klávesové zkratky">
+
+<!ENTITY zotero.preferences.keys.openZotero "Otevřít/Zavřít Zotero panel">
+<!ENTITY zotero.preferences.keys.toggleFullscreen "Tlačítko celoobrazového módu">
+<!ENTITY zotero.preferences.keys.library "Knihovna">
+<!ENTITY zotero.preferences.keys.quicksearch "Rychlé hledání">
+<!ENTITY zotero.preferences.keys.newItem "Vytvoř novou položku">
+<!ENTITY zotero.preferences.keys.newNote "Vytvoř novou poznámku">
+<!ENTITY zotero.preferences.keys.toggleTagSelector "Tlačítko štítkového výběru">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Kopíruj citaci vybrané položky do schránky">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Kopíruj vybrané položky do schránky">
+<!ENTITY zotero.preferences.keys.importFromClipboard "Import from Clipboard">
+<!ENTITY zotero.preferences.keys.overrideGlobal "Pokusit se přepsat konfliktující klávesové zkratky">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Změny se projeví jen v nových oknech">
+
+<!ENTITY zotero.preferences.prefpane.proxies "Proxies">
+
+<!ENTITY zotero.preferences.proxies.proxyOptions "Proxy Options">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero will transparently redirect requests through saved proxies. See the">
+<!ENTITY zotero.preferences.proxies.desc_link "proxy documentation">
+<!ENTITY zotero.preferences.proxies.desc_after_link "for more information.">
+<!ENTITY zotero.preferences.proxies.transparent "Transparently redirect requests through previously used proxies">
+<!ENTITY zotero.preferences.proxies.configured "Configured Proxies">
+<!ENTITY zotero.preferences.proxies.hostname "Hostname">
+<!ENTITY zotero.preferences.proxies.scheme "Scheme">
+
+<!ENTITY zotero.preferences.proxies.multiSite "Multi-Site">
+<!ENTITY zotero.preferences.proxies.autoAssociate "Automatically associate new hosts">
+<!ENTITY zotero.preferences.proxies.variables "You may use the following variables in your proxy scheme:">
+<!ENTITY zotero.preferences.proxies.h_variable "&#37;h - The hostname of the proxied site (e.g., www.zotero.org)">
+<!ENTITY zotero.preferences.proxies.p_variable "&#37;p - The path of the proxied page excluding the leading slash (e.g., about/index.html)">
+<!ENTITY zotero.preferences.proxies.d_variable "&#37;d - The directory path (e.g., about/)">
+<!ENTITY zotero.preferences.proxies.f_variable "&#37;f - The filename (e.g., index.html)">
+<!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Any string">
+
+<!ENTITY zotero.preferences.prefpane.advanced "Pokročilé">
+
+<!ENTITY zotero.preferences.charset "Character Encoding">
+<!ENTITY zotero.preferences.charset.importCharset "Import Character Encoding">
+<!ENTITY zotero.preferences.charset.displayExportOption "Display character encoding option on export">
+
+<!ENTITY zotero.preferences.dataDir "Ukládání dat">
+<!ENTITY zotero.preferences.dataDir.useProfile "Použij adresář Firefox profilu">
+<!ENTITY zotero.preferences.dataDir.custom "Vlastní:">
+<!ENTITY zotero.preferences.dataDir.choose "Vybrat...">
+<!ENTITY zotero.preferences.dataDir.reveal "Ukaž adresář s daty">
+
+<!ENTITY zotero.preferences.dbMaintenance "Údržba databáze">
+<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Zkontroluj integritu databáze">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Resetuj překladače a styly...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Resetuj překladače...">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Resetuj styly...">

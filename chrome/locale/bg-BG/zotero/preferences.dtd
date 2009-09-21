@@ -1,0 +1,120 @@
+<!ENTITY zotero.preferences.title "Настройки на Зотеро">
+
+<!ENTITY zotero.preferences.default "По подразбиране:">
+
+<!ENTITY zotero.preferences.prefpane.general "Общи">
+
+<!ENTITY zotero.preferences.userInterface "Потребителски интерфейс">
+<!ENTITY zotero.preferences.statusBarIcon "Икона в лентата за състоянието">
+<!ENTITY zotero.preferences.statusBarIcon.none "Няма">
+<!ENTITY zotero.preferences.fontSize "Размер на шрифта:">
+<!ENTITY zotero.preferences.fontSize.small "Малък">
+<!ENTITY zotero.preferences.fontSize.medium "Среден">
+<!ENTITY zotero.preferences.fontSize.large "Голям">
+
+<!ENTITY zotero.preferences.miscellaneous "Разни">
+<!ENTITY zotero.preferences.autoUpdate "Автоматична проверка за усъвременени преводачи">
+<!ENTITY zotero.preferences.updateNow "Незабано осъвременяване">
+<!ENTITY zotero.preferences.reportTranslationFailure "Осведомяване за неработещи преводачи на страници">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Allow zotero.org to customize content based on current Zotero version">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "If enabled, the current Zotero version will be added to HTTP requests to zotero.org.">
+<!ENTITY zotero.preferences.parseRISRefer "Отваряне на изтеглените RIS/Refer файлове с Зотеро">
+<!ENTITY zotero.preferences.automaticSnapshots "Автоматично правене на снимки когато се създават обекти от интернет страници">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Автоматично прикачване на асоциираните PDF и други файлове по време на записа на обектите">
+<!ENTITY zotero.preferences.automaticTags "Автоматично маркиране на обектите с ключови думи и заглавие на темата">
+
+<!ENTITY zotero.preferences.openurl.caption "Отворяне на URL">
+
+<!ENTITY zotero.preferences.openurl.search "Търсене на решаващи сървъри">
+<!ENTITY zotero.preferences.openurl.custom "Потребителси...">
+<!ENTITY zotero.preferences.openurl.server "Решаващ сървър:">
+<!ENTITY zotero.preferences.openurl.version "Версия:">
+
+<!ENTITY zotero.preferences.prefpane.search "Търсене">
+<!ENTITY zotero.preferences.search.fulltextCache "Кеш на цялостният текст">
+<!ENTITY zotero.preferences.search.pdfIndexing "Индексиране на PDF">
+<!ENTITY zotero.preferences.search.indexStats "Статистики на индекса">
+
+<!ENTITY zotero.preferences.search.indexStats.indexed "Индексирани:">
+<!ENTITY zotero.preferences.search.indexStats.partial "Частични:">
+<!ENTITY zotero.preferences.search.indexStats.unindexed "Неиндексирани:">
+<!ENTITY zotero.preferences.search.indexStats.words "Думи:">
+
+<!ENTITY zotero.preferences.fulltext.textMaxLength "Максимален брой символи за индексиране на файл:">
+<!ENTITY zotero.preferences.fulltext.pdfMaxPages "Максимален брой страници за индексиране на файл:">
+
+<!ENTITY zotero.preferences.prefpane.export "Експорт">
+
+<!ENTITY zotero.preferences.citationOptions.caption "Опции за цитиране">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Включи интернет адреса на статиите в списъка с литературните източници">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "Когато тази опция е изключена, Зотеро включва интернет адреса на цитираната статия от списание или вестник, само ако номерата на страниците не са указани.">
+
+<!ENTITY zotero.preferences.quickCopy.caption "Бързо копиране">
+<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "Изходящ формат по подразбиране:">
+<!ENTITY zotero.preferences.quickCopy.copyAsHTML "Копиране в HTML формат">
+<!ENTITY zotero.preferences.quickCopy.macWarning "Внимание: Rich-text formatting ще бъде загубен при Mac OS X.">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Настройки специфични за страницата:">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Домен/пътека">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(напр. wikipedia.org)">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "Изходящ формат">
+
+<!ENTITY zotero.preferences.prefpane.styles "Styles">
+
+<!ENTITY zotero.preferences.styles.styleManager "Style Manager">
+<!ENTITY zotero.preferences.styles.styleManager.title "Title">
+<!ENTITY zotero.preferences.styles.styleManager.updated "Updated">
+<!ENTITY zotero.preferences.styles.styleManager.csl "CSL">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Инсталиране на допълнителни стилове...">
+
+<!ENTITY zotero.preferences.prefpane.keys "Клавишни Комбинации">
+
+<!ENTITY zotero.preferences.keys.openZotero "Отваряне/Затваряне на Панела на Зотеро">
+<!ENTITY zotero.preferences.keys.toggleFullscreen "Превключване в Режим на Цял Екран">
+<!ENTITY zotero.preferences.keys.library "Библиотека">
+<!ENTITY zotero.preferences.keys.quicksearch "Бързо Търсене">
+<!ENTITY zotero.preferences.keys.newItem "Създаване на нов обект">
+<!ENTITY zotero.preferences.keys.newNote "Създаване на нова бележка">
+<!ENTITY zotero.preferences.keys.toggleTagSelector "Превключване на Избора на Отметки">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Копирани на цитати за избраните обекти в клипборда">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Копиране на избраните обекти в клипборда">
+<!ENTITY zotero.preferences.keys.importFromClipboard "Import from Clipboard">
+<!ENTITY zotero.preferences.keys.overrideGlobal "Приоритет в случай на конфликт в клавишните комбинации.">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Промените ще се отразят само в новотворените прозорци">
+
+<!ENTITY zotero.preferences.prefpane.proxies "Proxies">
+
+<!ENTITY zotero.preferences.proxies.proxyOptions "Proxy Options">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero will transparently redirect requests through saved proxies. See the">
+<!ENTITY zotero.preferences.proxies.desc_link "proxy documentation">
+<!ENTITY zotero.preferences.proxies.desc_after_link "for more information.">
+<!ENTITY zotero.preferences.proxies.transparent "Transparently redirect requests through previously used proxies">
+<!ENTITY zotero.preferences.proxies.configured "Configured Proxies">
+<!ENTITY zotero.preferences.proxies.hostname "Hostname">
+<!ENTITY zotero.preferences.proxies.scheme "Scheme">
+
+<!ENTITY zotero.preferences.proxies.multiSite "Multi-Site">
+<!ENTITY zotero.preferences.proxies.autoAssociate "Automatically associate new hosts">
+<!ENTITY zotero.preferences.proxies.variables "You may use the following variables in your proxy scheme:">
+<!ENTITY zotero.preferences.proxies.h_variable "&#37;h - The hostname of the proxied site (e.g., www.zotero.org)">
+<!ENTITY zotero.preferences.proxies.p_variable "&#37;p - The path of the proxied page excluding the leading slash (e.g., about/index.html)">
+<!ENTITY zotero.preferences.proxies.d_variable "&#37;d - The directory path (e.g., about/)">
+<!ENTITY zotero.preferences.proxies.f_variable "&#37;f - The filename (e.g., index.html)">
+<!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Any string">
+
+<!ENTITY zotero.preferences.prefpane.advanced "За напреднали">
+
+<!ENTITY zotero.preferences.charset "Character Encoding">
+<!ENTITY zotero.preferences.charset.importCharset "Import Character Encoding">
+<!ENTITY zotero.preferences.charset.displayExportOption "Display character encoding option on export">
+
+<!ENTITY zotero.preferences.dataDir "Място за съхраняване">
+<!ENTITY zotero.preferences.dataDir.useProfile "Използване на папката с профила на Firefox">
+<!ENTITY zotero.preferences.dataDir.custom "Потребителски">
+<!ENTITY zotero.preferences.dataDir.choose "Избор...">
+<!ENTITY zotero.preferences.dataDir.reveal "Показване на папката с дани">
+
+<!ENTITY zotero.preferences.dbMaintenance "Подръжка на базата дани">
+<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "Проберка на цялостта на базата дани">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Възстановяване на преводачите и стиловете...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Възстановяване на преводачите...">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Възстановяване на стиловете...">

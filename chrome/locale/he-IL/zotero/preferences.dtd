@@ -1,0 +1,120 @@
+<!ENTITY zotero.preferences.title "Zotero העדפות">
+
+<!ENTITY zotero.preferences.default ":ברירת מחדל">
+
+<!ENTITY zotero.preferences.prefpane.general "כללי">
+
+<!ENTITY zotero.preferences.userInterface "ממשק משתמש">
+<!ENTITY zotero.preferences.statusBarIcon "Status bar icon:">
+<!ENTITY zotero.preferences.statusBarIcon.none "None">
+<!ENTITY zotero.preferences.fontSize ":גודל גופן">
+<!ENTITY zotero.preferences.fontSize.small "קטן">
+<!ENTITY zotero.preferences.fontSize.medium "בינוני">
+<!ENTITY zotero.preferences.fontSize.large "גדול">
+
+<!ENTITY zotero.preferences.miscellaneous "שונות">
+<!ENTITY zotero.preferences.autoUpdate "Automatically check for updated translators">
+<!ENTITY zotero.preferences.updateNow "עדכן עכשיו">
+<!ENTITY zotero.preferences.reportTranslationFailure "דווח על מתרגמי אתרים פגומים">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader "Allow zotero.org to customize content based on current Zotero version">
+<!ENTITY zotero.preferences.zoteroDotOrgVersionHeader.tooltip "If enabled, the current Zotero version will be added to HTTP requests to zotero.org.">
+<!ENTITY zotero.preferences.parseRISRefer "השתמש ב-Zotero להורדה של קבצי RIS/Refer">
+<!ENTITY zotero.preferences.automaticSnapshots "Automatically take snapshots when creating items from web pages">
+<!ENTITY zotero.preferences.downloadAssociatedFiles "Automatically attach associated PDFs and other files when saving items">
+<!ENTITY zotero.preferences.automaticTags "Automatically tag items with keywords and subject headings">
+
+<!ENTITY zotero.preferences.openurl.caption "OpenURL">
+
+<!ENTITY zotero.preferences.openurl.search "Search for resolvers">
+<!ENTITY zotero.preferences.openurl.custom "מותאם אישית...">
+<!ENTITY zotero.preferences.openurl.server "Resolver:">
+<!ENTITY zotero.preferences.openurl.version "גירסה:">
+
+<!ENTITY zotero.preferences.prefpane.search "Search">
+<!ENTITY zotero.preferences.search.fulltextCache "Full-Text Cache">
+<!ENTITY zotero.preferences.search.pdfIndexing "PDF Indexing">
+<!ENTITY zotero.preferences.search.indexStats "סטטיסטיקות אינדקס">
+
+<!ENTITY zotero.preferences.search.indexStats.indexed "Indexed:">
+<!ENTITY zotero.preferences.search.indexStats.partial "חלקי:">
+<!ENTITY zotero.preferences.search.indexStats.unindexed "Unindexed:">
+<!ENTITY zotero.preferences.search.indexStats.words "מילים:">
+
+<!ENTITY zotero.preferences.fulltext.textMaxLength "Maximum characters to index per file:">
+<!ENTITY zotero.preferences.fulltext.pdfMaxPages "Maximum pages to index per file:">
+
+<!ENTITY zotero.preferences.prefpane.export "Export">
+
+<!ENTITY zotero.preferences.citationOptions.caption "אפשרויות ציטוט">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL "Include URLs of paper articles in references">
+<!ENTITY zotero.preferences.export.citePaperJournalArticleURL.description "When this option is disabled, Zotero includes URLs when citing journal, magazine, and newspaper articles only if the article does not have a page range specified.">
+
+<!ENTITY zotero.preferences.quickCopy.caption "העתקה מהירה">
+<!ENTITY zotero.preferences.quickCopy.defaultOutputFormat "ברירת מחדל של פורמט פלט:">
+<!ENTITY zotero.preferences.quickCopy.copyAsHTML "העתק בתור HTML">
+<!ENTITY zotero.preferences.quickCopy.macWarning "Note: Rich-text formatting will be lost on Mac OS X.">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.setings "Site-Specific Settings:">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath "Domain/Path">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.domainPath.example "(לדוגמה wikipedia.org)">
+<!ENTITY zotero.preferences.quickCopy.siteEditor.outputFormat "פורמט פלט">
+
+<!ENTITY zotero.preferences.prefpane.styles "Styles">
+
+<!ENTITY zotero.preferences.styles.styleManager "Style Manager">
+<!ENTITY zotero.preferences.styles.styleManager.title "Title">
+<!ENTITY zotero.preferences.styles.styleManager.updated "Updated">
+<!ENTITY zotero.preferences.styles.styleManager.csl "CSL">
+<!ENTITY zotero.preferences.export.getAdditionalStyles "Get additional styles...">
+
+<!ENTITY zotero.preferences.prefpane.keys "Shortcut Keys">
+
+<!ENTITY zotero.preferences.keys.openZotero "פתח/סגור חלונות Zotero">
+<!ENTITY zotero.preferences.keys.toggleFullscreen "Toggle Fullscreen Mode">
+<!ENTITY zotero.preferences.keys.library "ספרייה">
+<!ENTITY zotero.preferences.keys.quicksearch "חיפוש מהיר">
+<!ENTITY zotero.preferences.keys.newItem "צור פריט חדש">
+<!ENTITY zotero.preferences.keys.newNote "Create a new note">
+<!ENTITY zotero.preferences.keys.toggleTagSelector "Toggle Tag Selector">
+<!ENTITY zotero.preferences.keys.copySelectedItemCitationsToClipboard "Copy Selected Item Citations to Clipboard">
+<!ENTITY zotero.preferences.keys.copySelectedItemsToClipboard "Copy Selected Items to Clipboard">
+<!ENTITY zotero.preferences.keys.importFromClipboard "Import from Clipboard">
+<!ENTITY zotero.preferences.keys.overrideGlobal "Try to override conflicting shortcuts">
+<!ENTITY zotero.preferences.keys.changesTakeEffect "Changes take effect in new windows only">
+
+<!ENTITY zotero.preferences.prefpane.proxies "Proxies">
+
+<!ENTITY zotero.preferences.proxies.proxyOptions "Proxy Options">
+<!ENTITY zotero.preferences.proxies.desc_before_link "Zotero will transparently redirect requests through saved proxies. See the">
+<!ENTITY zotero.preferences.proxies.desc_link "proxy documentation">
+<!ENTITY zotero.preferences.proxies.desc_after_link "for more information.">
+<!ENTITY zotero.preferences.proxies.transparent "Transparently redirect requests through previously used proxies">
+<!ENTITY zotero.preferences.proxies.configured "Configured Proxies">
+<!ENTITY zotero.preferences.proxies.hostname "Hostname">
+<!ENTITY zotero.preferences.proxies.scheme "Scheme">
+
+<!ENTITY zotero.preferences.proxies.multiSite "Multi-Site">
+<!ENTITY zotero.preferences.proxies.autoAssociate "Automatically associate new hosts">
+<!ENTITY zotero.preferences.proxies.variables "You may use the following variables in your proxy scheme:">
+<!ENTITY zotero.preferences.proxies.h_variable "&#37;h - The hostname of the proxied site (e.g., www.zotero.org)">
+<!ENTITY zotero.preferences.proxies.p_variable "&#37;p - The path of the proxied page excluding the leading slash (e.g., about/index.html)">
+<!ENTITY zotero.preferences.proxies.d_variable "&#37;d - The directory path (e.g., about/)">
+<!ENTITY zotero.preferences.proxies.f_variable "&#37;f - The filename (e.g., index.html)">
+<!ENTITY zotero.preferences.proxies.a_variable "&#37;a - Any string">
+
+<!ENTITY zotero.preferences.prefpane.advanced "מתקדם">
+
+<!ENTITY zotero.preferences.charset "Character Encoding">
+<!ENTITY zotero.preferences.charset.importCharset "Import Character Encoding">
+<!ENTITY zotero.preferences.charset.displayExportOption "Display character encoding option on export">
+
+<!ENTITY zotero.preferences.dataDir "מיקום אחסון">
+<!ENTITY zotero.preferences.dataDir.useProfile "Use Firefox profile directory">
+<!ENTITY zotero.preferences.dataDir.custom "מותאם אישית:">
+<!ENTITY zotero.preferences.dataDir.choose "בחר...">
+<!ENTITY zotero.preferences.dataDir.reveal "Show Data Directory">
+
+<!ENTITY zotero.preferences.dbMaintenance "Database Maintenance">
+<!ENTITY zotero.preferences.dbMaintenance.integrityCheck "בדוק שלמות מסד נתונים">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslatorsAndStyles "Reset Translators and Styles...">
+<!ENTITY zotero.preferences.dbMaintenance.resetTranslators "Reset Translators...">
+<!ENTITY zotero.preferences.dbMaintenance.resetStyles "Reset Styles...">

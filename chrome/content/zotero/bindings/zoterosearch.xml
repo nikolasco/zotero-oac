@@ -1,0 +1,901 @@
+<?xml version="1.0"?>
+<!--
+    ***** BEGIN LICENSE BLOCK *****
+    
+    Copyright (c) 2006  Center for History and New Media
+                        George Mason University, Fairfax, Virginia, USA
+                        http://chnm.gmu.edu
+    
+    Licensed under the Educational Community License, Version 1.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+    
+    http://www.opensource.org/licenses/ecl1.php
+    
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+    
+    ***** END LICENSE BLOCK *****
+-->
+
+<!DOCTYPE bindings SYSTEM "chrome://zotero/locale/searchbox.dtd">
+
+<bindings xmlns="http://www.mozilla.org/xbl"
+		  xmlns:xbl="http://www.mozilla.org/xbl"
+		  xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	
+	<binding id="search-box">
+		<resources>
+			<stylesheet src="chrome://zotero/skin/bindings/search.css"/>
+		</resources>
+		
+		<implementation>
+			<field name="searchRef"/>
+			<property name="search" onget="return this.searchRef;">
+				<setter>
+					<![CDATA[
+						this.searchRef = val;
+						
+						var conditionsBox = this.id('conditions');
+						while(conditionsBox.hasChildNodes())
+							conditionsBox.removeChild(conditionsBox.firstChild);
+						
+						var conditions = this.search.getSearchConditions();
+						for(var id in conditions)
+						{
+							// Checkboxes
+							switch (conditions[id]['condition']) {
+								case 'recursive':
+								case 'noChildren':
+								case 'includeParentsAndChildren':
+									var checkbox = conditions[id]['condition'] + 'Checkbox';
+									this.id(checkbox).setAttribute('condition',id);
+									this.id(checkbox).checked = (conditions[id]['operator']=='true');
+									continue;
+							}
+							
+							if(conditions[id]['condition'] == 'joinMode')
+							{
+								this.id('joinModeMenu').setAttribute('condition',id);
+								this.id('joinModeMenu').value = conditions[id]['operator'];
+							}
+							else
+							{
+								this.addCondition(conditions[id]);
+							}
+						}
+					]]>
+				</setter>
+			</property>
+			<method name="addCondition">
+				<parameter name="ref"/>
+				<body>
+					<![CDATA[
+						var conditionsBox = this.id('conditions');
+						var condition = document.createElement('searchcondition');
+						condition.setAttribute('flex','1');
+						
+						conditionsBox.appendChild(condition);
+						
+						// Default to an empty 'title' condition
+						if (!ref) {
+							ref = this.search.getSearchCondition(this.search.addCondition("title","contains",""))
+						}
+						
+						condition.initWithParentAndCondition(this, ref);
+						
+						if (conditionsBox.childNodes.length == 2){
+							conditionsBox.childNodes[0].enableRemoveButton();
+						}
+						else if (conditionsBox.childNodes.length == 1){
+							conditionsBox.childNodes[0].disableRemoveButton();
+						}
+					]]>
+				</body>
+			</method>
+			<method name="removeCondition">
+				<parameter name="id"/>
+				<body>
+					<![CDATA[
+						var conditionsBox = this.id('conditions');
+						
+						this.search.removeCondition(id);
+						
+						for (var i = 0, len=conditionsBox.childNodes.length; i < len; i++){
+							if (conditionsBox.childNodes[i].conditionID == id){
+								conditionsBox.removeChild(conditionsBox.childNodes[i]);
+								break;
+							}
+						}
+						
+						if (conditionsBox.childNodes.length == 1){
+							conditionsBox.childNodes[0].disableRemoveButton();
+						}
+					]]>
+				</body>
+			</method>
+			<method name="updateJoinMode">
+				<body>
+					<![CDATA[
+						var menu = this.id('joinModeMenu');
+						if(menu.hasAttribute('condition'))
+							this.search.updateCondition(menu.getAttribute('condition'),'joinMode',menu.value,null);
+						else
+							menu.setAttribute('condition', this.search.addCondition('joinMode',menu.value,null));
+					]]>
+				</body>
+			</method>
+			<method name="updateCheckbox">
+				<parameter name="condition"/>
+				<body>
+					<![CDATA[
+						var checkbox = this.id(condition + 'Checkbox');
+						var value = checkbox.checked ? 'true' : 'false';
+						if(checkbox.hasAttribute('condition'))
+						{
+							this.search.updateCondition(checkbox.getAttribute('condition'),
+								condition, value, null);
+						}
+						else
+						{
+							checkbox.setAttribute('condition',
+								this.search.addCondition(condition, value, null));
+						}
+					]]>
+				</body>
+			</method>
+			<!-- Calls updateSearch() on all search conditions -->
+			<method name="updateSearch">
+				<body>
+					<![CDATA[
+						var conditionsBox = this.id('conditions');
+						
+						if (conditionsBox.hasChildNodes()) {
+							for(var i = 0, len=conditionsBox.childNodes.length; i < len; i++) {
+								conditionsBox.childNodes[i].updateSearch();
+							}
+						}
+					]]>
+				</body>
+			</method>
+			<method name="save">
+				<body>
+					<![CDATA[
+						this.updateSearch();
+						return this.search.save(true);
+					]]>
+				</body>
+			</method>
+			
+			<method name="handleKeyPress">
+				<parameter name="event"/>
+				<body>
+				<![CDATA[
+					switch (event.keyCode) {
+						case event.DOM_VK_RETURN:
+						case event.DOM_VK_ENTER:
+							if (event.shiftKey) {
+								this.addCondition();
+							}
+							else {
+								this.doCommand();
+							}
+							break;
+					}
+				]]>
+				</body>
+			</method>
+			
+			
+			<method name="id">
+				<parameter name="id"/>
+				<body>
+					<![CDATA[
+						return document.getAnonymousNodes(this)[0].getElementsByAttribute('id',id)[0];
+					]]>
+				</body>
+			</method>
+		</implementation>
+		
+		<content>
+			<xul:vbox id="search-box" flex="1" onkeypress="document.getBindingParent(this).handleKeyPress(event)">
+				<xul:groupbox xbl:inherits="flex">
+					<xul:caption align="center">
+						<xul:label value="&zotero.search.joinMode.prefix;"/>
+						<xul:menulist id="joinModeMenu" oncommand="document.getBindingParent(this).updateJoinMode(); event.stopPropagation()">
+							<xul:menupopup>
+								<xul:menuitem label="&zotero.search.joinMode.any;" value="any"/>
+								<xul:menuitem label="&zotero.search.joinMode.all;" value="all" selected="true"/>
+							</xul:menupopup>
+						</xul:menulist>
+						<xul:label value="&zotero.search.joinMode.suffix;"/>
+					</xul:caption>
+					<xul:vbox id="conditions"/>
+				</xul:groupbox>
+				<xul:hbox>
+					<xul:checkbox id="recursiveCheckbox" label="&zotero.search.recursive.label;" oncommand="document.getBindingParent(this).updateCheckbox('recursive'); event.stopPropagation()"/>
+					<xul:checkbox id="noChildrenCheckbox" label="&zotero.search.noChildren;" oncommand="document.getBindingParent(this).updateCheckbox('noChildren'); event.stopPropagation()"/>
+				</xul:hbox>
+				<xul:checkbox id="includeParentsAndChildrenCheckbox" label="&zotero.search.includeParentsAndChildren;" oncommand="document.getBindingParent(this).updateCheckbox('includeParentsAndChildren'); event.stopPropagation()"/>
+			</xul:vbox>
+		</content>
+	</binding>
+	
+	
+	
+	<binding id="search-condition">
+		<resources>
+			<stylesheet src="chrome://zotero/skin/bindings/search.css"/>
+		</resources>
+		
+		<implementation>
+			<field name="conditionID"/>
+			<field name="selectedCondition"/>
+			<field name="mode"/>
+			<field name="selectedOperator"/>
+			<field name="value"/>
+			<field name="parent"/>
+			<field name="dontupdate"/>
+			<constructor>
+				<![CDATA[
+					var operators = new Array('is', 'isNot', 'beginsWith', 'contains', 'doesNotContain', 'isLessThan', 'isGreaterThan', 'isBefore', 'isAfter', 'isInTheLast');
+					var operatorsList = this.id('operatorsmenu');
+					
+					// Build operator menu
+					for(var i in operators)
+					{
+						operatorsList.appendItem(Zotero.getString('searchOperator.'+operators[i]),operators[i]);
+					}
+					
+					// Build conditions menu
+					var conditionsList = this.id('conditionsmenu');
+					var conditions = Zotero.SearchConditions.getStandardConditions();
+					
+					for (var i=0, len=conditions.length; i<len; i++) {
+						var menuitem = conditionsList.appendItem(conditions[i]['localized'], conditions[i]['name']);
+						
+						var baseFields = null;
+						try {
+							baseFields = Zotero.ItemFields.getTypeFieldsFromBase(conditions[i]['name']);
+						}
+						catch (e) {}
+						
+						// Add tooltip, building it if it doesn't exist
+						if (baseFields) {
+							if (!this.id(conditions[i]['name'] + '-tooltip')) {
+								var fieldName = null;
+								try {
+									fieldName = Zotero.getString('itemFields.' + conditions[i]['name']);
+								}
+								catch (e) {}
+								
+								if (fieldName) {
+									var localized = [fieldName];
+								}
+								else {
+									var localized = [];
+								}
+								
+								for (var j in baseFields) {
+									var str = Zotero.SearchConditions.getLocalizedName(Zotero.ItemFields.getName(baseFields[j]));
+									
+									if (localized.indexOf(str) == -1) {
+										localized.push(str);
+									}
+								}
+								localized.sort();
+								
+								var tt = document.createElement('tooltip');
+								tt.setAttribute('id', conditions[i]['name'] + '-tooltip');
+								tt.setAttribute('orient', 'vertical');
+								tt.setAttribute('noautohide', true);
+								
+								var grid = document.createElement('grid');
+								
+								var columns = document.createElement('columns');
+								var col1 = document.createElement('column');
+								var col2 = document.createElement('column');
+								columns.appendChild(col1);
+								columns.appendChild(col2);
+								
+								var rows = document.createElement('rows');
+								
+								var fieldRow = document.createElement('row');
+								var label = document.createElement('label');
+								label.setAttribute('value', Zotero.getString('searchConditions.tooltip.fields'));
+								fieldRow.appendChild(label);
+								var vbox = document.createElement('vbox');
+								for each(var str in localized) {
+									var label = document.createElement('label')
+									label.setAttribute('value', str);
+									vbox.appendChild(label);
+								}
+								fieldRow.appendChild(vbox);
+								
+								rows.appendChild(fieldRow);
+								
+								grid.appendChild(rows);
+								tt.appendChild(grid);
+								
+								this.id('condition-tooltips').appendChild(tt);
+							}
+							
+							menuitem.setAttribute('tooltip', conditions[i]['name'] + '-tooltip');
+						}
+					}
+					conditionsList.selectedIndex = 0;
+				]]>
+			</constructor>
+			<method name="onConditionSelected">
+				<body>
+					<![CDATA[
+					// Skip if correct condition already selected
+					if (this.id('conditionsmenu').value==this.selectedCondition){
+						return;
+					}
+					var conditionsMenu = this.id('conditionsmenu');
+					var operatorsList = this.id('operatorsmenu');
+					
+					this.selectedCondition = conditionsMenu.value;
+					this.selectedOperator = operatorsList.value;
+					
+					var condition = Zotero.SearchConditions.get(conditionsMenu.value);
+					var operators = condition['operators'];
+					
+					// Display appropriate operators for condition
+					var selectThis;
+					for(var i = 0, len = operatorsList.firstChild.childNodes.length; i < len; i++)
+					{
+						var val = operatorsList.firstChild.childNodes[i].getAttribute('value');
+						var hidden = !operators[val];
+						operatorsList.firstChild.childNodes[i].setAttribute('hidden', hidden);
+						if (!hidden && (selectThis == null || this.selectedOperator == val))
+						{
+							selectThis = i;
+						}
+					}
+					operatorsList.selectedIndex = selectThis;
+					
+					// Generate drop-down menu instead of textbox for certain conditions
+					switch (conditionsMenu.value){
+						case 'collectionID':
+							var merged = [];
+							
+							var cols = Zotero.getCollections(false, true);
+							for (var i in cols)
+							{
+								// Indent subcollections
+								var indent = '';
+								if (cols[i].level) {
+									for (var j=1; j<cols[i].level; j++) {
+										indent += '    ';
+									}
+									indent += '- ';
+								}
+								merged.push([indent + cols[i].getName(), 'C' + cols[i].getID()]);
+							}
+							
+							var searches = Zotero.Searches.getAll();
+							for (var i in searches)
+							{
+								if (searches[i]['id'] != this.parent.search.getID())
+								{
+									merged.push([searches[i]['name'], 'S' + searches[i]['id']]);
+								}
+							}
+							
+							this.createValueMenu(merged);
+							break;
+						
+						case 'itemTypeID':
+							var types = Zotero.ItemTypes.getTypes();
+							for (var i in types)
+							{
+								types[i][0] = Zotero.getString('itemTypes.' + types[i]['name']);
+								types[i][1] = types[i]['id'];
+								delete types[i]['name'];
+								delete types[i]['id'];
+							}
+							this.createValueMenu(types);
+							break;
+						
+						case 'fileTypeID':
+							var types = Zotero.FileTypes.getTypes();
+							for (var i in types) {
+								types[i][0] = Zotero.getString('fileTypes.' + types[i]['name']);
+								types[i][1] = types[i]['id'];
+								delete types[i]['name'];
+								delete types[i]['id'];
+							}
+							this.createValueMenu(types);
+							break;
+						
+						default:
+							if (operatorsList.value=='isInTheLast')
+							{
+								this.id('value-date-age').value = this.value;
+							}
+							
+							// Textbox
+							else {
+								// If switching from menu to textbox, clear value
+								if (this.id('valuefield').hidden){
+									this.id('valuefield').value = '';
+								}
+								// If switching between textbox conditions, get loaded value for new one
+								else {
+									this.id('valuefield').value = this.value;
+								}
+								
+								// Update field drop-down if applicable
+								this.id('valuefield').update(conditionsMenu.value, this.mode);
+							}
+					}
+					
+					this.onOperatorSelected();
+					]]>
+				</body>
+			</method>
+			<method name="onOperatorSelected">
+				<body>
+					<![CDATA[
+					var conditionsMenu = this.id('conditionsmenu');
+					var operatorsList = this.id('operatorsmenu');
+					
+					// Drop-down menu
+					if (conditionsMenu.value == 'collectionID' || conditionsMenu.value == 'itemTypeID'
+							|| conditionsMenu.value == 'fileTypeID') {
+						this.id('valuefield').hidden = true;
+						this.id('valuemenu').hidden = false;
+						this.id('value-date-age').hidden = true;
+					}
+					
+					// Textbox + units dropdown for isInTheLast operator
+					else if (operatorsList.value=='isInTheLast')
+					{
+						// If switching from text field, clear value
+						if (this.id('value-date-age').hidden){
+							this.value = '';
+						}
+						this.id('valuefield').hidden = true;
+						this.id('valuemenu').hidden = true;
+						this.id('value-date-age').hidden = false;
+					}
+					
+					// Textbox
+					else
+					{
+						// If switching from date age, clear value
+						if (this.id('valuefield').hidden){
+							this.value = '';
+						}
+						this.id('valuefield').hidden = false;
+						this.id('valuemenu').hidden = true;
+						this.id('value-date-age').hidden = true;
+					}
+					]]>
+				</body>
+			</method>
+			<method name="createValueMenu">
+				<parameter name="values"/>
+				<body>
+					<![CDATA[
+						while (this.id('valuemenu').hasChildNodes()){
+							this.id('valuemenu').removeChild(this.id('valuemenu').firstChild);
+						}
+						
+						if (values.length){
+							for (var i in values){
+								this.id('valuemenu').appendItem(values[i][0], values[i][1]);
+							}
+							this.id('valuemenu').selectedIndex = 0;
+						}
+						
+						if (this.value)
+						{
+							this.id('valuemenu').value = this.value;
+						}
+					]]>
+				</body>
+			</method>
+			<method name="initWithParentAndCondition">
+				<parameter name="parent"/>
+				<parameter name="condition"/>
+				<body>
+					<![CDATA[
+						this.parent = parent;
+						this.conditionID = condition['id'];
+						
+						if(this.parent.search)
+						{
+							this.dontupdate = true;	//so that the search doesn't get updated while we are creating controls.
+							var prefix = '';
+							
+							// Handle special conditions
+							switch (condition['condition'])
+							{
+								case 'savedSearchID':
+									this.id('conditionsmenu').value = 'collectionID';
+									prefix = 'S';
+									break;
+								
+								case 'collectionID':
+									prefix = 'C';
+									// fall through
+									
+								default:
+									this.id('conditionsmenu').value = condition['condition'];
+							}
+							
+							// Convert datetimes from UTC to localtime
+							if ((condition['condition']=='accessDate' ||
+									condition['condition']=='dateAdded' ||
+									condition['condition']=='dateModified') &&
+									Zotero.Date.isSQLDateTime(condition['value'])){
+								
+								condition['value'] =
+									Zotero.Date.dateToSQL(Zotero.Date.sqlToDate(condition['value'], true));
+							}
+							
+							this.mode = condition['mode'];
+							this.id('operatorsmenu').value = condition['operator'];
+							this.value = prefix +
+								(condition.value ? condition.value : '');
+
+							this.dontupdate = false;
+						}
+						
+						this.onConditionSelected();
+						
+						this.id('conditionsmenu').focus();
+					]]>
+				</body>
+			</method>
+			<!-- Gets the value from the field and updates the associated search condition -->
+			<method name="updateSearch">
+				<body>
+					<![CDATA[
+						if(this.parent && this.parent.search && !this.dontupdate)
+						{
+							var condition = this.id('conditionsmenu').value;
+							var operator = this.id('operatorsmenu').value;
+							
+							// Regular text field
+							if (!this.id('valuefield').hidden)
+							{
+								var value = this.id('valuefield').value;
+								
+								// Convert datetimes to UTC before saving
+								if ((this.id('conditionsmenu').value=='accessDate' ||
+										this.id('conditionsmenu').value=='dateAdded' ||
+										this.id('conditionsmenu').value=='dateModified') &&
+										Zotero.Date.isSQLDateTime(value)){
+									
+									var value = Zotero.Date.dateToSQL(Zotero.Date.sqlToDate(value), true);
+								}
+								
+								// Append mode to condition
+								if (this.id('valuefield').mode){
+									condition += '/' + this.id('valuefield').mode;
+								}
+							}
+							
+							// isInTheLast operator
+							else if (!this.id('value-date-age').hidden)
+							{
+								var value = this.id('value-date-age').value;
+							}
+							
+							// Handle special C1234 and S5678 form for
+							// collections and searches
+							else if (this.id('conditionsmenu').value=='collectionID')
+							{
+								var letter = this.id('valuemenu').value.substr(0,1);
+								if (letter=='C')
+								{
+									condition = 'collectionID';
+								}
+								else if (letter=='S')
+								{
+									condition = 'savedSearchID';
+								}
+								var value = this.id('valuemenu').value.substr(1);
+							}
+							
+							// Regular drop-down menu
+							else
+							{
+								var value = this.id('valuemenu').value;
+							}
+							this.parent.search.updateCondition(this.conditionID, condition, operator, value);
+						}
+					]]>
+				</body>
+			</method>
+			<method name="onRemoveClicked">
+				<body>
+					<![CDATA[
+						if (this.parent){
+							this.parent.removeCondition(this.conditionID);
+							window.sizeToContent()
+						}
+					]]>
+				</body>
+			</method>
+			<method name="onAddClicked">
+				<body>
+					<![CDATA[
+						if (this.parent){
+							this.parent.addCondition();
+							window.sizeToContent();
+						}
+					]]>
+				</body>
+			</method>
+			<method name="disableRemoveButton">
+				<body>
+					<![CDATA[
+						document.getAnonymousNodes(this)[0].lastChild.previousSibling.disabled = true;
+					]]>
+				</body>
+			</method>
+			<method name="enableRemoveButton">
+				<body>
+					<![CDATA[
+						document.getAnonymousNodes(this)[0].lastChild.previousSibling.disabled = false;
+					]]>
+				</body>
+			</method>
+			<method name="id">
+				<parameter name="id"/>
+				<body>
+					<![CDATA[
+						var elems = document.getAnonymousNodes(this)[0].getElementsByAttribute('id',id);
+						return elems[0] ? elems[0] : false;
+					]]>
+				</body>
+			</method>
+		</implementation>
+		
+		<content>
+			<xul:hbox id="search-condition" xbl:inherits="flex">
+				<xul:popupset id="condition-tooltips"/>
+				
+				<xul:menulist id="conditionsmenu" oncommand="this.parentNode.parentNode.onConditionSelected(); event.stopPropagation()">
+					<xul:menupopup/>
+				</xul:menulist>
+				<xul:menulist id="operatorsmenu" oncommand="this.parentNode.parentNode.onOperatorSelected(); event.stopPropagation()">
+					<xul:menupopup/>
+				</xul:menulist>
+				<xul:zoterosearchtextbox id="valuefield" flex="1"/>
+				<xul:menulist id="valuemenu" flex="1" hidden="true">
+					<xul:menupopup/>
+				</xul:menulist>
+				<xul:zoterosearchagefield id="value-date-age" hidden="true" flex="1"/>
+				<!-- Adding elements below will break disable/enableRemoveButton() -->
+				<xul:toolbarbutton id="remove" class="zotero-clicky" label="-" oncommand="this.parentNode.parentNode.onRemoveClicked(event); event.stopPropagation()"/>
+				<xul:toolbarbutton id="add" class="zotero-clicky" label="+" oncommand="this.parentNode.parentNode.onAddClicked(event); event.stopPropagation()"/>
+			</xul:hbox>
+		</content>
+	</binding>
+	
+	
+	
+	<binding id="search-textbox">
+		<resources>
+			<stylesheet src="chrome://zotero/skin/bindings/search.css"/>
+		</resources>
+		
+		<implementation>
+			<property name="value"
+				onget="return document.getAnonymousNodes(this)[0].value"
+				onset="document.getAnonymousNodes(this)[0].setAttribute('value', val); return val"/>
+			<property name="mode">
+				<getter>
+					<![CDATA[
+						if (this.getAttribute('hasOptions')!='true'){
+							return false;
+						}
+						
+						var button = this.id('textbox-button');
+						var menu = this.id(button.popup);
+						
+						var selectedIndex = -1;
+						for (var i=0; i<menu.childNodes.length; i++){
+							if (menu.childNodes[i].getAttribute('checked')=='true'){
+								selectedIndex = i;
+								break;
+							}
+						}
+						switch (button.popup){
+							case 'textbox-fulltext-menu':
+								switch (selectedIndex){
+									case 0:
+										return false;
+									
+									case 1:
+										return 'phraseBinary';
+									
+									case 2:
+										return 'regexp';
+									
+									case 3:
+										return 'regexpCS';
+								}
+								break;
+						}
+						
+						throw('Invalid search textbox popup');
+					]]>
+				</getter>
+			</property>
+			<method name="update">
+				<parameter name="condition"/>
+				<parameter name="mode"/>
+				<body>
+					<![CDATA[
+						var button = this.id('textbox-button');
+						
+						switch (condition){
+							case 'fulltextContent':
+								button.popup = 'textbox-fulltext-menu';
+								button.setAttribute('popup', 'textbox-fulltext-menu');
+								var menu = this.id(button.popup);
+								this.setAttribute('hasOptions', true);
+								
+								var selectedIndex = 0;
+								if (mode){
+									switch (mode){
+										case 'phrase':
+											selectedIndex = 0;
+											break;
+										
+										case 'phraseBinary':
+											selectedIndex = 1;
+											break;
+										
+										case 'regexp':
+											selectedIndex = 2;
+											break;
+										
+										case 'regexpCS':
+											selectedIndex = 3;
+											break;
+									}
+								}
+								menu.childNodes[selectedIndex].setAttribute('checked', true);
+								break;
+								
+							default:
+								this.setAttribute('hasOptions', false);
+								
+								// Set textbox to autocomplete mode
+								switch (condition)
+								{
+									// Skip autocomplete for these fields
+									case 'date':
+									case 'note':
+									case 'extra':
+										break;
+									
+									default:
+									
+										var textbox = document.getAnonymousNodes(this)[0];
+										textbox.setAttribute('type', 'autocomplete');
+										textbox.setAttribute('autocompletesearch', 'zotero');
+										textbox.setAttribute('timeout', '250');
+										
+										if (condition=='creator')
+										{
+											// 2 searches both single- and double-field creators
+											var autocompleteCondition = condition + '/2'
+										}
+										else
+										{
+											var autocompleteCondition = condition;
+										}
+										
+										textbox.setAttribute('autocompletesearchparam', autocompleteCondition);
+								}
+						}
+						
+						if (!autocompleteCondition)
+						{
+							var textbox = document.getAnonymousNodes(this)[0];
+							textbox.removeAttribute('type');
+						}
+					]]>
+				</body>
+			</method>
+			<method name="id">
+				<parameter name="id"/>
+				<body>
+					<![CDATA[
+						return document.getAnonymousNodes(this)[0].getElementsByAttribute('id',id)[0];
+					]]>
+				</body>
+			</method>
+		</implementation>
+		
+		<content>
+			<xul:textbox id="search-textbox" xbl:inherits="hasOptions,flex">
+				<xul:popupset>
+					<xul:menupopup id="textbox-fulltext-menu">
+						<xul:menuitem type="radio" label="&zotero.search.textModes.phrase;"/>
+						<xul:menuitem type="radio" label="&zotero.search.textModes.phraseBinary;"/>
+						<xul:menuitem type="radio" label="&zotero.search.textModes.regexp;"/>
+						<xul:menuitem type="radio" label="&zotero.search.textModes.regexpCS;"/>
+					</xul:menupopup>
+				</xul:popupset>
+				
+				<xul:toolbarbutton id="textbox-button" type="menu"/>
+			</xul:textbox>
+		</content>
+	</binding>
+	
+	
+	
+	<binding id="search-in-the-last">
+		<resources>
+			<stylesheet src="chrome://zotero/skin/bindings/search.css"/>
+		</resources>
+		
+		<implementation>
+			<property name="value">
+				<getter>
+					<![CDATA[
+						var menulist = document.getAnonymousNodes(this)[0].firstChild.nextSibling;
+						
+						return document.getAnonymousNodes(this)[0].firstChild.value + ' ' +
+							menulist.firstChild.childNodes[menulist.selectedIndex].getAttribute('value')
+					]]>
+				</getter>
+				<setter>
+					<![CDATA[
+						var [num, units] = val.split(' ');
+						document.getAnonymousNodes(this)[0].firstChild.setAttribute('value', num);
+						
+						var menulist = document.getAnonymousNodes(this)[0].firstChild.nextSibling;
+						var menupopup = menulist.firstChild;
+						
+						var selectThis = 0;
+						for (var i=0; i<menupopup.childNodes.length; i++){
+							if (menupopup.childNodes[i].value == units)
+							{
+								selectThis = i;
+								break;
+							}
+						}
+						menulist.selectedIndex = selectThis;
+						
+						return val;
+					]]>
+				</setter>
+			</property>
+			<method name="id">
+				<parameter name="id"/>
+				<body>
+					<![CDATA[
+						return document.getAnonymousNodes(this)[0].getElementsByAttribute('id',id)[0];
+					]]>
+				</body>
+			</method>
+		</implementation>
+		
+		<content>
+			<xul:hbox id="search-in-the-last" flex="1">
+				<xul:textbox flex="1"/>
+				<xul:menulist>
+					<xul:menupopup flex="1">
+						<xul:menuitem label="&zotero.search.date.units.days;" value="days" selected="true"/>
+						<xul:menuitem label="&zotero.search.date.units.months;" value="months"/>
+						<xul:menuitem label="&zotero.search.date.units.years;" value="years"/>
+					</xul:menupopup>
+				</xul:menulist>
+			</xul:hbox>
+		</content>
+	</binding>
+</bindings>
