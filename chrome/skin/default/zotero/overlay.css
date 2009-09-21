@@ -355,7 +355,7 @@
 }
 #zotero-annotate-image-tb-rectangle
 {
-	list-style-image: url('chrome://zotero/skin/icon_rectangle.png');
+	list-style-image: url('chrome://zotero/skin/icon_rectangle.gif');
 }
 
 #zotero-annotate-image-tb-rectangle[tool-active=true]
@@ -365,7 +365,7 @@
 
 #zotero-annotate-image-tb-polygon
 {
-	list-style-image: url('chrome://zotero/skin/icon_polygon.png');
+	list-style-image: url('chrome://zotero/skin/icon_polygon.gif');
 	
 }
 
@@ -375,17 +375,17 @@
 }
 #zotero-annotate-image-tb-zoomIn
 {
-	list-style-image: url('chrome://zotero/skin/icon_zoom_in.png');
+	list-style-image: url('chrome://zotero/skin/icon_zoom_in.gif');
 }
 #zotero-annotate-image-tb-zoomIn[tool-active=true]
 {
-	list-style-image: url('chrome://zotero/skin/icon_zoom_in.png');
+	list-style-image: url('chrome://zotero/skin/icon_zoom_in.gif');
 }
 #zotero-annotate-image-tb-zoomOut
 {
-	list-style-image: url('chrome://zotero/skin/icon_zoom_out.png');
+	list-style-image: url('chrome://zotero/skin/icon_zoom_out.gif');
 }
 #zotero-annotate-image-tb-zoomOut[tool-active=true]
 {
-	list-style-image: url('chrome://zotero/skin/icon_zoom_out.png');
+	list-style-image: url('chrome://zotero/skin/icon_zoom_out.gif');
 }

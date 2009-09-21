@@ -1,9 +1,3 @@
-/**
- * AXE Imagetagger
- * @authors Doug Reside
- * 			Grant Dickie
- */
-
 Zotero.AXEImage= function(Zotero_Browser, browser, itemID){
 
 	this.Zotero_Browser = Zotero_Browser;
@@ -11,6 +5,16 @@ Zotero.AXEImage= function(Zotero_Browser, browser, itemID){
 	this.document = browser.contentDocument;
 	this.window = browser.contentWindow;
 	this.itemID=itemID;
+	
+	/*var jScriptTag = this.document.createElement("script");
+	jScriptTag.src="chrome://zotero/content/jquery-1.3.2.min.js";
+	jScriptTag.type="text/JavaScript";
+	this.document.getElementsByTagName("head").item(0).appendChild(jScriptTag);
+	jScriptTag = this.document.createElement("script");
+	jScriptTag.src="chrome://zotero/content/jquery-ui-1.7.2.custom.min.js";
+	jScriptTag.type="text/JavaScript";
+	this.document.getElementsByTagName("head").item(0).appendChild(jScriptTag);
+	*/
 	this.scale=1;
 	this.DOM = null;
 	this.src = "";
@@ -30,15 +34,26 @@ Zotero.AXEImage.prototype.loadImageFromPage = function(){
 	var origSizeStr = this.document.title.toString();
 	var strEnd = origSizeStr.indexOf(" pixels");
 	var strBeg = origSizeStr.lastIndexOf(" ",strEnd-1);
-	origSizeStr = origSizeStr.substring(strBeg,strEnd).split("x")
-	this.DOM = this.document.getElementsByTagName("img")[0];
-	this.DOM.style.width=parseInt(origSizeStr[0])+"px";
-	this.DOM.style.height=parseInt(origSizeStr[1])+"px";
+	origSizeStr = origSizeStr.substring(strBeg,strEnd).split("x");
+
 	
+	var img = this.document.getElementsByTagName("img")[0];
+	img.style.width=parseInt(origSizeStr[0])+"px";
+	img.style.height=parseInt(origSizeStr[1])+"px";
+	this.DOM = this.document.createElement("div");
+	this.DOM.appendChild(img.cloneNode(true));
+	var body = this.document.getElementsByTagName("body")[0];
+	body.appendChild(this.DOM);
+	
+	body.style.cursor = "pointer";
+
+	img.parentNode.removeChild(img);	
+	img = this.DOM.firstChild;
+		img.style.cursor = "pointer";
 }
 
 Zotero.AXEImage.prototype.zoomIn = function(){
-	alert("zoom in "+this.DOM.style.width+"px");
+	
 	this.DOM.style.width = parseInt(this.DOM.style.width) * 2;
 	this.DOM.style.height = parseInt(this.DOM.style.height) * 2;
 }
@@ -48,29 +63,161 @@ Zotero.AXEImage.prototype.zoomOut = function(){
 	this.DOM.style.height = parseInt(this.DOM.style.height) / 2;
 }
 Zotero.AXEImage.prototype.createRectangle = function(e){
+	  this.Zotero_Browser.toggleMode(null);
 	
-	var newRect = new Zotero.AXE_rectangle(this,e.screenX,e.screenY,e.screenX+100,e.screenY+100);
-	alert(newRect.DOM.className);
+	var newRect = new Zotero.AXE_rectangle(this,e.pageX,e.pageY,e.pageX+100,e.pageY+100);
+
 	this.DOM.parentNode.appendChild(newRect.DOM);
+	this.DOM.parentNode.appendChild(newRect.resizeOutline);
+
 	//this.DOM.parentNode.appendChild(this.document.createTextNode("Hello"));
 }
-Zotero.AXE_rectangle=function(img, top, left, bottom, right){
+Zotero.AXE_rectangle=function(img, left, top, right, bottom){
+	var me = this;
 	
-	alert("new rectangle");
+		this.Zotero_Browser = img.Zotero_Browser;
+	this.browser = img.browser;
+	this.document = img.document;
+	this.dragging = false;
+	this.window = img.window;
+	this.itemID=img.itemID;
 	this.img = img; // tagged AXEImage object
 	this.coords = [top, left, bottom, right]; // array of nodes outlining polygon 
 	this.noteRef = null; // href to note
+	this.resizeOutline = img.document.createElement("div");
+	this.resizeOutline.className ="resize";
+	
 	this.DOM = img.document.createElement("div");
 	this.DOM.className="AXERectangle";
+	
 	this.DOM.style.top = top+"px";	
 	this.DOM.style.left = left+"px";	
 	this.DOM.style.height = parseInt(bottom)-parseInt(top)+"px";	
 	this.DOM.style.width = parseInt(right)-parseInt(left)+"px";
+	this.rectX=left;
+	this.rectY=top;
 	this.DOM.style.border = "thin solid red";
 	this.DOM.style.position = "absolute";
 	this.DOM.style.display = "block";
 	
+	this.DOM.style.zIndex=9;
+		this.resizeOutline.style.position = "absolute";
+	this.resizeOutline.style.display = "block";
+	this.resizeOutline.style.border = "thin solid black";
+	this.resizeOutline.style.top = parseInt(top)+parseInt(this.DOM.style.height)-10;
+	this.resizeOutline.style.left = parseInt(left)+parseInt(this.DOM.style.width)-10;
+	this.resizeOutline.style.height = "10px";
+	this.resizeOutline.style.width = "10px";
+	this.resizeOutline.style.zIndex=10;
+	
+	this.resizeOutline.addEventListener("mousedown",function(e){
+		
+			me._startMove(e,true)
+		
+	},false);
+	this.DOM.addEventListener("mousedown",function(e){
+
+		me._startMove(e,false);
+
+	},true);
+
+	
 }
+
+/**
+ * Called to begin moving the annotation
+ *
+ * @param {Event} e DOM event corresponding to click on the grippy
+ * @private
+ */
+Zotero.AXE_rectangle.prototype._startMove = function(e,resizing) {
+	// stop propagation
+	e.stopPropagation();
+	e.preventDefault();
+	
+	var body = this.document.getElementsByTagName("body")[0];
+	var me = this;
+	// set the handler required to deactivate
+	
+	/**
+	 * Callback to end move action
+	 * @inner
+	 */
+	
+	
+	/**
+	 * Listener to handle mouse moves on main page
+	 * @inner
+	 */
+	var handleMoveMouse1 = function(e) {
+		if (resizing) {
+			me.resizeBox(e.pageX + 1, e.pageY + 1);
+		}
+		else{
+			me.displayWithAbsoluteCoordinates(e.pageX + 1, e.pageY + 1);
+		}
+	};
+	/**
+	 * Listener to handle mouse moves in iframe
+	 * @inner
+	 */
+	/*var handleMoveMouse2 = function(e) {
+		me.displayWithAbsoluteCoordinates(e.pageX + me.rectX + 1, e.pageY + me.rectY + 1);
+	};*/
+	this.document.addEventListener("mousemove", handleMoveMouse1, false);
+	//this.DOM.addEventListener("mousemove", handleMoveMouse2, false);
+	
+	/**
+	 * Listener to finish off move when a click is made
+	 * @inner
+	 */
+	var handleMove = function(e) {
+		
+		me.document.removeEventListener("mousemove", handleMoveMouse1, false);
+		//me.DOM.removeEventListener("mousemove", handleMoveMouse2, false);
+		me.document.removeEventListener("click", handleMove, false);
+		me.dragging=false;
+		
+		
+		// stop propagation
+		e.stopPropagation();
+		e.preventDefault();
+	};	
+	this.document.addEventListener("mouseup", handleMove, false);
+	me.DOM.addEventListener("mouseup", handleMove, false);
+	body.style.cursor = "pointer";
+
+}
+
+Zotero.AXE_rectangle.prototype.resizeBox=function(absX,absY){
+
+	
+	this.DOM.style.width = absX-parseInt(this.DOM.style.left)+"px";
+
+	this.DOM.style.height =  absY-parseInt(this.DOM.style.top)+"px";
+
+	this.resizeOutline.style.top = parseInt(this.DOM.style.top)+parseInt(this.DOM.style.height)-10;
+	this.resizeOutline.style.left = parseInt(this.DOM.style.left)+parseInt(this.DOM.style.width)-10;
+}
+Zotero.AXE_rectangle.prototype.displayWithAbsoluteCoordinates = function(absX, absY) {
+	//if(!this.node) throw "Annotation not initialized!";
+	
+	var startScroll = this.window.scrollMaxX;
+	
+	
+	this.DOM.style.left = absX+"px";
+	this.rectX = absX;
+	this.DOM.style.top =  absY+"px";
+	this.rectY = absY;
+	this.resizeOutline.style.top = parseInt(absY)+parseInt(this.DOM.style.height)-10;
+	this.resizeOutline.style.left = parseInt(absX)+parseInt(this.DOM.style.width)-10;
+
+	
+}
+
+
+
+
 Zotero.AXE_polygon=function(img, nodes, noteRef){
 	this.img = img; // tagged AXEImage object
 	this.coords = coords; // array of nodes outlining polygon 

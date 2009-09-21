@@ -23,6 +23,7 @@
 <?xml-stylesheet href="chrome://zotero/skin/overlay.css" type="text/css"?>
 <?xml-stylesheet href="chrome://zotero-platform/content/overlay.css" type="text/css"?>
 
+	
 <!DOCTYPE overlay [
 	<!ENTITY % globalDTD SYSTEM "chrome://global/locale/global.dtd"> %globalDTD;
 	<!ENTITY % zoteroDTD SYSTEM "chrome://zotero/locale/zotero.dtd"> %zoteroDTD;
@@ -33,6 +34,7 @@
 	
     <!-- Include the global XPCOM object -->
 	<script src="include.js"/>
+
 	
 	<script src="overlay.js"/>
     <script src="fileInterface.js"/>
