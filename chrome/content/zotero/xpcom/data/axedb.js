@@ -1,9 +1,10 @@
 /*
     ***** BEGIN LICENSE BLOCK *****
     
-    Copyright (c) 2006  Center for History and New Media
-                        George Mason University, Fairfax, Virginia, USA
-                        http://chnm.gmu.edu
+    Copyright (c) 2006  Maryland Institute for Technology in the Humanities
+    					University of Maryland
+    					College Park, Maryland, USA
+                        http://mith2.umd.edu
     
     Licensed under the Educational Community License, Version 1.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -22,9 +23,7 @@
 
 
 /*
- * Constructor for Item object
- *
- * Generally should be called through Zotero.Items rather than directly
+ * Constructor
  */
 Zotero.AXEdb = function() {
 
@@ -32,6 +31,8 @@ Zotero.AXEdb = function() {
 	
 }
 
+
+// initiallized object parameters
 Zotero.AXEdb.prototype._init = function () {
 	// Primary fields
 	this._id = null;
@@ -40,6 +41,7 @@ Zotero.AXEdb.prototype._init = function () {
 	this._itemTypeID = null;
 }
 
+//Save a region record in database and associates with an Item type Note in the Item db table
 Zotero.AXEdb.prototype.saveRegionItem = function(intNoteID, intRegionType){
 	
 	//setup a values array based upon @args to send to the zotero.DB.query object
@@ -62,7 +64,7 @@ Zotero.AXEdb.prototype.saveRegionItem = function(intNoteID, intRegionType){
 	
 }
 
-
+// receives a region ID and a list of point values as array and writes list to axeRegionPoints table
 Zotero.AXEdb.prototype.saveRegionPoints = function(intRegionID, arrValuesList){
 	
 	if (intRegionID > 0) {
@@ -107,6 +109,7 @@ Zotero.AXEdb.prototype.saveRegionPoints = function(intRegionID, arrValuesList){
 	
 }
 
+// deletes regin point info for a given region from axeRegionPoints table
 Zotero.AXEdb.prototype.deleteRegionPoints = function(intRegionID){
 	
 	if (intRegionID > 0) {
@@ -127,39 +130,58 @@ Zotero.AXEdb.prototype.deleteRegionPoints = function(intRegionID){
 	
 }
 
-
-Zotero.AXEdb.prototype.getRegion = function(intNoteID){
+//selects all region point information for a given region from axeRegionPoints
+//and returns info ina  multi dimension array
+Zotero.AXEdb.prototype.getRegion = function(intRegionID){
 
 	//// 	NOT WORKING AT ALL RIGHT NOW
-
-	var sql = "SELECT axeRegion.regionID, axeRegion.regionType,   FROM ";
-	var row = Zotero.DB.rowQuery(sql, params);
 	
-	if (!row) {
-		if (allowFail) {
-			this._primaryDataLoaded = true;
-			return false;
-		}
-		throw ("Item " + (id ? id : libraryID + "/" + key)
-				+ " not found in Zotero.Item.loadPrimaryData()");
+	var arrRegionMap = new Array();  //master array which packages data arrays
+	var arrRegionFields = new Array(); //holds field type ID for the given point
+	var arrRegionValues = new Array(); //holds point value for the given point
+	var arrRegionOrder = new Array(); //holds order value for the given point
+
+	var sql = "SELECT axeRegionPoints.regionID, axeRegionPoints.regionFieldID, axeRegionPoints.regionFieldValue, axeRegionPoints.regionFieldOrder FROM axeRegionPoints WHERE axeRegionPoints.regionID = '"+intRegionID+"' ORDER BY axeRegionPoints.regionFieldOrder";
+	var rows = Zotero.DB.query(sql, "");
+	
+	for(var liCount=0;liCount<rows.length;liCount++) {
+			var row = rows[liCount];
+			arrRegionFields[liCount] = row['regionFieldID'];
+			arrRegionValues[liCount] = row['regionFieldValue'];
+			arrRegionOrder[liCount] = row['regionFieldOrder'];
 	}
 	
-	this.loadFromRow(row);
+	arrRegionMap[0] = arrRegionFields;
+	arrRegionMap[1] = arrRegionValues;
+	arrRegionMap[2] = arrRegionOrder;	
+
+	return arrRegionMap;
 	
+}
+
+//selects all regions that belong to a given item
+//and returns region ID and type in a  multi dimension array
+Zotero.AXEdb.prototype.getRegionList = function(intItemID){
+
 	//// 	NOT WORKING AT ALL RIGHT NOW
 	
-	var sql = "INSERT INTO axeImageRegion (sourceItemID, pointX, pointY, pointOrder) VALUES ('1', '25', '75', '1')";
-	var insertStatement = Zotero.DB.getStatement(sql);
-
-		
-	try {
-		insertStatement.execute();
-	}
-	catch (e) {
-		throw (e + ' [ERROR: ' + Zotero.DB.getLastErrorString() + ']');
+	var arrNoteList = new Array();  //master array which packages data arrays
+	var arrNoteItemIDs = new Array();  //holds region IDs
+	var arrNoteItemTypes = new Array();  //holds region type IDs
+	
+	var sql = "SELECT axeRegion.regionID, axeRegion.regionType FROM axeRegion WHERE axeRegion.sourceItemID IN (SELECT DISTINCT itemNotes.itemID FROM itemNotes WHERE itemNotes.sourceItemID = '"+intItemID+"')";
+	var rows = Zotero.DB.query(sql, "");
+	
+	for(var liCount=0;liCount<rows.length;liCount++) {
+			var row = rows[liCount];
+			arrNoteItemIDs[liCount] = row['regionID'];
+			arrNoteItemTypes[liCount] = row['regionType'];
 	}
 	
-	alert("Saved a bogus Region");
+	arrNoteList[0] = arrNoteItemIDs;
+	arrNoteList[1] = arrNoteItemTypes;
+
+	return arrNoteList;
 	
 }
 

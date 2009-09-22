@@ -50,6 +50,84 @@ Zotero.AXEImage.prototype.loadImageFromPage = function(){
 	img.parentNode.removeChild(img);	
 	img = this.DOM.firstChild;
 		img.style.cursor = "pointer";
+		
+
+		
+	//draw existing regions from db
+	//start by grabbinglist of region ids that belong to this item
+	var axeRegionDBObj = new Zotero.AXEdb();
+	var arrRegionList = axeRegionDBObj.getRegionList(parseInt(this.itemID)-1);
+	var arrRIDs = arrRegionList[0];
+	var arrRTypes = arrRegionList[1];
+	
+	//now loop through each item and grab the point informatino for the region
+	for(var rliCount=0;rliCount<arrRTypes.length;rliCount++) {
+		
+		var intRType = arrRTypes[rliCount];
+		var intRID = arrRIDs[rliCount];
+		
+		//get the region point list that belongs to this region
+		var arrReturnedRegions = axeRegionDBObj.getRegion(intRID);
+		if (arrReturnedRegions.length > 0) {
+		
+			//check the type and process accordingly
+			if (intRType == 1) {
+				//alert("Drawing Rectangle ID: "+intRID);
+				
+				var intLeft = "";
+				var intTop = "";
+				var intRight = "";
+				var intBottom = "";
+				
+				var arrRPType = arrReturnedRegions[0];
+				var arrRPVal = arrReturnedRegions[1];
+				var arrRPOrder = arrReturnedRegions[2];
+				
+				for(var rpCount=0;rpCount<arrRPType.length;rpCount++) {
+
+					if (arrRPType[rpCount] == 1) {
+						if (arrRPOrder[rpCount] == 1) {
+							//alert("Writing intLeft");
+							intLeft = arrRPVal[rpCount];
+						} else if (arrRPOrder[rpCount] == 2) {
+							//alert("Writing intRight");
+							intRight = arrRPVal[rpCount];
+						}
+					} else if (arrRPType[rpCount] == 2) {
+						if (arrRPOrder[rpCount] == 1) {
+							//alert("Writing intTop");
+							intTop = arrRPVal[rpCount];
+						} else if (arrRPOrder[rpCount] == 2) {
+							//alert("Writing intBottom");
+							intBottom = arrRPVal[rpCount];
+						}
+					}
+	
+				}
+				
+									
+				if (intLeft.length > 0 && intTop.length > 0 && intRight.length > 0 && intBottom.length > 0) {
+					//alert("Ready to draw Rectangle: "+intRID);
+					this.Zotero_Browser.toggleMode(null);
+					var newRectRegion = new Zotero.AXE_rectangle(this,intRID,intLeft,intTop,intRight,intBottom);
+					this.DOM.parentNode.appendChild(newRectRegion.DOM);
+					this.DOM.parentNode.appendChild(newRectRegion.resizeOutline);
+				} else {
+					alert("Cannot draw Rectangle: "+intRID);
+				}
+				
+				
+			} else {
+				alert("System cannot currently draw regions other than Rectangle");
+			}
+			
+		
+		
+		}
+		
+	}
+
+		
 }
 
 Zotero.AXEImage.prototype.zoomIn = function(){
@@ -130,6 +208,22 @@ Zotero.AXEImage.prototype.createRectangle = function(e){
 	this.DOM.parentNode.appendChild(newRect.DOM);
 	this.DOM.parentNode.appendChild(newRect.resizeOutline);
 	//this.DOM.parentNode.appendChild(this.document.createTextNode("Hello"));
+	
+
+
+
+
+/*
+	
+	//temp to test reading funciton
+	var arrReturnedRegions = axeDBObj.getRegion(intRegionID);
+	if (arrReturnedRegions.length > 0) {
+		alert("Got Values: "+arrReturnedRegions.length);
+	}
+
+*/
+
+
 
 }
 
@@ -329,8 +423,6 @@ Zotero.AXE_rectangle.prototype.updateRectangleShift = function() {
 	axeUpdateDBObj.saveRegionPoints(this.DOM.id, arrRegionMap);
 	
 }
-
-
 
 
 Zotero.AXE_polygon=function(img, nodes, noteRef){
