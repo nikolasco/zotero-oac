@@ -108,13 +108,6 @@ Zotero.AXEImage.prototype.zoomOut = function(){
 	this.DOM.style.height = parseInt(this.DOM.style.height) / 2;
 }
 Zotero.AXEImage.prototype.createRectangle = function(e){
-
-	//draw rectangle over image
-	this.Zotero_Browser.toggleMode(null);
-	var newRect = new Zotero.AXE_rectangle(this,e.pageX,e.pageY,e.pageX+100,e.pageY+100);
-	this.DOM.parentNode.appendChild(newRect.DOM);
-	this.DOM.parentNode.appendChild(newRect.resizeOutline);
-	//this.DOM.parentNode.appendChild(this.document.createTextNode("Hello"));
 	
 	//create a new NOTE item on this image item and then associate
 	//coordinates of rectangle with the note
@@ -173,11 +166,19 @@ Zotero.AXEImage.prototype.createRectangle = function(e){
 	
 	//write region coordinate info to db
 	var axeDBObj = new Zotero.AXEdb();
-	axeDBObj.saveRegion(noteID, intRegionType, arrRegionMap);
+	var intRegionID = axeDBObj.saveRegionItem(noteID, intRegionType);
+	axeDBObj.saveRegionPoints(intRegionID, arrRegionMap);
+	
+	//draw rectangle
+	this.Zotero_Browser.toggleMode(null);
+	var newRect = new Zotero.AXE_rectangle(this,intRegionID,e.pageX,e.pageY,e.pageX+100,e.pageY+100);
+	this.DOM.parentNode.appendChild(newRect.DOM);
+	this.DOM.parentNode.appendChild(newRect.resizeOutline);
+	//this.DOM.parentNode.appendChild(this.document.createTextNode("Hello"));
 
 }
 
-Zotero.AXE_rectangle=function(img, left, top, right, bottom){
+Zotero.AXE_rectangle=function(img, regionID, left, top, right, bottom){
 	var me = this;
 	
 		this.Zotero_Browser = img.Zotero_Browser;
@@ -194,6 +195,8 @@ Zotero.AXE_rectangle=function(img, left, top, right, bottom){
 	
 	this.DOM = img.document.createElement("div");
 	this.DOM.className="AXERectangle";
+	this.DOM.id = regionID;
+	alert("DOM ID: "+this.DOM.id);
 	
 	this.DOM.style.top = top+"px";	
 	this.DOM.style.left = left+"px";	

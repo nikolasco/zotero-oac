@@ -40,8 +40,7 @@ Zotero.AXEdb.prototype._init = function () {
 	this._itemTypeID = null;
 }
 
-
-Zotero.AXEdb.prototype.saveRegion = function(intNoteID, intRegionType, arrValuesList){
+Zotero.AXEdb.prototype.saveRegionItem = function(intNoteID, intRegionType){
 	
 	//setup a values array based upon @args to send to the zotero.DB.query object
 	var sqlValues = new Array();
@@ -58,10 +57,15 @@ Zotero.AXEdb.prototype.saveRegion = function(intNoteID, intRegionType, arrValues
 	catch (e) {
 		throw (e + ' [ERROR: ' + Zotero.DB.getLastErrorString() + ']');
 	}
+
+	return insertID;
 	
-	//check and make sure we got a region ID back from the insert.
-	//if so, continue process.  If not, fire an alert and abort process.
-	if (intRegionType > 0) {
+}
+
+
+Zotero.AXEdb.prototype.saveRegionPoints = function(intRegionID, arrValuesList){
+	
+	if (intRegionID > 0) {
 		
 		//now that we have  a region ID, based upon type, we need to loop
 		//through the arrValuesList array and write entries to the axeRegionPoints table
@@ -82,7 +86,7 @@ Zotero.AXEdb.prototype.saveRegion = function(intNoteID, intRegionType, arrValues
 			strItemValue = arrItemValues[i];
 			strItemOrder = arrItemOrder[i];
 			
-			var sql = "INSERT INTO axeRegionPoints (regionID, regionFieldID, regionFieldValue, regionFieldOrder) VALUES ('"+insertID+"', '"+intFieldType+"', '"+strItemValue+"', '"+strItemOrder+"')";
+			var sql = "INSERT INTO axeRegionPoints (regionID, regionFieldID, regionFieldValue, regionFieldOrder) VALUES ('"+intRegionID+"', '"+intFieldType+"', '"+strItemValue+"', '"+strItemOrder+"')";
 			var insertStatement = Zotero.DB.getStatement(sql);
 		
 				
@@ -98,7 +102,7 @@ Zotero.AXEdb.prototype.saveRegion = function(intNoteID, intRegionType, arrValues
 		//alert("Saved a bogus Region with region ID "+insertID);
 		
 	} else {
-		alert("[ERROR: No insert ID returned from INSERt axeRegion query in Zotero.AXEdb.prototype.saveRegion]");
+		alert("[ERROR: Invalid RegionID in Zotero.AXEdb.prototype.saveRegion]");
 	}
 	
 }
