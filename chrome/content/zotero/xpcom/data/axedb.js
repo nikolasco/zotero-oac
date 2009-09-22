@@ -95,7 +95,7 @@ Zotero.AXEdb.prototype.saveRegion = function(intNoteID, intRegionType, arrValues
 
 		}
 	
-		alert("Saved a bogus Region with region ID "+insertID);
+		//alert("Saved a bogus Region with region ID "+insertID);
 		
 	} else {
 		alert("[ERROR: No insert ID returned from INSERt axeRegion query in Zotero.AXEdb.prototype.saveRegion]");
@@ -108,7 +108,7 @@ Zotero.AXEdb.prototype.getRegion = function(intNoteID){
 
 	//// 	NOT WORKING AT ALL RIGHT NOW
 
-	var sql = "SELECT axeRegion.regionID, axeRegion.regionType,   FROM 
+	var sql = "SELECT axeRegion.regionID, axeRegion.regionType,   FROM ";
 	var row = Zotero.DB.rowQuery(sql, params);
 	
 	if (!row) {

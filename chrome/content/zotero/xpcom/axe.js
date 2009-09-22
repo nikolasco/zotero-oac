@@ -24,7 +24,9 @@ Zotero.AXEImage= function(Zotero_Browser, browser, itemID){
 	this.clickMode = 0;  // determines onClick behavior
 						 // 0 = do nothing, 
 						 // 1 = draw first node for polygon 
-						 // 2 = draw another node on polygon
+
+
+/*						 // 2 = draw another node on polygon
 						 // 3 = draw rectangle
 	//TEMP CODE TO CALL THE AXE REGION DB INSERT FUNCTION Zotero.AXEdb.saveRegion
 	
@@ -67,6 +69,8 @@ Zotero.AXEImage= function(Zotero_Browser, browser, itemID){
 	var axeDBObj = new Zotero.AXEdb();
 	alert(axeDBObj);
 	axeDBObj.saveRegion(intItemID, intRegionType, arrRegionMap);
+	
+	*/
 						  
 		
 }
@@ -104,15 +108,75 @@ Zotero.AXEImage.prototype.zoomOut = function(){
 	this.DOM.style.height = parseInt(this.DOM.style.height) / 2;
 }
 Zotero.AXEImage.prototype.createRectangle = function(e){
-	  this.Zotero_Browser.toggleMode(null);
-	
-	var newRect = new Zotero.AXE_rectangle(this,e.pageX,e.pageY,e.pageX+100,e.pageY+100);
 
+	//draw rectangle over image
+	this.Zotero_Browser.toggleMode(null);
+	var newRect = new Zotero.AXE_rectangle(this,e.pageX,e.pageY,e.pageX+100,e.pageY+100);
 	this.DOM.parentNode.appendChild(newRect.DOM);
 	this.DOM.parentNode.appendChild(newRect.resizeOutline);
-
 	//this.DOM.parentNode.appendChild(this.document.createTextNode("Hello"));
+	
+	//create a new NOTE item on this image item and then associate
+	//coordinates of rectangle with the note
+	var startX = e.pageX;
+	var startY = e.pageY
+	var newX = e.pageX+100;
+	var newY = e.pageY+100;
+	
+	// NOTE:  RIGHT NOW THE COORDINATES FOR THE X/Y POINTS THAT ARE BEING STORED IN DATABSE
+	// ARE ACTUALLY RELATIVE TO THE PAGE  AND NOT TO THE IMAGE.  NEED TO ADD CALCULATIONS
+	// TO DETERMINE IMAGE PIXIL POSITION AS RELATED TO PAGE POSITION AND MODIFY VALUES OF
+	// startX, startY, newX, and newY accordingly
+	
+	var text = 'Rectangular Region: x='+startX+'/y='+startY+', x='+newX.toString()+'/y='+newY.toString();
+	text = Zotero.Utilities.prototype.trim(text);
+	var item = new Zotero.Item('note');
+	item.setNote(text);
+	//not sure why -1 works here, but it does
+	item.setSource(this.itemID-1);
+	var noteID = item.save();
+	
+	//alert("noteID: "+noteID);
+	
+	//now I have a note ID I can save the associated region info
+	
+	//declare variables needed to call region insert function 
+	var arrRegionMap = new Array();  //master array which packages data arrays
+	var arrRegionFields = new Array(); //holds field type ID for the given point
+	var arrRegionValues = new Array(); //holds point value for the given point
+	var arrRegionOrder = new Array(); //holds order value for the given point
+	var intRegionType; //type ID of region
+	var intItemID; //the item ID of the note item that this region is associated with.
+	
+	//seed variable values
+	arrRegionFields[0] = 1; // X
+	arrRegionFields[1] = 2; // Y
+	arrRegionFields[2] = 1; // X
+	arrRegionFields[3] = 2;	// Y
+	
+	arrRegionValues[0] = startX;
+	arrRegionValues[1] = startY;
+	arrRegionValues[2] = newX;
+	arrRegionValues[3] = newY;
+	
+	arrRegionOrder[0] = 1;
+	arrRegionOrder[1] = 1;
+	arrRegionOrder[2] = 2;
+	arrRegionOrder[3] = 2;
+	
+	arrRegionMap[0] = arrRegionFields;
+	arrRegionMap[1] = arrRegionValues;
+	arrRegionMap[2] = arrRegionOrder;
+	
+	intRegionType = 1;
+	intItemID = 1;
+	
+	//write region coordinate info to db
+	var axeDBObj = new Zotero.AXEdb();
+	axeDBObj.saveRegion(noteID, intRegionType, arrRegionMap);
+
 }
+
 Zotero.AXE_rectangle=function(img, left, top, right, bottom){
 	var me = this;
 	
