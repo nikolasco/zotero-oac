@@ -196,7 +196,7 @@ Zotero.AXE_rectangle=function(img, regionID, left, top, right, bottom){
 	this.DOM = img.document.createElement("div");
 	this.DOM.className="AXERectangle";
 	this.DOM.id = regionID;
-	alert("DOM ID: "+this.DOM.id);
+	//alert("DOM ID: "+this.DOM.id);
 	
 	this.DOM.style.top = top+"px";	
 	this.DOM.style.left = left+"px";	
@@ -299,16 +299,20 @@ Zotero.AXE_rectangle.prototype._startMove = function(e,resizing) {
 
 Zotero.AXE_rectangle.prototype.resizeBox=function(absX,absY){
 
-	
 	this.DOM.style.width = absX-parseInt(this.DOM.style.left)+"px";
 
 	this.DOM.style.height =  absY-parseInt(this.DOM.style.top)+"px";
 
 	this.resizeOutline.style.top = parseInt(this.DOM.style.top)+parseInt(this.DOM.style.height)-10;
 	this.resizeOutline.style.left = parseInt(this.DOM.style.left)+parseInt(this.DOM.style.width)-10;
+	
+	//update the database
+	this.updateRectangleShift();
+	
 }
 Zotero.AXE_rectangle.prototype.displayWithAbsoluteCoordinates = function(absX, absY) {
 	//if(!this.node) throw "Annotation not initialized!";
+	
 	
 	var startScroll = this.window.scrollMaxX;
 	
@@ -320,6 +324,54 @@ Zotero.AXE_rectangle.prototype.displayWithAbsoluteCoordinates = function(absX, a
 	this.resizeOutline.style.top = parseInt(absY)+parseInt(this.DOM.style.height)-10;
 	this.resizeOutline.style.left = parseInt(absX)+parseInt(this.DOM.style.width)-10;
 
+	//update the database
+	this.updateRectangleShift();
+	
+}
+
+Zotero.AXE_rectangle.prototype.updateRectangleShift = function() {
+
+	//declare variables needed to call region insert function 
+	var arrRegionMap = new Array();  //master array which packages data arrays
+	var arrRegionFields = new Array(); //holds field type ID for the given point
+	var arrRegionValues = new Array(); //holds point value for the given point
+	var arrRegionOrder = new Array(); //holds order value for the given point
+	var strTop = this.DOM.style.top;
+	var strLeft = this.DOM.style.left;
+	var strHeight = this.DOM.style.width;
+	var strWidth = this.DOM.style.height;
+	
+	
+	//get rid of "px" on values
+	strTop = strTop.replace("px", "");
+	strLeft = strLeft.replace("px", "");
+	strHeight = strHeight.replace("px", "");
+	strWidth = strWidth.replace("px", "");
+	
+	//seed variable values
+	arrRegionFields[0] = 1; // X
+	arrRegionFields[1] = 2; // Y
+	arrRegionFields[2] = 1; // X
+	arrRegionFields[3] = 2;	// Y
+	
+	arrRegionValues[0] = strLeft;
+	arrRegionValues[1] = strTop;
+	arrRegionValues[2] = parseInt(strWidth)+parseInt(strLeft);
+	arrRegionValues[3] = parseInt(strHeight)+parseInt(strTop);;
+	
+	arrRegionOrder[0] = 1;
+	arrRegionOrder[1] = 1;
+	arrRegionOrder[2] = 2;
+	arrRegionOrder[3] = 2;
+	
+	arrRegionMap[0] = arrRegionFields;
+	arrRegionMap[1] = arrRegionValues;
+	arrRegionMap[2] = arrRegionOrder;	
+	
+	//write region coordinate info to db
+	var axeUpdateDBObj = new Zotero.AXEdb();
+	axeUpdateDBObj.deleteRegionPoints(this.DOM.id);
+	axeUpdateDBObj.saveRegionPoints(this.DOM.id, arrRegionMap);
 	
 }
 

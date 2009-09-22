@@ -107,6 +107,26 @@ Zotero.AXEdb.prototype.saveRegionPoints = function(intRegionID, arrValuesList){
 	
 }
 
+Zotero.AXEdb.prototype.deleteRegionPoints = function(intRegionID){
+	
+	if (intRegionID > 0) {
+		
+		var sql = "DELETE FROM axeRegionPoints WHERE regionID = '"+intRegionID+"'";
+		var insertStatement = Zotero.DB.getStatement(sql);		
+		try {
+			insertStatement.execute();
+		}
+		catch (e) {
+			throw (e + ' [ERROR: ' + Zotero.DB.getLastErrorString() + ']');
+		}
+
+		
+	} else {
+		alert("[ERROR: Invalid RegionID in Zotero.AXEdb.prototype.deleteRegionPoints]");
+	}
+	
+}
+
 
 Zotero.AXEdb.prototype.getRegion = function(intNoteID){
 
