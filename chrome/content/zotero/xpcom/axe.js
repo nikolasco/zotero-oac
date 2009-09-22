@@ -24,54 +24,9 @@ Zotero.AXEImage= function(Zotero_Browser, browser, itemID){
 	this.clickMode = 0;  // determines onClick behavior
 						 // 0 = do nothing, 
 						 // 1 = draw first node for polygon 
-
-
-/*						 // 2 = draw another node on polygon
+						 // 2 = draw another node on polygon
 						 // 3 = draw rectangle
-	//TEMP CODE TO CALL THE AXE REGION DB INSERT FUNCTION Zotero.AXEdb.saveRegion
-	
-	//declare variables needed to call region insert function 
-	var arrRegionMap = new Array();  //master array which packages data arrays
-	var arrRegionFields = new Array(); //holds field type ID for the given point
-	var arrRegionValues = new Array(); //holds point value for the given point
-	var arrRegionOrder = new Array(); //holds order value for the given point
-	var intRegionType; //type ID of region
-	var intItemID; //the item ID of the note item that this region is associated with.
-	
-	//artificically seed the variables.  This will need to be done in an
-	//intelligent way by region drawing code.  This arbitrary seeding pass
-	//values for a rectangle
-	
-	arrRegionFields[0] = 1; // X
-	arrRegionFields[1] = 2; // Y
-	arrRegionFields[2] = 1; // X
-	arrRegionFields[3] = 2;	// Y
-	
-	arrRegionValues[0] = 5;
-	arrRegionValues[1] = 25;
-	arrRegionValues[2] = 72;
-	arrRegionValues[3] = 55;
-	
-	arrRegionOrder[0] = 1;
-	arrRegionOrder[1] = 1;
-	arrRegionOrder[2] = 2;
-	arrRegionOrder[3] = 2;
-	
-	arrRegionMap[0] = arrRegionFields;
-	arrRegionMap[1] = arrRegionValues;
-	arrRegionMap[2] = arrRegionOrder;
-	
-	intRegionType = 1;
-	intItemID = 1;
-	
-	// END ARTIFICIALLY SEED VARIABLES SECTION
-						 					 
-	var axeDBObj = new Zotero.AXEdb();
-	alert(axeDBObj);
-	axeDBObj.saveRegion(intItemID, intRegionType, arrRegionMap);
-	
-	*/
-						  
+				  
 		
 }
 Zotero.AXEImage.prototype.loadImageFromPage = function(){
