@@ -1,3 +1,98 @@
+//this.window.scrollMaxX
+/**
+ * Called to begin moving the annotation
+ *
+ * @param {Event} e DOM event corresponding to click on the grippy
+ * @private
+ */
+var _startMove = function(e,doc,obj,DOM,resizing) {
+	// stop propagation
+	e.stopPropagation();
+	e.preventDefault();
+	
+	var body = doc.getElementsByTagName("body")[0];
+
+	// set the handler required to deactivate
+
+	/**
+	 * Listener to handle mouse moves on main page
+	 * @inner
+	 */
+	var handleMoveMouse1 = function(e) {
+		if (resizing) {
+			_resizeBox(obj,DOM,e.pageX + 1, e.pageY + 1);
+		}
+		else{
+			_displayWithAbsoluteCoordinates(obj,DOM,e.pageX + 1, e.pageY + 1);
+		}
+	};
+	/**
+	 * Listener to handle mouse moves in iframe
+	 * @inner
+	 */
+
+	doc.addEventListener("mousemove", handleMoveMouse1, false);
+	
+	/**
+	 * Listener to finish off move when a click is made
+	 * @inner
+	 */
+	var handleMove = function(e) {
+		
+		doc.removeEventListener("mousemove", handleMoveMouse1, false);
+		doc.removeEventListener("click", handleMove, false);
+		//me.dragging=false;
+		obj.update();
+		
+		// stop propagation
+		e.stopPropagation();
+		e.preventDefault();
+	};	
+	doc.addEventListener("mouseup", handleMove, false);
+	DOM.addEventListener("mouseup", handleMove, false);
+	body.style.cursor = "pointer";
+
+}
+
+var _resizeBox=function(obj,DOM,absX,absY){
+
+	obj.DOM.style.width = absX-parseInt(obj.DOM.style.left)+"px";
+
+	obj.DOM.style.height =  absY-parseInt(obj.DOM.style.top)+"px";
+
+	DOM.style.top = parseInt(obj.DOM.style.top)+parseInt(obj.DOM.style.height)-10;
+	DOM.style.left = parseInt(obj.DOM.style.left)+parseInt(obj.DOM.style.width)-10;
+	
+	//update the database
+	//this.updateRectangleShift();
+	
+}
+var _displayWithAbsoluteCoordinates = function(obj,DOM,absX, absY,scrollMax) {
+	//if(!this.node) throw "Annotation not initialized!";
+	
+	
+	
+	
+	
+	DOM.style.left = absX+"px";
+	obj.absX = absX;
+	DOM.style.top =  absY+"px";
+	obj.absY = absY;
+	if (obj.resizeOutline) {
+		obj.resizeOutline.style.top = parseInt(absY) + parseInt(DOM.style.height) - 10;
+		obj.resizeOutline.style.left = parseInt(absX) + parseInt(DOM.style.width) - 10;
+	}
+	//update the database
+	//this.updateRectangleShift();
+	
+}
+
+
+
+
+
+
+
 Zotero.AXEImage= function(Zotero_Browser, browser, itemID){
 
 	this.Zotero_Browser = Zotero_Browser;
@@ -183,7 +278,7 @@ Zotero.AXEImage.prototype.clickForNode = function(e){
 		break;
 		case 4:
 		//move or delete an existing node
-		
+		 me._startMove(e);
 		break;
 		default:
 		alert("default");
@@ -260,10 +355,73 @@ Zotero.AXE_node = function(img,posX,posY, num, intRegionID, intNodeNumber){
 		default:
 			this.DOM.className="firstNode";   
 			this.DOM.style.backgroundColor="red";
+						this.DOM.addEventListener("mouseover",function(e){
+				me.img.clickMode=4;
+				
+			},true);
+			this.DOM.addEventListener("mouseout",function(e){
+				me.img.clickMode=2;
+			},true);
 		break;	
 	}
 //	this.DOM.style.backgroundImage="url(chrome://zotero/skin/icon_first_node.png)";
 					   
+}
+Zotero.AXE_node._startMove = function(e) {
+	// stop propagation
+	e.stopPropagation();
+	e.preventDefault();
+	
+	var body = this.document.getElementsByTagName("body")[0];
+	var me = this;
+	// set the handler required to deactivate
+	
+	/**
+	 * Callback to end move action
+	 * @inner
+	 */
+	
+	
+	/**
+	 * Listener to handle mouse moves on main page
+	 * @inner
+	 */
+	var handleMoveMouse1 = function(e) {
+
+			me.displayWithAbsoluteCoordinates(e.pageX + 1, e.pageY + 1);
+		
+	};
+	/**
+	 * Listener to handle mouse moves in iframe
+	 * @inner
+	 */
+	/*var handleMoveMouse2 = function(e) {
+		me.displayWithAbsoluteCoordinates(e.pageX + me.rectX + 1, e.pageY + me.rectY + 1);
+	};*/
+	this.document.addEventListener("mousemove", handleMoveMouse1, false);
+	//this.DOM.addEventListener("mousemove", handleMoveMouse2, false);
+	
+	/**
+	 * Listener to finish off move when a click is made
+	 * @inner
+	 */
+	var handleMove = function(e) {
+		
+		me.document.removeEventListener("mousemove", handleMoveMouse1, false);
+		//me.DOM.removeEventListener("mousemove", handleMoveMouse2, false);
+		me.document.removeEventListener("click", handleMove, false);
+		me.dragging=false;
+		
+		
+		// stop propagation
+		e.stopPropagation();
+		e.preventDefault();
+	};	
+	this.document.addEventListener("mouseup", handleMove, false);
+	me.DOM.addEventListener("mouseup", handleMove, false);
+	body.style.cursor = "pointer";
+
+
 }
 Zotero.AXEImage.prototype.createRectangle = function(e){
 	
@@ -499,12 +657,12 @@ Zotero.AXE_rectangle=function(img, regionID, left, top, right, bottom){
 	
 	this.resizeOutline.addEventListener("mousedown",function(e){
 		
-			me._startMove(e,true)
-		
+			//me._startMove(e,true)
+			_startMove(e,me.document,me,me.resizeOutline,true)
 	},false);
 	this.DOM.addEventListener("mousedown",function(e){
-
-		me._startMove(e,false);
+		_startMove(e,me.document,me,me.DOM,false)
+		//me._startMove(e,false);
 
 	},true);
 
@@ -607,9 +765,11 @@ Zotero.AXE_rectangle.prototype.displayWithAbsoluteCoordinates = function(absX, a
 	this.updateRectangleShift();
 	
 }
-
+Zotero.AXE_rectangle.prototype.update = function(){
+	this.updateRectangleShift();
+}
 Zotero.AXE_rectangle.prototype.updateRectangleShift = function() {
-
+	alert('updating');
 	//declare variables needed to call region insert function 
 	var arrRegionMap = new Array();  //master array which packages data arrays
 	var arrRegionFields = new Array(); //holds field type ID for the given point
