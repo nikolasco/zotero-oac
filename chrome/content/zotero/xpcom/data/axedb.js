@@ -163,7 +163,6 @@ Zotero.AXEdb.prototype.getRegion = function(intRegionID){
 //and returns region ID and type in a  multi dimension array
 Zotero.AXEdb.prototype.getRegionList = function(intItemID){
 
-	//// 	NOT WORKING AT ALL RIGHT NOW
 	
 	var arrNoteList = new Array();  //master array which packages data arrays
 	var arrNoteItemIDs = new Array();  //holds region IDs
@@ -171,11 +170,16 @@ Zotero.AXEdb.prototype.getRegionList = function(intItemID){
 	
 	var sql = "SELECT axeRegion.regionID, axeRegion.regionType FROM axeRegion WHERE axeRegion.sourceItemID IN (SELECT DISTINCT itemNotes.itemID FROM itemNotes WHERE itemNotes.sourceItemID = '"+intItemID+"')";
 	var rows = Zotero.DB.query(sql, "");
-	
+	var intRegCount = 0;
 	for(var liCount=0;liCount<rows.length;liCount++) {
 			var row = rows[liCount];
-			arrNoteItemIDs[liCount] = row['regionID'];
-			arrNoteItemTypes[liCount] = row['regionType'];
+			var sqlTwo = "SELECT COUNT(*) FROM deletedItems WHERE itemID = '"+row['regionID']+"'";
+			var countValue = Zotero.DB.valueQuery(sqlTwo, "");
+			if (countValue == 0) {
+				arrNoteItemIDs[intRegCount] = row['regionID'];
+				arrNoteItemTypes[intRegCount] = row['regionType'];
+				intRegCount++;
+			}
 	}
 	
 	arrNoteList[0] = arrNoteItemIDs;

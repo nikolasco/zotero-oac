@@ -3889,6 +3889,20 @@ Zotero.Item.prototype.erase = function(deleteChildren) {
 	Zotero.DB.query('DELETE FROM itemSeeAlso WHERE itemID=?', this.id);
 	Zotero.DB.query('DELETE FROM itemSeeAlso WHERE linkedItemID=?', this.id);
 	
+	
+	//get associated regions for this id and delete all
+	//points and region association data
+	var axeDeleteDBObj = new Zotero.AXEdb();
+	var intRegionIDs = axeDeleteDBObj.getRegionList(this.id);
+	for(var rgCount=0;rgCount<intRegionIDs.length;rgCount++) {
+		Zotero.DB.query('DELETE FROM axeRegionPoints WHERE regionID=?', intRegionIDs[rgCount]);
+		Zotero.DB.query('DELETE FROM axeRegion WHERE regionID=?', intRegionIDs[rgCount]);
+	}
+	
+	
+	
+	
+	
 	var tags = this.getTags();
 	if (tags) {
 		var hasTags = true;
