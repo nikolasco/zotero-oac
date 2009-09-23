@@ -149,19 +149,25 @@ Zotero.AXEImage.prototype.clickForNode = function(e){
 	
 	switch(this.clickMode){
 		case 1:
+		// No nodes in polygon array, begin making notes and create polygon
 			me.clickMode = 2;
 			me.createNode(e,1);
 			
 		break;
 		case 2:
+		// Add a new node to the polygon
 			me.createNode(e,2);
 			me.drawLine(me.nodeArray[me.nodeArray.length-2],me.nodeArray[me.nodeArray.length-1]);
 		break;
 		case 3:
+		// Complete the polygon
 			me.drawLine(me.nodeArray[me.nodeArray.length-1],me.nodeArray[0]);
 			me.recordPolygon();
 		break;
+		case 4:
+		//move or delete an existing node
 		
+		break;
 		default:
 		alert("default");
 		break;
