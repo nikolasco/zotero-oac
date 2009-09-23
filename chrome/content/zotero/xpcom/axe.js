@@ -21,21 +21,24 @@ Zotero.AXEImage= function(Zotero_Browser, browser, itemID){
 	this.oHeight = 0;
 	this.oWidth = 0;
 	this.annotations = [];
-	this.clickMode = 0;  // determines onClick behavior
+	this.clickMode = 1;  // determines onClick behavior
 						 // 0 = do nothing, 
 						 // 1 = draw first node for polygon 
 						 // 2 = draw another node on polygon
 						 // 3 = draw rectangle
+	this.nodeArray = [];
 				  
 		
 }
 Zotero.AXEImage.prototype.loadImageFromPage = function(){
 	
+
+	
 	var origSizeStr = this.document.title.toString();
 	var strEnd = origSizeStr.indexOf(" pixels");
 	var strBeg = origSizeStr.lastIndexOf(" ",strEnd-1);
 	origSizeStr = origSizeStr.substring(strBeg,strEnd).split("x");
-
+	
 	
 	var img = this.document.getElementsByTagName("img")[0];
 	img.style.width=parseInt(origSizeStr[0])+"px";
@@ -140,6 +143,100 @@ Zotero.AXEImage.prototype.zoomOut = function(){
 	this.DOM.style.width = parseInt(this.DOM.style.width) / 2;
 	this.DOM.style.height = parseInt(this.DOM.style.height) / 2;
 }
+Zotero.AXEImage.prototype.clickForNode = function(e){
+	
+	var me = this;
+	
+	switch(this.clickMode){
+		case 1:
+			me.clickMode = 2;
+			me.createNode(e,1);
+			
+		break;
+		case 2:
+			me.createNode(e,2);
+			me.drawLine(me.nodeArray[me.nodeArray.length-2],me.nodeArray[me.nodeArray.length-1]);
+		break;
+		case 3:
+			me.drawLine(me.nodeArray[me.nodeArray.length-1],me.nodeArray[0]);
+			me.recordPolygon();
+		break;
+		
+		default:
+		alert("default");
+		break;
+		
+	}
+
+	
+	
+		 // 0 = do nothing, 
+						 // 1 = draw first node for polygon 
+						 // 2 = draw another node on polygon
+						 // 3 = draw rectangle
+}
+
+Zotero.AXEImage.prototype.createNode = function(e,num){
+	this.nodeArray[this.nodeArray.length]={x:e.pageX,y:e.pageY};
+	
+	var newNode = new Zotero.AXE_node(this,e.pageX,e.pageY,num);
+	this.DOM.parentNode.appendChild(newNode.DOM);
+	return;
+	
+}
+Zotero.AXEImage.prototype.recordPolygon=function(){
+	// Record the polygon from this.nodeArray;
+	alert('recorded');
+	this.nodeArray = [];
+	this.Zotero_Browser.toggleMode(null);
+}
+Zotero.AXE_node = function(img,posX,posY, num){
+	// A node in a polygon, created a position posX,posY within a 
+	// parent node (parentNode)	
+	var me = this;
+	this.img = img;
+	this.Zotero_Browser = img.Zotero_Browser;
+	this.browser = img.browser;
+	this.document = this.browser.contentDocument;
+	this.window = this.browser.contentWindow;
+	this.itemID= img.itemID;		
+	
+	this.posX = posX;
+	this.posY = posY;
+	this.clickBehavior=1; // 0 = do nothing
+					   // 1 = select to move
+					   // 2 = draw polygon;
+					   // 3 = remove 
+	this.DOM = this.document.createElement("div");
+
+	this.DOM.style.top = posY;
+	this.DOM.style.left = posX;
+	this.DOM.style.height = "9px";
+	this.DOM.style.width = "9px";
+	this.DOM.style.position = "absolute";
+	this.DOM.style.display = "block";
+
+
+	switch(num){
+		case 1:
+			this.DOM.className="firstNode";   
+			this.DOM.style.backgroundColor="blue";
+
+			this.DOM.addEventListener("mouseover",function(e){
+				me.img.clickMode=3;
+			},true);
+			this.DOM.addEventListener("mouseout",function(e){
+				me.img.clickMode=2;
+			},true);
+		break;
+		default:
+			this.DOM.className="firstNode";   
+			this.DOM.style.backgroundColor="red";
+		break;	
+	}
+//	this.DOM.style.backgroundImage="url(chrome://zotero/skin/icon_first_node.png)";
+					   
+}
 Zotero.AXEImage.prototype.createRectangle = function(e){
 	
 	//create a new NOTE item on this image item and then associate
@@ -226,6 +323,110 @@ Zotero.AXEImage.prototype.createRectangle = function(e){
 
 
 }
+Zotero.AXEImage.prototype.drawDot=function(x,y){
+	var dot = this.document.createElement("div");
+
+	dot.style.top = y;
+	dot.style.left = x;
+	dot.style.height = "2px";
+	dot.style.width = "2px";
+	dot.style.position = "absolute";
+	dot.style.display = "block";
+	dot.style.backgroundColor="yellow";
+	this.DOM.appendChild(dot);
+}
+Zotero.AXEImage.prototype.drawLine=function(first,second){
+// Because the object is passed by reference, we need to make a working copy
+  start = {x: first.x,y:first.y};
+  end = {x: second.x,y:second.y};
+	
+  limit=1;
+//This function is modified from code at http://ajaxphp.packtpub.com/ajax/whiteboard/
+  
+  var dy = end.y - start.y;
+  var dx = end.x - start.x;
+
+  var stepx, stepy, limit;
+  if (dy < 0) 
+  {
+    dy = -dy;
+    stepy = -1;
+  }
+  else
+  {
+    stepy = 1; 
+  }
+  if (dx < 0) 
+  {
+    dx = -dx;  
+    stepx = -1; 
+  }
+  else 
+  {
+    stepx = 1; 
+  }
+  if (limit < 0 || limit == null) {
+  	limit = (Math.ceil((dy / 100)))*2;
+  }
+ 
+  dy <<= 1; 
+  dx <<= 1; 
+  dot = this.drawDot(start.x,start.y);
+// this.dotArray.push(dot);
+
+  if (dx > dy) 
+  {
+    fraction = dy - (dx >> 1); 
+	dcount=0;
+    while (start.x != end.x)
+    {
+      if (fraction >= 0) 
+      {
+        start.y += stepy;
+        fraction -= dx;
+      }
+      start.x += stepx;
+      fraction += dy;
+  if (dcount == limit) {
+  
+  	dot = this.drawDot(start.x,start.y);
+	//this.dotArray.push(dot);
+	dcount = 0;
+  }
+  else {
+  	dcount++;
+  }
+  
+
+        
+    }
+  }
+  else
+  {
+    fraction = dx - (dy >> 1);
+	dcount = 0;
+    while (start.y != end.y) 
+    {
+      if (fraction >= 0) 
+      {
+        start.x += stepx;
+        fraction -= dy;
+      }      
+      start.y += stepy;
+      fraction += dx;
+      if (dcount == limit) {
+  	dot = this.drawDot(start.x,start.y);
+	//this.dotArray.push(dot);
+	dcount = 0;
+  }
+  else {
+  	dcount++;
+  }
+
+    }
+  }
+}
+
 
 Zotero.AXE_rectangle=function(img, regionID, left, top, right, bottom){
 	var me = this;
@@ -455,17 +656,7 @@ Zotero.AXE_polygon.prototype.hide=function(){
 Zotero.AXE_polygon.prototype.show=function(){
 	// show this polygon if hidden
 }
-Zotero.AXE_node = function(parentNode,posX,posY){
-	// A node in a polygon, created a position posX,posY within a 
-	// parent node (parentNode)	
-	this.parentNode = parentNode;
-	this.posX = posX;
-	this.posY = posY;
-	this.clickBehavior // 0 = do nothing
-					   // 1 = select to move
-					   // 2 = draw polygon;
-					   // 3 = remove 
-}
+
 Zotero.AXE_node.prototype.remove = function(parentNode,posX,posY){
 	// delete node	
 }

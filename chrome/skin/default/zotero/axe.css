@@ -1,0 +1,13 @@
+body{
+	background-color: blue;
+}
+.firstNode{
+background-color: blue;
+  background-image:url('icon_first_node.png');
+}
+
+.node{
+  background-color: red;
+  background-image:url('icon_first_node.png');
+}
+

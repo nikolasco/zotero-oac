@@ -1,0 +1,8 @@
+.firstNode{
+  background-image:url('chrome://zotero/skin/icon_first_node.png');
+}
+
+.node{
+	background-color: red;
+  background-image:url('chrome://zotero/skin/icon_first_node.png');
+}

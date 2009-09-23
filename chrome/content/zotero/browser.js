@@ -104,7 +104,7 @@ var Zotero_Browser = new function() {
 			cursor: "text",
 			event: "mouseup",
 			callback: function(e){
-				alert("POLY");
+			
 				_AXE("polygon", e);
 			}
 		}
@@ -650,9 +650,9 @@ var Zotero_Browser = new function() {
 	switch (type){
 		
 		case ("polygon"):
-			axe.clickMode=1;
-			axe.drawNode(e);
-			alert(e);
+			
+			axe.clickForNode(e);
+		
 				e.stopPropagation();
 		e.preventDefault();		
 		break;
