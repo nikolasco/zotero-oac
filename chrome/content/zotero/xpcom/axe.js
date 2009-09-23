@@ -27,6 +27,8 @@ Zotero.AXEImage= function(Zotero_Browser, browser, itemID){
 						 // 2 = draw another node on polygon
 						 // 3 = draw rectangle
 	this.nodeArray = [];
+	this.workingRegion = "";
+	this.workingNode = 0;
 				  
 		
 }
@@ -146,12 +148,27 @@ Zotero.AXEImage.prototype.zoomOut = function(){
 Zotero.AXEImage.prototype.clickForNode = function(e){
 	
 	var me = this;
+	var axePolyDBObj = new Zotero.AXEdb();
 	
 	switch(this.clickMode){
 		case 1:
-		// No nodes in polygon array, begin making notes and create polygon
+			
+			//a polygon region has been started, so create a note for it and an associated Region ID
+			var text = 'New Polygon';
+			var intRegionType = 2;
+			text = Zotero.Utilities.prototype.trim(text);
+			var item = new Zotero.Item('note');
+			item.setNote(text);
+			//not sure why -1 works here, but it does
+			item.setSource(this.itemID-1);
+			var noteID = item.save();
+			var intRegionID = axePolyDBObj.saveRegionItem(noteID, intRegionType);
+			this.workingNode = 1;
+			this.workingRegion = intRegionID;
+			
 			me.clickMode = 2;
 			me.createNode(e,1);
+			
 			
 		break;
 		case 2:
@@ -183,10 +200,12 @@ Zotero.AXEImage.prototype.clickForNode = function(e){
 }
 
 Zotero.AXEImage.prototype.createNode = function(e,num){
+
 	this.nodeArray[this.nodeArray.length]={x:e.pageX,y:e.pageY};
 	
-	var newNode = new Zotero.AXE_node(this,e.pageX,e.pageY,num);
+	var newNode = new Zotero.AXE_node(this,e.pageX,e.pageY,num, this.workingRegion, this.workingNode);
 	this.DOM.parentNode.appendChild(newNode.DOM);
+	this.workingNode++;
 	return;
 	
 }
@@ -197,9 +216,10 @@ Zotero.AXEImage.prototype.recordPolygon=function(){
 	this.clickMode=1;
 	this.Zotero_Browser.toggleMode(null);
 }
-Zotero.AXE_node = function(img,posX,posY, num){
+Zotero.AXE_node = function(img,posX,posY, num, intRegionID, intNodeNumber){
 	// A node in a polygon, created a position posX,posY within a 
 	// parent node (parentNode)	
+	
 	var me = this;
 	this.img = img;
 	this.Zotero_Browser = img.Zotero_Browser;
@@ -215,6 +235,7 @@ Zotero.AXE_node = function(img,posX,posY, num){
 					   // 2 = draw polygon;
 					   // 3 = remove 
 	this.DOM = this.document.createElement("div");
+	this.DOM.id = intRegionID+"_"+intNodeNumber;
 
 	this.DOM.style.top = posY;
 	this.DOM.style.left = posX;
@@ -299,6 +320,7 @@ Zotero.AXEImage.prototype.createRectangle = function(e){
 	arrRegionMap[2] = arrRegionOrder;
 	
 	intRegionType = 1;
+	// ??????????????????????  CHECK THIS VALUE/VARIABLE.  THIS DOESN'T LOOK RIGHT
 	intItemID = 1;
 	
 	//write region coordinate info to db
