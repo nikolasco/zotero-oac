@@ -188,6 +188,7 @@ Zotero.AXEImage.prototype.recordPolygon=function(){
 	// Record the polygon from this.nodeArray;
 	alert('recorded');
 	this.nodeArray = [];
+	this.clickMode=1;
 	this.Zotero_Browser.toggleMode(null);
 }
 Zotero.AXE_node = function(img,posX,posY, num){
