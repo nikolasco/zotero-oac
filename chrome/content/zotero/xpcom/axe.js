@@ -1,4 +1,3 @@
-//this.window.scrollMaxX
 /**
  * Called to begin moving the annotation
  *
@@ -39,11 +38,12 @@ var _startMove = function(e,doc,obj,DOM,resizing) {
 	 */
 	var handleMove = function(e) {
 			
-		doc.removeEventListener("mousemove", handleMoveMouse1, false);
+		doc.removeEventListener("mousemove", handleMoveMouse1, true);
 	
-		DOM.removeEventListener("mousemove", handleMoveMouse1, false);
-	
-		doc.removeEventListener("click", handleMove, false);
+		DOM.removeEventListener("mousemove", handleMove, true);
+	DOM.removeEventListener("mouseup", handleMove, true);
+			doc.removeEventListener("mouseup", handleMove, true);
+		doc.removeEventListener("click", handleMove, true);
 
 		obj.update();
 	
@@ -51,7 +51,7 @@ var _startMove = function(e,doc,obj,DOM,resizing) {
 		e.stopPropagation();
 		e.preventDefault();
 	};	
-		doc.addEventListener("mousemove", handleMoveMouse1, false);
+		doc.addEventListener("mousemove", handleMoveMouse1, true);
 	doc.addEventListener("mouseup", handleMove, true);
 	DOM.addEventListener("mouseup", handleMove, true);
 	body.style.cursor = "pointer";
@@ -71,13 +71,7 @@ var _resizeBox=function(obj,DOM,absX,absY){
 	//this.updateRectangleShift();
 	return;
 }
-var _displayWithAbsoluteCoordinates = function(obj,DOM,absX, absY,scrollMax) {
-	//if(!this.node) throw "Annotation not initialized!";
-	
-	
-	
-	
-	
+var _displayWithAbsoluteCoordinates = function(obj,DOM,absX, absY,scrollMax) {	
 	DOM.style.left = absX+"px";
 	obj.absX = absX;
 	DOM.style.top =  absY+"px";
@@ -86,16 +80,12 @@ var _displayWithAbsoluteCoordinates = function(obj,DOM,absX, absY,scrollMax) {
 		obj.resizeOutline.style.top = parseInt(absY) + parseInt(DOM.style.height) - 10;
 		obj.resizeOutline.style.left = parseInt(absX) + parseInt(DOM.style.width) - 10;
 	}
-	//update the database
-	//this.updateRectangleShift();
+
 	return;
 }
-
-
-
-
-
-
+/************
+// AXEImage
+************/
 
 Zotero.AXEImage= function(Zotero_Browser, browser, itemID){
 
@@ -104,16 +94,6 @@ Zotero.AXEImage= function(Zotero_Browser, browser, itemID){
 	this.document = browser.contentDocument;
 	this.window = browser.contentWindow;
 	this.itemID=itemID;
-	
-	/*var jScriptTag = this.document.createElement("script");
-	jScriptTag.src="chrome://zotero/content/jquery-1.3.2.min.js";
-	jScriptTag.type="text/JavaScript";
-	this.document.getElementsByTagName("head").item(0).appendChild(jScriptTag);
-	jScriptTag = this.document.createElement("script");
-	jScriptTag.src="chrome://zotero/content/jquery-ui-1.7.2.custom.min.js";
-	jScriptTag.type="text/JavaScript";
-	this.document.getElementsByTagName("head").item(0).appendChild(jScriptTag);
-	*/
 	this.scale=1;
 	this.DOM = null;
 	this.src = "";
@@ -126,8 +106,11 @@ Zotero.AXEImage= function(Zotero_Browser, browser, itemID){
 						 // 2 = draw another node on polygon
 						 // 3 = draw rectangle
 	this.nodeArray = [];
+	this.polygons = [];
+	this.curPolygon = 0;
 	this.workingRegion = "";
 	this.workingNode = 0;
+	this.drawingState = false;
 				  
 		
 }
@@ -222,7 +205,7 @@ Zotero.AXEImage.prototype.loadImageFromPage = function(){
 				
 				
 			} else {
-				alert("System cannot currently draw regions other than Rectangle");
+				//alert("System cannot currently draw regions other than Rectangle");
 			}
 			
 		
@@ -248,10 +231,10 @@ Zotero.AXEImage.prototype.clickForNode = function(e){
 	
 	var me = this;
 	var axePolyDBObj = new Zotero.AXEdb();
-	
+
 	switch(this.clickMode){
 		case 1:
-			
+
 			//a polygon region has been started, so create a note for it and an associated Region ID
 			var text = 'New Polygon';
 			var intRegionType = 2;
@@ -264,21 +247,33 @@ Zotero.AXEImage.prototype.clickForNode = function(e){
 			var intRegionID = axePolyDBObj.saveRegionItem(noteID, intRegionType);
 			this.workingNode = 1;
 			this.workingRegion = intRegionID;
-			
-			me.clickMode = 2;
-			me.createNode(e,1);
-			
+			var newPoly = new Zotero.AXE_polygon(this,noteID);
+			this.polygons.push(newPoly);
+			this.curPolygon = this.polygons.length-1;
+			this.clickMode = 2;
+			this.polygons[this.curPolygon].addNode(e,0);
+			this.drawingState=true;
 			
 		break;
 		case 2:
 		// Add a new node to the polygon
-			me.createNode(e,2);
-			me.drawLine(me.nodeArray[me.nodeArray.length-2],me.nodeArray[me.nodeArray.length-1]);
+			var num = this.polygons[this.curPolygon].nodes.length;
+			this.polygons[this.curPolygon].addNode(e,num);
+			
 		break;
 		case 3:
 		// Complete the polygon
-			me.drawLine(me.nodeArray[me.nodeArray.length-1],me.nodeArray[0]);
+	
+			var poly = this.polygons[this.curPolygon];
+			var start = poly.nodes[poly.nodes.length-1];
+			var end = poly.nodes[0];
+			poly.completed = true;
+			end.enterLine = this.drawLine({x:start.posX,y:start.posY},{x:end.posX,y:end.posY});
+			start.exitLine = end.enterLine;
 			me.recordPolygon();
+			this.drawingState=false;
+			
+			
 		break;
 		case 4:
 		//move or delete an existing node
@@ -300,15 +295,15 @@ Zotero.AXEImage.prototype.clickForNode = function(e){
 						 // 3 = draw rectangle
 }
 
-Zotero.AXEImage.prototype.createNode = function(e,num){
 
-	this.nodeArray[this.nodeArray.length]={x:e.pageX,y:e.pageY};
-	
-	var newNode = new Zotero.AXE_node(this,e.pageX,e.pageY,num, this.workingRegion, this.workingNode);
-	this.DOM.parentNode.appendChild(newNode.DOM);
-	this.workingNode++;
-	return;
-	
+Zotero.AXEImage.prototype.deleteLine=function(line){
+	if (line) {
+		for (var n = 0; n < line.length; n++) {
+			if (line[n].parentNode) {
+				line[n].parentNode.removeChild(line[n]);
+			}
+		}
+	}
 }
 Zotero.AXEImage.prototype.recordPolygon=function(){
 	// Record the polygon from this.nodeArray;
@@ -317,84 +312,7 @@ Zotero.AXEImage.prototype.recordPolygon=function(){
 	this.clickMode=1;
 	this.Zotero_Browser.toggleMode(null);
 }
-Zotero.AXE_node = function(img,posX,posY, num, intRegionID, intNodeNumber){
-	// A node in a polygon, created a position posX,posY within a 
-	// parent node (parentNode)	
-	
-	var me = this;
-	this.img = img;
-	this.Zotero_Browser = img.Zotero_Browser;
-	this.browser = img.browser;
-	this.document = this.browser.contentDocument;
-	this.window = this.browser.contentWindow;
-	this.itemID= img.itemID;		
-	
-	this.posX = posX;
-	this.posY = posY;
-	this.clickBehavior=1; // 0 = do nothing
-					   // 1 = select to move
-					   // 2 = draw polygon;
-					   // 3 = remove 
-	this.DOM = this.document.createElement("div");
-	this.DOM.id = intRegionID+"_"+intNodeNumber;
 
-	this.DOM.style.top = posY;
-	this.DOM.style.left = posX;
-	this.DOM.style.height = "9px";
-	this.DOM.style.width = "9px";
-	this.DOM.style.position = "absolute";
-	this.DOM.style.display = "block";
-	
-
-	switch(num){
-		case 1:
-			this.DOM.className="firstNode";   
-			this.DOM.style.backgroundColor="blue";
-
-			this.DOM.addEventListener("mouseover",function(e){
-				me.img.clickMode=3;
-			},false);
-			this.DOM.addEventListener("mouseout",function(e){
-				me.img.clickMode=2;
-			},false);
-		break;
-		default:
-			this.DOM.className="firstNode";   
-			this.DOM.style.backgroundColor="red";
-			this.DOM.addEventListener("mouseover",function(e){
-			
-if (me.img.clickMode != 5) {
-	me.img.clickMode = 4;
-}
-				
-			},false);
-			this.DOM.addEventListener("mouseout",function(e){
-			
-
-				if (me.img.clickMode != 5) {
-					me.img.clickMode = 2;
-				}
-			},false);
-				this.DOM.addEventListener("mousedown",function moveStart(e){
-						me.img.clickMode=5;		
-						me.Zotero_Browser.toggleMode(null);
-						_startMove(e,me.document,me,me.DOM,false);
-				},true);
-		break;	
-	}
-
-//	this.DOM.style.backgroundImage="url(chrome://zotero/skin/icon_first_node.png)";
-					   
-}
-
-
-Zotero.AXE_node.prototype.update=function(){
-		
-		this.DOM.removeEventListener("mousedown",moveStart,true);
-					
-			
-				
-}
 Zotero.AXEImage.prototype.createRectangle = function(e){
 	
 	//create a new NOTE item on this image item and then associate
@@ -479,12 +397,13 @@ Zotero.AXEImage.prototype.drawDot=function(x,y){
 	dot.style.display = "block";
 	dot.style.backgroundColor="yellow";
 	this.DOM.appendChild(dot);
+	return dot;
 }
-Zotero.AXEImage.prototype.drawLine=function(first,second){
+Zotero.AXEImage.prototype.drawLine=function(first,second,dotArray){
 // Because the object is passed by reference, we need to make a working copy
   start = {x: first.x,y:first.y};
   end = {x: second.x,y:second.y};
-	
+  var dotArray = []; 	
   limit=1;
 //This function is modified from code at http://ajaxphp.packtpub.com/ajax/whiteboard/
   
@@ -517,6 +436,7 @@ Zotero.AXEImage.prototype.drawLine=function(first,second){
   dy <<= 1; 
   dx <<= 1; 
   dot = this.drawDot(start.x,start.y);
+  dotArray.push(dot);
 // this.dotArray.push(dot);
 
   if (dx > dy) 
@@ -534,7 +454,7 @@ Zotero.AXEImage.prototype.drawLine=function(first,second){
       fraction += dy;
   if (dcount == limit) {
   
-  	dot = this.drawDot(start.x,start.y);
+  	dotArray.push(this.drawDot(start.x,start.y));
 	//this.dotArray.push(dot);
 	dcount = 0;
   }
@@ -560,7 +480,7 @@ Zotero.AXEImage.prototype.drawLine=function(first,second){
       start.y += stepy;
       fraction += dx;
       if (dcount == limit) {
-  	dot = this.drawDot(start.x,start.y);
+  	dotArray.push(this.drawDot(start.x,start.y));
 	//this.dotArray.push(dot);
 	dcount = 0;
   }
@@ -570,6 +490,7 @@ Zotero.AXEImage.prototype.drawLine=function(first,second){
 
     }
   }
+  return dotArray;
 }
 
 
@@ -626,84 +547,6 @@ Zotero.AXE_rectangle=function(img, regionID, left, top, right, bottom){
 	
 }
 
-/**
- * Called to begin moving the annotation
- *
- * @param {Event} e DOM event corresponding to click on the grippy
- * @private
- */
-/*
-Zotero.AXE_rectangle.prototype._startMove = function(e,resizing) {
-	// stop propagation
-	e.stopPropagation();
-	e.preventDefault();
-	
-	var body = this.document.getElementsByTagName("body")[0];
-	var me = this;
-	// set the handler required to deactivate
-	
-	var handleMoveMouse1 = function(e) {
-		if (resizing) {
-			me.resizeBox(e.pageX + 1, e.pageY + 1);
-		}
-		else{
-			me.displayWithAbsoluteCoordinates(e.pageX + 1, e.pageY + 1);
-		}
-	};
-	
-	this.document.addEventListener("mousemove", handleMoveMouse1, false);
-	//this.DOM.addEventListener("mousemove", handleMoveMouse2, false);
-	
-	
-	var handleMove = function(e) {
-		
-		me.document.removeEventListener("mousemove", handleMoveMouse1, false);
-		//me.DOM.removeEventListener("mousemove", handleMoveMouse2, false);
-		me.document.removeEventListener("click", handleMove, false);
-		me.dragging=false;
-		
-		
-		// stop propagation
-		e.stopPropagation();
-		e.preventDefault();
-	};	
-	this.document.addEventListener("mouseup", handleMove, false);
-	me.DOM.addEventListener("mouseup", handleMove, false);
-	body.style.cursor = "pointer";
-
-}
-Zotero.AXE_rectangle.prototype.resizeBox=function(absX,absY){
-
-	this.DOM.style.width = absX-parseInt(this.DOM.style.left)+"px";
-
-	this.DOM.style.height =  absY-parseInt(this.DOM.style.top)+"px";
-
-	this.resizeOutline.style.top = parseInt(this.DOM.style.top)+parseInt(this.DOM.style.height)-10;
-	this.resizeOutline.style.left = parseInt(this.DOM.style.left)+parseInt(this.DOM.style.width)-10;
-	
-	//update the database
-	this.updateRectangleShift();
-	
-}
-
-Zotero.AXE_rectangle.prototype.displayWithAbsoluteCoordinates = function(absX, absY) {
-	//if(!this.node) throw "Annotation not initialized!";
-	
-	
-	var startScroll = this.window.scrollMaxX;
-	
-	
-	this.DOM.style.left = absX+"px";
-	this.rectX = absX;
-	this.DOM.style.top =  absY+"px";
-	this.rectY = absY;
-	this.resizeOutline.style.top = parseInt(absY)+parseInt(this.DOM.style.height)-10;
-	this.resizeOutline.style.left = parseInt(absX)+parseInt(this.DOM.style.width)-10;
-
-	//update the database
-	this.updateRectangleShift();
-	
-}*/
 Zotero.AXE_rectangle.prototype.update = function(){
 	this.updateRectangleShift();
 }
@@ -754,10 +597,168 @@ Zotero.AXE_rectangle.prototype.updateRectangleShift = function() {
 }
 
 
-Zotero.AXE_polygon=function(img, nodes, noteRef){
+/***********
+ * AXE_node
+ * @param {Object} img
+ * @param {Object} posX
+ * @param {Object} posY
+ * @param {Object} num
+ * @param {Object} intRegionID
+ * @param {Object} intNodeNumber
+ */
+Zotero.AXE_node = function(img, posX, posY, polygon, num, intRegionID, intNodeNumber){
+	// A node in a polygon, created a position posX,posY within a 
+	// parent node (parentNode)	
+	
+	var me = this;
+	this.num = num;
+	this.img = img;
+	this.polygon = polygon;
+	this.Zotero_Browser = img.Zotero_Browser;
+	this.browser = img.browser;
+	this.document = this.browser.contentDocument;
+	this.window = this.browser.contentWindow;
+	this.itemID = img.itemID;
+	this.enterLine = [];
+	this.exitLine = [];
+	this.posX = posX;
+	this.posY = posY;
+	this.clickBehavior = 1; // 0 = do nothing
+	// 1 = select to move
+	// 2 = draw polygon;
+	// 3 = remove 
+	this.DOM = this.document.createElement("div");
+	this.DOM.id = intRegionID + "_" + intNodeNumber;
+	
+	this.DOM.style.top = posY;
+	this.DOM.style.left = posX;
+	this.DOM.style.height = "9px";
+	this.DOM.style.width = "9px";
+	this.DOM.style.position = "absolute";
+	this.DOM.style.display = "block";
+
+	if (num == 0) {
+		this.DOM.className = "firstNode";
+		this.DOM.style.backgroundColor = "blue";
+		
+		this.DOM.addEventListener("mouseover", function(e){
+			me.img.clickMode = 3;
+		}, false);
+		this.DOM.addEventListener("mouseout", function(e){
+			if (me.img.drawingState) {
+				me.img.clickMode = 2;
+			}
+			else{
+				me.img.clickMode=1;
+			}
+		}, false);
+	}
+	else {
+	
+		this.DOM.className = "firstNode";
+		this.DOM.style.backgroundColor = "red";
+		this.DOM.addEventListener("mouseover", function(e){
+		
+			if (me.img.clickMode != 5) {
+				me.img.clickMode = 4;
+			}
+			
+		}, false);
+		this.DOM.addEventListener("mouseout", function(e){
+		
+		
+			if (me.img.drawingState) {
+				me.img.clickMode = 2;
+			}
+			else{
+				me.img.clickMode=1;
+			}
+		}, false);
+		this.DOM.addEventListener("mousedown", function moveStart(e){
+			me.img.clickMode = 5;
+			me.Zotero_Browser.toggleMode(null);
+			_startMove(e, me.document, me, me.DOM, false);
+		}, true);
+	
+	
+}
+					   
+}
+
+
+Zotero.AXE_node.prototype.update=function(){
+
+		this.img.clickMode=2;
+		this.posX = parseInt(this.DOM.style.left);
+		this.posY = parseInt(this.DOM.style.top);
+		
+		this.img.deleteLine(this.enterLine);
+	
+		
+		
+		var before = this.polygon.nodes[this.num-1];
+		var after = this.polygon.nodes[this.num+1];
+	
+		if (!before) {
+			before = this.polygon.nodes[this.polygon.nodes.length-1];
+		}
+		if (before){
+	
+			var start = {x:before.posX,y:before.posY};
+			var end = {x:this.polygon.nodes[this.num].posX,y:this.polygon.nodes[this.num].posY};
+			this.enterLine = this.img.drawLine(start,end);
+			before.exitLine = this.enterLine;
+		
+		}
+		if (this.exitLine) {
+			if (this.exitLine.length > 0) {
+				this.img.deleteLine(this.exitLine);
+				if (!after) {
+					after = this.polygon.nodes[0];
+				}
+				if (after) {
+				
+					var last = {
+						x: after.posX,
+						y: after.posY
+					};
+					this.exitLine = this.img.drawLine(end, last);
+					after.enterLine = this.exitLine;
+				
+				}
+			}
+		}
+		if (!(this.polygon.completed)) {
+			alert(this.polygon.completed);
+			// If the polygon isn't yet complete, go back to node making.
+			this.img.Zotero_Browser.toggleMode("zotero-annotate-image-tb-polygon", true);
+			this.img.clickMode = 2;
+		}
+		 			
+			
+				
+}
+Zotero.AXE_polygon=function(img,noteRef){
 	this.img = img; // tagged AXEImage object
-	this.coords = coords; // array of nodes outlining polygon 
+	this.nodes = []; // array of nodes outlining polygon 
 	this.noteRef = noteRef; // href to note	
+	this.completed=false;
+}
+Zotero.AXE_polygon.prototype.addNode=function(e,num){
+		
+	
+	var newNode = new Zotero.AXE_node(this.img,e.pageX,e.pageY,this,num, this.img.workingRegion, this.img.workingNode);
+	this.nodes.push(newNode);
+	if (num>0){
+		var start = this.nodes[this.nodes.length-2];
+		var end = this.nodes[this.nodes.length-1];
+		newNode.enterLine = this.img.drawLine({x:start.posX,y:start.posY},{x:end.posX,y:end.posY});
+		start.exitLine = newNode.enterLine;
+	}
+	this.img.DOM.parentNode.appendChild(newNode.DOM);
+	this.workingNode++;
+	return newNode;
+
 }
 Zotero.AXE_polygon.prototype.redraw=function(){
 	// redraws the polygon based on the arrays
