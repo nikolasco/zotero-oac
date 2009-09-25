@@ -646,6 +646,7 @@ Zotero.AXE_node = function(img, posX, posY, polygon, num, intRegionID, intNodeNu
 		}, false);
 		this.DOM.addEventListener("mouseout", function(e){
 			if (me.img.drawingState) {
+				alert("firstNode drawing");
 				me.img.clickMode = 2;
 			}
 			else{
@@ -668,6 +669,7 @@ Zotero.AXE_node = function(img, posX, posY, polygon, num, intRegionID, intNodeNu
 		
 		
 			if (me.img.drawingState) {
+				alert("regular drawing");
 				me.img.clickMode = 2;
 			}
 			else{
@@ -732,6 +734,7 @@ Zotero.AXE_node.prototype.update=function(){
 			alert(this.polygon.completed);
 			// If the polygon isn't yet complete, go back to node making.
 			this.img.Zotero_Browser.toggleMode("zotero-annotate-image-tb-polygon", true);
+			alert("firstNode no drawing");
 			this.img.clickMode = 2;
 		}
 		 			
