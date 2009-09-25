@@ -1,3 +1,6 @@
+// "Global" Axe functions for providing draggable functionality 
+// to any element.
+
 /**
  * Called to begin moving the annotation
  *
@@ -104,7 +107,7 @@ Zotero.AXEImage= function(Zotero_Browser, browser, itemID){
 						 // 0 = do nothing, 
 						 // 1 = draw first node for polygon 
 						 // 2 = draw another node on polygon
-						 // 3 = draw rectangle
+						 // 3 = complete polygon
 	this.nodeArray = [];
 	this.polygons = [];
 	this.curPolygon = 0;
@@ -115,28 +118,29 @@ Zotero.AXEImage= function(Zotero_Browser, browser, itemID){
 		
 }
 Zotero.AXEImage.prototype.loadImageFromPage = function(){
-	
-
-	
+		
 	var origSizeStr = this.document.title.toString();
 	var strEnd = origSizeStr.indexOf(" pixels");
 	var strBeg = origSizeStr.lastIndexOf(" ",strEnd-1);
+
 	origSizeStr = origSizeStr.substring(strBeg,strEnd).split("x");
 	
-	
-	var img = this.document.getElementsByTagName("img")[0];
-	img.style.width=parseInt(origSizeStr[0])+"px";
-	img.style.height=parseInt(origSizeStr[1])+"px";
+	this.img = this.document.getElementsByTagName("img")[0];
+	this.img.style.width=parseInt(origSizeStr[0])+"px";
+	this.img.style.height=parseInt(origSizeStr[1])+"px";
 	this.DOM = this.document.createElement("div");
-	this.DOM.appendChild(img.cloneNode(true));
+	this.DOM.appendChild(this.img.cloneNode(true));
 	var body = this.document.getElementsByTagName("body")[0];
 	body.appendChild(this.DOM);
 	
 	body.style.cursor = "pointer";
 
-	img.parentNode.removeChild(img);	
-	img = this.DOM.firstChild;
-		img.style.cursor = "pointer";
+	this.img.parentNode.removeChild(this.img);	
+	this.img = this.DOM.firstChild;
+	this.img.style.width=parseInt(origSizeStr[0])+"px";
+	this.img.style.height=parseInt(origSizeStr[1])+"px";
+	alert(this.img.style.width);
+	this.img.style.cursor = "pointer";
 		
 
 		
@@ -219,13 +223,13 @@ Zotero.AXEImage.prototype.loadImageFromPage = function(){
 
 Zotero.AXEImage.prototype.zoomIn = function(){
 	
-	this.DOM.style.width = parseInt(this.DOM.style.width) * 2;
-	this.DOM.style.height = parseInt(this.DOM.style.height) * 2;
+	this.img.style.width = parseInt(this.img.style.width) * 2;
+	this.img.style.height = parseInt(this.img.style.height) * 2;
 }
 Zotero.AXEImage.prototype.zoomOut = function(){
 
-	this.DOM.style.width = parseInt(this.DOM.style.width) / 2;
-	this.DOM.style.height = parseInt(this.DOM.style.height) / 2;
+	this.img.style.width = parseInt(this.img.style.width) / 2;
+	this.img.style.height = parseInt(this.img.style.height) / 2;
 }
 Zotero.AXEImage.prototype.clickForNode = function(e){
 	
