@@ -231,7 +231,7 @@ Zotero.AXEImage.prototype.clickForNode = function(e){
 	
 	var me = this;
 	var axePolyDBObj = new Zotero.AXEdb();
-
+	
 	switch(this.clickMode){
 		case 1:
 
@@ -627,6 +627,7 @@ Zotero.AXE_node = function(img, posX, posY, polygon, num, intRegionID, intNodeNu
 	// 1 = select to move
 	// 2 = draw polygon;
 	// 3 = remove 
+	
 	this.DOM = this.document.createElement("div");
 	this.DOM.id = intRegionID + "_" + intNodeNumber;
 	
@@ -636,7 +637,7 @@ Zotero.AXE_node = function(img, posX, posY, polygon, num, intRegionID, intNodeNu
 	this.DOM.style.width = "9px";
 	this.DOM.style.position = "absolute";
 	this.DOM.style.display = "block";
-
+	
 	if (num == 0) {
 		this.DOM.className = "firstNode";
 		this.DOM.style.backgroundColor = "blue";
@@ -646,10 +647,11 @@ Zotero.AXE_node = function(img, posX, posY, polygon, num, intRegionID, intNodeNu
 		}, false);
 		this.DOM.addEventListener("mouseout", function(e){
 			if (me.img.drawingState) {
-				alert("firstNode drawing");
+				
 				me.img.clickMode = 2;
 			}
 			else{
+				
 				me.img.clickMode=1;
 			}
 		}, false);
@@ -669,10 +671,11 @@ Zotero.AXE_node = function(img, posX, posY, polygon, num, intRegionID, intNodeNu
 		
 		
 			if (me.img.drawingState) {
-				alert("regular drawing");
+			
 				me.img.clickMode = 2;
 			}
 			else{
+			
 				me.img.clickMode=1;
 			}
 		}, false);
@@ -690,7 +693,7 @@ Zotero.AXE_node = function(img, posX, posY, polygon, num, intRegionID, intNodeNu
 
 Zotero.AXE_node.prototype.update=function(){
 
-		this.img.clickMode=2;
+		//this.img.clickMode=2;
 		this.posX = parseInt(this.DOM.style.left);
 		this.posY = parseInt(this.DOM.style.top);
 		
@@ -731,10 +734,10 @@ Zotero.AXE_node.prototype.update=function(){
 			}
 		}
 		if (!(this.polygon.completed)) {
-			alert(this.polygon.completed);
+			
 			// If the polygon isn't yet complete, go back to node making.
 			this.img.Zotero_Browser.toggleMode("zotero-annotate-image-tb-polygon", true);
-			alert("firstNode no drawing");
+			
 			this.img.clickMode = 2;
 		}
 		 			
