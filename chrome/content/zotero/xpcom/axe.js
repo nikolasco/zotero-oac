@@ -872,6 +872,63 @@ Zotero.AXE_node.prototype.update=function(){
 		
 		
 		////put code here to go to databse and re-write the posx, posy values for this node.
+		var axePgWriteDBObj = new Zotero.AXEdb();
+		var arrDOMInfo = this.DOM.id.split("_");
+		//delete current records for this region number
+		axePgWriteDBObj.deleteRegionPoints(arrDOMInfo[0]);
+		//rebuild the region node data
+		var arrPolyNodes = this.polygon.nodes;
+		var arrRegionMap = new Array(); //holds collection of point info arrays
+		var arrRegionFields = new Array(); //holds field type ID for the given point
+		var arrRegionValues = new Array(); //holds point value for the given point
+		var arrRegionOrder = new Array(); //holds order value for the given point
+		
+		var intSlice = 0;
+		
+		for(var rliCount=0;rliCount<arrPolyNodes.length;rliCount++) {
+			if (rliCount == this.num) {
+
+				arrRegionFields[intSlice] = 1;
+				arrRegionValues[intSlice] = this.posX;
+				arrRegionOrder[intSlice] = rliCount+1;
+				intSlice++;
+				arrRegionFields[intSlice] = 2;
+				arrRegionValues[intSlice] = this.posY;
+				arrRegionOrder[intSlice] = rliCount+1;		
+				intSlice++;	
+				
+			
+			} else {
+			
+			
+				var evntNode = arrPolyNodes[rliCount];
+				//alert("evntNodeX: "+evntNode.posX);
+				
+				arrRegionFields[intSlice] = 1;
+				arrRegionValues[intSlice] = evntNode.posX;
+				arrRegionOrder[intSlice] = rliCount+1;
+				intSlice++;
+				arrRegionFields[intSlice] = 2;
+				arrRegionValues[intSlice] = evntNode.posY;
+				arrRegionOrder[intSlice] = rliCount+1;		
+				intSlice++;	
+			
+			}
+		}
+		
+		arrRegionMap[0] = arrRegionFields;
+		arrRegionMap[1] = arrRegionValues;
+		arrRegionMap[2] = arrRegionOrder;
+		
+		var intRegionID = arrDOMInfo[0];
+		
+		//write region coordinate info to db
+		axePgWriteDBObj.saveRegionPoints(intRegionID, arrRegionMap);
+
+
+		
+		
+		
 		
 		this.img.deleteLine(this.enterLine);
 		
