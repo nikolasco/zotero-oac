@@ -54,7 +54,7 @@ var _startMove = function(e,doc,obj,DOM,resizing) {
 		e.stopPropagation();
 		e.preventDefault();
 	};	
-		doc.addEventListener("mousemove", handleMoveMouse1, true);
+	doc.addEventListener("mousemove", handleMoveMouse1, true);
 	doc.addEventListener("mouseup", handleMove, true);
 	DOM.addEventListener("mouseup", handleMove, true);
 	body.style.cursor = "pointer";
@@ -114,16 +114,19 @@ Zotero.AXEImage= function(Zotero_Browser, browser, itemID){
 	this.workingRegion = "";
 	this.workingNode = 0;
 	this.drawingState = false;
+	this.regionType=0;
 				  
 		
 }
 Zotero.AXEImage.prototype.loadImageFromPage = function(){
-		
+	
+
+	
 	var origSizeStr = this.document.title.toString();
 	var strEnd = origSizeStr.indexOf(" pixels");
 	var strBeg = origSizeStr.lastIndexOf(" ",strEnd-1);
-
 	origSizeStr = origSizeStr.substring(strBeg,strEnd).split("x");
+	
 	
 	this.img = this.document.getElementsByTagName("img")[0];
 	this.img.style.width=parseInt(origSizeStr[0])+"px";
@@ -139,15 +142,19 @@ Zotero.AXEImage.prototype.loadImageFromPage = function(){
 	this.img = this.DOM.firstChild;
 	this.img.style.width=parseInt(origSizeStr[0])+"px";
 	this.img.style.height=parseInt(origSizeStr[1])+"px";
-	alert(this.img.style.width);
+	//alert(this.img.style.width);
 	this.img.style.cursor = "pointer";
 		
 
 		
 	//draw existing regions from db
 	//start by grabbinglist of region ids that belong to this item
+	var sqlParent = "SELECT itemAttachments.sourceItemID FROM itemAttachments WHERE itemAttachments.itemID = '"+this.itemID+"'";
+	var parentID = Zotero.DB.valueQuery(sqlParent, "");
+	
+	
 	var axeRegionDBObj = new Zotero.AXEdb();
-	var arrRegionList = axeRegionDBObj.getRegionList(parseInt(this.itemID)-1);
+	var arrRegionList = axeRegionDBObj.getRegionList(parentID);
 	var arrRIDs = arrRegionList[0];
 	var arrRTypes = arrRegionList[1];
 	
@@ -163,6 +170,7 @@ Zotero.AXEImage.prototype.loadImageFromPage = function(){
 		
 			//check the type and process accordingly
 			if (intRType == 1) {
+				this.regionType = 1;
 				//alert("Drawing Rectangle ID: "+intRID);
 				
 				var intLeft = "";
@@ -208,8 +216,100 @@ Zotero.AXEImage.prototype.loadImageFromPage = function(){
 				}
 				
 				
+			} else if (intRType == 2) {
+				this.regionType = 2;
+				this.workingNode = 1;
+				this.workingRegion = intRID;
+				
+				var arrX = new Array();
+				var arrY = new Array();
+				
+				var arrRPType = arrReturnedRegions[0];
+				var arrRPVal = arrReturnedRegions[1];
+				var arrRPOrder = arrReturnedRegions[2];
+				
+				var intLastOrder = arrRPOrder[arrRPOrder.length-1];
+				var intOrderInc = 1;
+				var intStackSlice = 0;
+				var blnFoundX = false;
+				var blnFoundY = false;
+				
+				for(var iCount=0;iCount<arrRPType.length;iCount++) {
+					if (arrRPType[iCount] == 1) {
+						arrX[intStackSlice] = arrRPVal[iCount];
+						blnFoundX = true;
+					} else if (arrRPType[iCount] == 2) {
+						arrY[intStackSlice] = arrRPVal[iCount];
+						blnFoundY = true;
+					}
+					if (blnFoundX && blnFoundY) {
+						blnFoundX = false;
+						blnFoundY = false;
+						intStackSlice++;
+					}
+				}
+				var intFirstX = 0;
+				var intFirstY = 0;
+				var intLastX = 0;
+				var intLastY = 0;
+				
+				for(var xCount=0;xCount<arrX.length;xCount++) {
+					//draw the first node
+					
+					//alert("In Nodes Loop");
+					
+					
+					if (xCount == 0) {
+						//alert("Drawing Frist Node");
+						var start = [];
+						var end = [];
+						intFirstX = arrX[xCount];
+						intFirstY = arrY[xCount];
+						intLastX = arrX[xCount];
+						intLastY = arrY[xCount];
+						this.workingNode = 1;
+						this.workingRegion = intRID;
+						var newPoly = new Zotero.AXE_polygon(this,intRID);
+						this.polygons.push(newPoly);
+						this.curPolygon = this.polygons.length-1;
+						this.polygons[this.curPolygon].addNode(arrX[xCount], arrY[xCount], 0, this.workingRegion, this.workingNode, start, end);
+						this.drawingState=true;				
+								
+					//draw the last node
+					} else if (xCount == (arrX.length -1)) {
+						//alert("Drawing Last Node");
+						var start = {posX:parseInt(intLastX),posY:parseInt(intLastY)};
+						var end = {posX:parseInt(arrX[xCount]),posY:parseInt(arrY[xCount])};
+						this.workingNode = xCount + 1;
+						//var num = this.polygons[this.curPolygon].nodes.length;
+						var num = xCount;
+						this.polygons[this.curPolygon].addNode(arrX[xCount], arrY[xCount], num, this.workingRegion, this.workingNode, start, end);
+						this.drawLine({x:parseInt(arrX[xCount]),y:parseInt(arrY[xCount])},{x:parseInt(intFirstX),y:parseInt(intFirstY)});
+						this.drawingState=false;
+						var poly = this.polygons[this.curPolygon];
+						poly.completed = true;
+						
+						
+
+					//draw an in-between node
+					} else {
+					
+						//alert("Drawing In-Between Node");
+						var start = {posX:parseInt(intLastX),posY:parseInt(intLastY)};
+						var end = {posX:parseInt(arrX[xCount]),posY:parseInt(arrY[xCount])};
+						this.workingNode = xCount + 1;
+						var num = xCount;
+						this.polygons[this.curPolygon].addNode(arrX[xCount], arrY[xCount], num, this.workingRegion, this.workingNode, start, end);
+						intLastX = arrX[xCount];
+						intLastY = arrY[xCount];
+
+					}
+					
+				}				
+				
+				//alert("Drew a polygon");
 			} else {
-				//alert("System cannot currently draw regions other than Rectangle");
+				alert("System cannot currently draw unrecognized regions");
 			}
 			
 		
@@ -245,36 +345,55 @@ Zotero.AXEImage.prototype.clickForNode = function(e){
 			text = Zotero.Utilities.prototype.trim(text);
 			var item = new Zotero.Item('note');
 			item.setNote(text);
-			//not sure why -1 works here, but it does
-			item.setSource(this.itemID-1);
+			var sqlParent = "SELECT itemAttachments.sourceItemID FROM itemAttachments WHERE itemAttachments.itemID = '"+this.itemID+"'";
+			var parentID = Zotero.DB.valueQuery(sqlParent, "");
+			item.setSource(parentID);
 			var noteID = item.save();
 			var intRegionID = axePolyDBObj.saveRegionItem(noteID, intRegionType);
 			this.workingNode = 1;
 			this.workingRegion = intRegionID;
-			var newPoly = new Zotero.AXE_polygon(this,noteID);
+			var newPoly = new Zotero.AXE_polygon(this,intRegionID);
+			
+			
+			
 			this.polygons.push(newPoly);
 			this.curPolygon = this.polygons.length-1;
 			this.clickMode = 2;
-			this.polygons[this.curPolygon].addNode(e,0);
+			var strEX = e.pageX;
+			var strYX = e.pageY;
+			var start = [];
+			var end = [];
+			
+			this.polygons[this.curPolygon].addNode(strEX, strYX, 0, this.workingRegion, this.workingNode, start, end);
 			this.drawingState=true;
 			
 		break;
 		case 2:
 		// Add a new node to the polygon
+			//this.curPolygon = this.polygons.length-1;
+			var strEX = e.pageX;
+			var strYX = e.pageY;
+			var poly = this.polygons[this.curPolygon];
+			var start = poly.nodes[poly.nodes.length-1];
+			var end = {posX:strEX,posY:strYX};
+		
+			this.workingNode++
 			var num = this.polygons[this.curPolygon].nodes.length;
-			this.polygons[this.curPolygon].addNode(e,num);
+			this.polygons[this.curPolygon].addNode(strEX, strYX, num, this.workingRegion, this.workingNode, start, end);
 			
 		break;
 		case 3:
 		// Complete the polygon
-	
+			//this.curPolygon = this.polygons.length-1;
 			var poly = this.polygons[this.curPolygon];
 			var start = poly.nodes[poly.nodes.length-1];
 			var end = poly.nodes[0];
+			
 			poly.completed = true;
 			end.enterLine = this.drawLine({x:start.posX,y:start.posY},{x:end.posX,y:end.posY});
+			//this.drawLine({x:lstart.posX,y:lstart.posY},{x:lend.posX,y:lend.posY});
 			start.exitLine = end.enterLine;
-			me.recordPolygon();
+			me.recordPolygon(this.workingRegion, this.polygons[this.curPolygon]);
 			this.drawingState=false;
 			
 			
@@ -300,6 +419,7 @@ Zotero.AXEImage.prototype.clickForNode = function(e){
 }
 
 
+	//alert("e.pageX: "+e.pageX);
 Zotero.AXEImage.prototype.deleteLine=function(line){
 	if (line) {
 		for (var n = 0; n < line.length; n++) {
@@ -309,15 +429,54 @@ Zotero.AXEImage.prototype.deleteLine=function(line){
 		}
 	}
 }
-Zotero.AXEImage.prototype.recordPolygon=function(){
+Zotero.AXEImage.prototype.recordPolygon=function(intRegionID, objPoly){
 	// Record the polygon from this.nodeArray;
-	alert('recorded');
+	//alert('recorded');
+	
+	var arrPolyNodes = objPoly.nodes;
+	//alert("Size of Nodes Array for this Poly: "+arrPolyNodes.length);
+	//alert("RegionID: "+intRegionID);
+	
+	var arrRegionMap = new Array(); //holds collection of point info arrays
+	var arrRegionFields = new Array(); //holds field type ID for the given point
+	var arrRegionValues = new Array(); //holds point value for the given point
+	var arrRegionOrder = new Array(); //holds order value for the given point
+	
+	var intSlice = 0;
+	
+	for(var rliCount=0;rliCount<arrPolyNodes.length;rliCount++) {
+		var evntNode = arrPolyNodes[rliCount];
+		//alert("evntNodeX: "+evntNode.posX);
+		
+		arrRegionFields[intSlice] = 1;
+		arrRegionValues[intSlice] = evntNode.posX;
+		arrRegionOrder[intSlice] = rliCount+1;
+		intSlice++;
+		arrRegionFields[intSlice] = 2;
+		arrRegionValues[intSlice] = evntNode.posY;
+		arrRegionOrder[intSlice] = rliCount+1;		
+		intSlice++;	
+	}
+	
+	arrRegionMap[0] = arrRegionFields;
+	arrRegionMap[1] = arrRegionValues;
+	arrRegionMap[2] = arrRegionOrder;
+	
+	var intRegionID = this.workingRegion;
+	
+	//write region coordinate info to db
+	var axePgWriteDBObj = new Zotero.AXEdb();
+	axePgWriteDBObj.saveRegionPoints(intRegionID, arrRegionMap);
+	
 	this.nodeArray = [];
 	this.clickMode=1;
 	this.Zotero_Browser.toggleMode(null);
+	
+	//alert('recorded');
 }
 
 Zotero.AXEImage.prototype.createRectangle = function(e){
+	this.regionType=1;
 	
 	//create a new NOTE item on this image item and then associate
 	//coordinates of rectangle with the note
@@ -336,7 +495,9 @@ Zotero.AXEImage.prototype.createRectangle = function(e){
 	var item = new Zotero.Item('note');
 	item.setNote(text);
 	//not sure why -1 works here, but it does
-	item.setSource(this.itemID-1);
+	var sqlParent = "SELECT itemAttachments.sourceItemID FROM itemAttachments WHERE itemAttachments.itemID = '"+this.itemID+"'";
+	var parentID = Zotero.DB.valueQuery(sqlParent, "");
+	item.setSource(parentID);
 	var noteID = item.save();
 	
 	//alert("noteID: "+noteID);
@@ -405,6 +566,7 @@ Zotero.AXEImage.prototype.drawDot=function(x,y){
 }
 Zotero.AXEImage.prototype.drawLine=function(first,second,dotArray){
 // Because the object is passed by reference, we need to make a working copy
+	//alert("first.x: "+first.x);
   start = {x: first.x,y:first.y};
   end = {x: second.x,y:second.y};
   var dotArray = []; 	
@@ -413,6 +575,9 @@ Zotero.AXEImage.prototype.drawLine=function(first,second,dotArray){
   
   var dy = end.y - start.y;
   var dx = end.x - start.x;
+  
+ // alert("dy: "+dy);
+ // alert("dx: "+dx);
 
   var stepx, stepy, limit;
   if (dy < 0) 
@@ -445,10 +610,12 @@ Zotero.AXEImage.prototype.drawLine=function(first,second,dotArray){
 
   if (dx > dy) 
   {
+  	//alert("Im in this loop dx > dy");
     fraction = dy - (dx >> 1); 
 	dcount=0;
     while (start.x != end.x)
     {
+    	//alert("start.x: "+start.x+" / end.x: "+end.x);
       if (fraction >= 0) 
       {
         start.y += stepy;
@@ -466,7 +633,6 @@ Zotero.AXEImage.prototype.drawLine=function(first,second,dotArray){
   	dcount++;
   }
   
-
         
     }
   }
@@ -494,6 +660,7 @@ Zotero.AXEImage.prototype.drawLine=function(first,second,dotArray){
 
     }
   }
+  
   return dotArray;
 }
 
@@ -552,10 +719,11 @@ Zotero.AXE_rectangle=function(img, regionID, left, top, right, bottom){
 }
 
 Zotero.AXE_rectangle.prototype.update = function(){
+	//alert("this.DOM.id: "+this.DOM.id);
 	this.updateRectangleShift();
 }
 Zotero.AXE_rectangle.prototype.updateRectangleShift = function() {
-	
+	//alert('updating');
 	//declare variables needed to call region insert function 
 	var arrRegionMap = new Array();  //master array which packages data arrays
 	var arrRegionFields = new Array(); //holds field type ID for the given point
@@ -696,14 +864,16 @@ Zotero.AXE_node = function(img, posX, posY, polygon, num, intRegionID, intNodeNu
 
 
 Zotero.AXE_node.prototype.update=function(){
+		//alert("This is where Node Updates Happen");
 
 		//this.img.clickMode=2;
 		this.posX = parseInt(this.DOM.style.left);
 		this.posY = parseInt(this.DOM.style.top);
 		
-		this.img.deleteLine(this.enterLine);
-	
 		
+		////put code here to go to databse and re-write the posx, posy values for this node.
+		
+		this.img.deleteLine(this.enterLine);
 		
 		var before = this.polygon.nodes[this.num-1];
 		var after = this.polygon.nodes[this.num+1];
@@ -712,14 +882,15 @@ Zotero.AXE_node.prototype.update=function(){
 			before = this.polygon.nodes[this.polygon.nodes.length-1];
 		}
 		if (before){
-	
-			var start = {x:before.posX,y:before.posY};
-			var end = {x:this.polygon.nodes[this.num].posX,y:this.polygon.nodes[this.num].posY};
+			
+			var start = {x:parseInt(before.posX),y:parseInt(before.posY)};
+			var end = {x:parseInt(this.polygon.nodes[this.num].posX),y:parseInt(this.polygon.nodes[this.num].posY)};
 			this.enterLine = this.img.drawLine(start,end);
 			before.exitLine = this.enterLine;
 		
 		}
 		if (this.exitLine) {
+		
 			if (this.exitLine.length > 0) {
 				this.img.deleteLine(this.exitLine);
 				if (!after) {
@@ -748,21 +919,29 @@ Zotero.AXE_node.prototype.update=function(){
 			
 				
 }
+
 Zotero.AXE_polygon=function(img,noteRef){
 	this.img = img; // tagged AXEImage object
 	this.nodes = []; // array of nodes outlining polygon 
 	this.noteRef = noteRef; // href to note	
 	this.completed=false;
 }
-Zotero.AXE_polygon.prototype.addNode=function(e,num){
-		
+Zotero.AXE_polygon.prototype.addNode=function(strX, strY, num, intWorkingRegion, intWorkingNode, objStart, objEnd){
+
+	var newNode = new Zotero.AXE_node(this.img,strX,strY,this,num, intWorkingRegion, intWorkingNode);
 	
-	var newNode = new Zotero.AXE_node(this.img,e.pageX,e.pageY,this,num, this.img.workingRegion, this.img.workingNode);
 	this.nodes.push(newNode);
+	
 	if (num>0){
+		
+		var intStartX = objStart.posX;
+		var intStartY = objStart.posY;
+		var intEndX = objEnd.posX;
+		var intEndY = objEnd.posY
+
 		var start = this.nodes[this.nodes.length-2];
 		var end = this.nodes[this.nodes.length-1];
-		newNode.enterLine = this.img.drawLine({x:start.posX,y:start.posY},{x:end.posX,y:end.posY});
+		newNode.enterLine = this.img.drawLine({x:intStartX,y:intStartY},{x:intEndX,y:intEndY});
 		start.exitLine = newNode.enterLine;
 	}
 	this.img.DOM.parentNode.appendChild(newNode.DOM);
@@ -770,6 +949,7 @@ Zotero.AXE_polygon.prototype.addNode=function(e,num){
 	return newNode;
 
 }
+
 Zotero.AXE_polygon.prototype.redraw=function(){
 	// redraws the polygon based on the arrays
 }
