@@ -256,11 +256,8 @@ Zotero.AXEImage.prototype.loadImageFromPage = function(){
 				for(var xCount=0;xCount<arrX.length;xCount++) {
 					//draw the first node
 					
-					//alert("In Nodes Loop");
-					
-					
 					if (xCount == 0) {
-						//alert("Drawing Frist Node");
+
 						var start = [];
 						var end = [];
 						intFirstX = arrX[xCount];
@@ -277,23 +274,24 @@ Zotero.AXEImage.prototype.loadImageFromPage = function(){
 								
 					//draw the last node
 					} else if (xCount == (arrX.length -1)) {
-						//alert("Drawing Last Node");
-						var start = {posX:parseInt(intLastX),posY:parseInt(intLastY)};
-						var end = {posX:parseInt(arrX[xCount]),posY:parseInt(arrY[xCount])};
+					
+						this.curPolygon = this.polygons.length-1;
+						var lstart = {posX:parseInt(intLastX),posY:parseInt(intLastY)};
+						var lend = {posX:parseInt(arrX[xCount]),posY:parseInt(arrY[xCount])};
 						this.workingNode = xCount + 1;
-						//var num = this.polygons[this.curPolygon].nodes.length;
 						var num = xCount;
-						this.polygons[this.curPolygon].addNode(arrX[xCount], arrY[xCount], num, this.workingRegion, this.workingNode, start, end);
-						this.drawLine({x:parseInt(arrX[xCount]),y:parseInt(arrY[xCount])},{x:parseInt(intFirstX),y:parseInt(intFirstY)});
+						this.polygons[this.curPolygon].addNode(arrX[xCount], arrY[xCount], num, this.workingRegion, this.workingNode, lstart, lend);
 						this.drawingState=false;
 						var poly = this.polygons[this.curPolygon];
 						poly.completed = true;
-						
-						
+						var start = poly.nodes[poly.nodes.length-1];
+						var end = poly.nodes[0];
+						end.enterLine = this.drawLine({x:parseInt(arrX[xCount]),y:parseInt(arrY[xCount])},{x:parseInt(intFirstX),y:parseInt(intFirstY)});
+						start.exitLine = end.enterLine;
 
 					//draw an in-between node
 					} else {
-					
+						this.curPolygon = this.polygons.length-1;
 						//alert("Drawing In-Between Node");
 						var start = {posX:parseInt(intLastX),posY:parseInt(intLastY)};
 						var end = {posX:parseInt(arrX[xCount]),posY:parseInt(arrY[xCount])};
@@ -306,8 +304,7 @@ Zotero.AXEImage.prototype.loadImageFromPage = function(){
 					}
 					
 				}				
-				
-				//alert("Drew a polygon");
+
 			} else {
 				alert("System cannot currently draw unrecognized regions");
 			}
@@ -924,12 +921,6 @@ Zotero.AXE_node.prototype.update=function(){
 		
 		//write region coordinate info to db
 		axePgWriteDBObj.saveRegionPoints(intRegionID, arrRegionMap);
-
-
-		
-		
-		
-		
 		this.img.deleteLine(this.enterLine);
 		
 		var before = this.polygon.nodes[this.num-1];
