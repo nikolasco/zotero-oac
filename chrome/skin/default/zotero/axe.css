@@ -1,13 +1,13 @@
-body{
+div{
 	background-color: blue;
 }
 .firstNode{
 background-color: blue;
-  background-image:url('icon_first_node.png');
+  background-image:url('chrome://zotero/skin/icon_first_node.png');
 }
 
 .node{
   background-color: red;
-  background-image:url('icon_first_node.png');
+  background-image:url('chrome://zotero/skin/icon_first_node.png');
 }
 
