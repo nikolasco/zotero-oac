@@ -134,7 +134,6 @@ Zotero.AXEdb.prototype.deleteRegionPoints = function(intRegionID){
 //and returns info ina  multi dimension array
 Zotero.AXEdb.prototype.getRegion = function(intRegionID){
 
-	//// 	NOT WORKING AT ALL RIGHT NOW
 	
 	var arrRegionMap = new Array();  //master array which packages data arrays
 	var arrRegionFields = new Array(); //holds field type ID for the given point
@@ -168,12 +167,12 @@ Zotero.AXEdb.prototype.getRegionList = function(intItemID){
 	var arrNoteItemIDs = new Array();  //holds region IDs
 	var arrNoteItemTypes = new Array();  //holds region type IDs
 	
-	var sql = "SELECT axeRegion.regionID, axeRegion.regionType FROM axeRegion WHERE axeRegion.sourceItemID IN (SELECT DISTINCT itemNotes.itemID FROM itemNotes WHERE itemNotes.sourceItemID = '"+intItemID+"')";
+	var sql = "SELECT axeRegion.regionID, axeRegion.sourceItemID, axeRegion.regionType FROM axeRegion WHERE axeRegion.sourceItemID IN (SELECT DISTINCT itemNotes.itemID FROM itemNotes WHERE itemNotes.sourceItemID = '"+intItemID+"')";
 	var rows = Zotero.DB.query(sql, "");
 	var intRegCount = 0;
 	for(var liCount=0;liCount<rows.length;liCount++) {
 			var row = rows[liCount];
-			var sqlTwo = "SELECT COUNT(*) FROM deletedItems WHERE itemID = '"+row['regionID']+"'";
+			var sqlTwo = "SELECT COUNT(*) FROM deletedItems WHERE itemID = '"+row['sourceItemID']+"'";
 			var countValue = Zotero.DB.valueQuery(sqlTwo, "");
 			if (countValue == 0) {
 				arrNoteItemIDs[intRegCount] = row['regionID'];
