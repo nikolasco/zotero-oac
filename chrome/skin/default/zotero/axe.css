@@ -1,13 +1,58 @@
-div{
-	background-color: blue;
+/* CSS Document */
+
+/* -- Yahoo CSS Reset ------------------------------------------------- */
+
+body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,form,fieldset,input,textarea,p,blockquote,th,td { 
+	margin:0;
+	padding:0;
 }
-.firstNode{
-background-color: blue;
-  background-image:url('chrome://zotero/skin/icon_first_node.png');
+table {
+	border-collapse:collapse;
+	border-spacing:0;
+}
+fieldset,img { 
+	border:0;
+}
+address,caption,cite,code,dfn,em,strong,th,var {
+	font-style:normal;
+	font-weight:normal;
+}
+ol,ul {
+	list-style:none;
+}
+caption,th {
+	text-align:left;
+}
+h1,h2,h3,h4,h5,h6 {
+	font-size:100%;
+	font-weight:normal;
+}
+q:before,q:after {
+	content:'';
+}
+abbr,acronym { border:0;
+}
+/*-----AXE----*/
+a.firstNode{
+ height: 6px;
+  width: 6px;
+  background-image:url('zotero://attachment/axe_blue_small.png');
+}
+a.firstNode:hover{
+  height: 9px;
+  width: 9px;
+  background-image:url('zotero://attachment/axe_blue_large.png');
+}
+a.node{
+	height: 6px;
+	width: 6px;
+  background-image:url('zotero://attachment/axe_red_small.png');
 }
 
-.node{
-  background-color: red;
-  background-image:url('chrome://zotero/skin/icon_first_node.png');
+a.node:hover{
+  height: 9px;
+  width: 9px;
+  background-image: url('zotero://attachment/axe_red_large.png');
 }
+
 

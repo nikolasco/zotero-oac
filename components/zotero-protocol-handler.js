@@ -668,7 +668,7 @@ function ChromeExtensionHandler() {
 				
 				if (parseInt(id) != id) {
 					// Proxy annotation icons
-					if (id.match(/^annotation.*\.(png|html|css|gif)$/)) {
+					if (id.match(/^(annotation|axe).*\.(png|html|css|gif)$/)) {
 						var chromeURL = 'chrome://zotero/skin/' + id;
 						var ios = Components.classes["@mozilla.org/network/io-service;1"].
 									getService(Components.interfaces.nsIIOService);

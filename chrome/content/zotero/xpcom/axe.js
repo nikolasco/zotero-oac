@@ -110,13 +110,27 @@ Zotero.AXEImage= function(Zotero_Browser, browser, itemID){
 						 // 3 = complete polygon
 	this.nodeArray = [];
 	this.polygons = [];
+	this.rectangles = [];
 	this.curPolygon = 0;
 	this.workingRegion = "";
 	this.workingNode = 0;
 	this.drawingState = false;
 	this.regionType=0;
+	this.zoomLevel = 0;
+	head = this.document.getElementsByTagName("head")[0];
+	
+	link = this.document.createElement("link");
+	link.href="zotero://attachment/axe.css";
+	link.type="text/css";
+	link.rel="stylesheet";
+	head.appendChild(link);
+	
+
 				  
 		
+}
+Zotero.AXEImage.prototype.getAllRegions = function(){
+	
 }
 Zotero.AXEImage.prototype.loadImageFromPage = function(){
 	
@@ -142,6 +156,9 @@ Zotero.AXEImage.prototype.loadImageFromPage = function(){
 	this.img = this.DOM.firstChild;
 	this.img.style.width=parseInt(origSizeStr[0])+"px";
 	this.img.style.height=parseInt(origSizeStr[1])+"px";
+	this.oWidth = parseInt(this.img.style.width);
+	this.oHeight = parseInt(this.img.style.height);
+	this.zoomLevel = 0;
 	//alert(this.img.style.width);
 	this.img.style.cursor = "pointer";
 		
@@ -209,6 +226,7 @@ Zotero.AXEImage.prototype.loadImageFromPage = function(){
 					//alert("Ready to draw Rectangle: "+intRID);
 					this.Zotero_Browser.toggleMode(null);
 					var newRectRegion = new Zotero.AXE_rectangle(this,intRID,intLeft,intTop,intRight,intBottom);
+					this.rectangles.push(newRectRegion);
 					this.DOM.parentNode.appendChild(newRectRegion.DOM);
 					this.DOM.parentNode.appendChild(newRectRegion.resizeOutline);
 				} else {
@@ -319,14 +337,42 @@ Zotero.AXEImage.prototype.loadImageFromPage = function(){
 }
 
 Zotero.AXEImage.prototype.zoomIn = function(){
+
+	this.img.style.width = parseFloat(this.img.style.width) * 2;
+	this.img.style.height = parseFloat(this.img.style.height) * 2;
 	
-	this.img.style.width = parseInt(this.img.style.width) * 2;
-	this.img.style.height = parseInt(this.img.style.height) * 2;
+	for (n in this.rectangles){
+		rect = this.rectangles[n];
+		rect.DOM.style.top = parseFloat(rect.DOM.style.top)*2;
+		rect.DOM.style.left = parseFloat(rect.DOM.style.left)*2;
+		rect.DOM.style.height = parseFloat(rect.DOM.style.height)*2;
+		rect.DOM.style.width = parseFloat(rect.DOM.style.width)*2;
+			rect.resizeOutline.style.top = parseFloat(rect.DOM.style.top)+parseFloat(rect.DOM.style.height)-10;
+	rect.resizeOutline.style.left = parseFloat(rect.DOM.style.left)+parseFloat(rect.DOM.style.width)-10;
+		rect.resizeOutline.style.height = 10;
+		rect.resizeOutline.style.width = 10;
+		
+	}
+	this.zoomLevel++;
 }
 Zotero.AXEImage.prototype.zoomOut = function(){
 
-	this.img.style.width = parseInt(this.img.style.width) / 2;
-	this.img.style.height = parseInt(this.img.style.height) / 2;
+	this.img.style.width = parseFloat(this.img.style.width) / 2;
+	this.img.style.height = parseFloat(this.img.style.height) / 2;
+	
+		for (n in this.rectangles){
+		rect = this.rectangles[n];
+		rect.DOM.style.top = parseFloat(rect.DOM.style.top)/2;
+		rect.DOM.style.left = parseFloat(rect.DOM.style.left)/2;
+		rect.DOM.style.height = parseFloat(rect.DOM.style.height)/2;
+		rect.DOM.style.width = parseFloat(rect.DOM.style.width)/2;
+		rect.resizeOutline.style.top = parseFloat(rect.DOM.style.top)+parseFloat(rect.DOM.style.height)-10;
+		rect.resizeOutline.style.left = parseFloat(rect.DOM.style.left)+parseFloat(rect.DOM.style.width)-10;
+		rect.resizeOutline.style.height = 10;
+		rect.resizeOutline.style.width = 10;	
+		
+	}
+	this.zoomLevel--;
 }
 Zotero.AXEImage.prototype.clickForNode = function(e){
 	
@@ -474,13 +520,23 @@ Zotero.AXEImage.prototype.recordPolygon=function(intRegionID, objPoly){
 
 Zotero.AXEImage.prototype.createRectangle = function(e){
 	this.regionType=1;
-	
+	var factor = 2*this.zoomLevel;
+	if (factor==0){
+		factor =1;
+	}
+	else if (factor>0){
+		factor = 1/factor;
+	}
+	else{
+		factor = (Math.abs(factor));
+	}
+	alert(this.zoomLevel+" * 2="+factor);
 	//create a new NOTE item on this image item and then associate
 	//coordinates of rectangle with the note
-	var startX = e.pageX;
-	var startY = e.pageY
-	var newX = e.pageX+100;
-	var newY = e.pageY+100;
+	var startX = parseFloat(e.pageX)*factor;
+	var startY = parseFloat(e.pageY)*factor;
+	var newX = startX+(factor*100);
+	var newY = startY+(factor*100);
 	
 	// NOTE:  RIGHT NOW THE COORDINATES FOR THE X/Y POINTS THAT ARE BEING STORED IN DATABSE
 	// ARE ACTUALLY RELATIVE TO THE PAGE  AND NOT TO THE IMAGE.  NEED TO ADD CALCULATIONS
@@ -543,7 +599,7 @@ Zotero.AXEImage.prototype.createRectangle = function(e){
 	var newRect = new Zotero.AXE_rectangle(this,intRegionID,e.pageX,e.pageY,e.pageX+100,e.pageY+100);
 	this.DOM.parentNode.appendChild(newRect.DOM);
 	this.DOM.parentNode.appendChild(newRect.resizeOutline);
-
+	this.rectangles.push(newRect);
 
 
 
@@ -728,15 +784,35 @@ Zotero.AXE_rectangle.prototype.updateRectangleShift = function() {
 	var arrRegionOrder = new Array(); //holds order value for the given point
 	var strTop = this.DOM.style.top;
 	var strLeft = this.DOM.style.left;
-	var strHeight = this.DOM.style.width;
-	var strWidth = this.DOM.style.height;
+	var strHeight = this.DOM.style.height;
+	var strWidth = this.DOM.style.width;
 	
 	
 	//get rid of "px" on values
+	/*
+	//Unnecessary.  parseFloat kills px.
+	 
 	strTop = strTop.replace("px", "");
 	strLeft = strLeft.replace("px", "");
 	strHeight = strHeight.replace("px", "");
 	strWidth = strWidth.replace("px", "");
+	*/
+	var factor = 2*this.img.zoomLevel;
+	if (factor==0){
+		factor =1;
+	}
+	else if (factor>0){
+		factor = 1/factor;
+	}
+	else{
+		factor = (Math.abs(factor));
+	}
+	alert(this.img.zoomLevel+" * 2="+factor);
+	//create a new NOTE item on this image item and then associate
+	//coordinates of rectangle with the note
+
+	
+	
 	
 	//seed variable values
 	arrRegionFields[0] = 1; // X
@@ -744,10 +820,10 @@ Zotero.AXE_rectangle.prototype.updateRectangleShift = function() {
 	arrRegionFields[2] = 1; // X
 	arrRegionFields[3] = 2;	// Y
 	
-	arrRegionValues[0] = strLeft;
-	arrRegionValues[1] = strTop;
-	arrRegionValues[2] = parseInt(strWidth)+parseInt(strLeft);
-	arrRegionValues[3] = parseInt(strHeight)+parseInt(strTop);;
+	arrRegionValues[0] = parseFloat(strLeft)*factor;
+	arrRegionValues[1] = parseFloat(strTop)*factor;
+	arrRegionValues[2] = (parseFloat(strWidth)*factor)+arrRegionValues[0];
+	arrRegionValues[3] = (parseFloat(strHeight)*factor)+arrRegionValues[1];
 	
 	arrRegionOrder[0] = 1;
 	arrRegionOrder[1] = 1;
@@ -797,24 +873,27 @@ Zotero.AXE_node = function(img, posX, posY, polygon, num, intRegionID, intNodeNu
 	// 2 = draw polygon;
 	// 3 = remove 
 	
-	this.DOM = this.document.createElement("div");
+	this.DOM = this.document.createElement("a");
 	this.DOM.id = intRegionID + "_" + intNodeNumber;
 	
 	this.DOM.style.top = posY;
 	this.DOM.style.left = posX;
-	this.DOM.style.height = "9px";
-	this.DOM.style.width = "9px";
+
 	this.DOM.style.position = "absolute";
 	this.DOM.style.display = "block";
 	
 	if (num == 0) {
 		this.DOM.className = "firstNode";
-		this.DOM.style.backgroundColor = "blue";
+	
 		
 		this.DOM.addEventListener("mouseover", function(e){
+			me.DOM.style.top=parseInt(me.DOM.style.top)-3;
+				me.DOM.style.left=parseInt(me.DOM.style.left)-3;
 			me.img.clickMode = 3;
 		}, false);
 		this.DOM.addEventListener("mouseout", function(e){
+			me.DOM.style.top=parseInt(me.DOM.style.top)+3;
+			me.DOM.style.left=parseInt(me.DOM.style.left)+3;
 			if (me.img.drawingState) {
 				
 				me.img.clickMode = 2;
@@ -827,17 +906,19 @@ Zotero.AXE_node = function(img, posX, posY, polygon, num, intRegionID, intNodeNu
 	}
 	else {
 	
-		this.DOM.className = "firstNode";
-		this.DOM.style.backgroundColor = "red";
+		this.DOM.className = "node";
+	
 		this.DOM.addEventListener("mouseover", function(e){
-		
+					me.DOM.style.top=parseInt(me.DOM.style.top)-3;
+				me.DOM.style.left=parseInt(me.DOM.style.left)-3;
 			if (me.img.clickMode != 5) {
 				me.img.clickMode = 4;
 			}
 			
 		}, false);
 		this.DOM.addEventListener("mouseout", function(e){
-		
+			me.DOM.style.top=parseInt(me.DOM.style.top)+3;
+			me.DOM.style.left=parseInt(me.DOM.style.left)+3;
 		
 			if (me.img.drawingState) {
 			
