@@ -541,7 +541,7 @@ Zotero.AXEImage.prototype.clickForNode = function(e){
 			//this.drawLine({x:lstart.posX,y:lstart.posY},{x:lend.posX,y:lend.posY});
 			start.exitLine = end.enterLine;
 			me.recordPolygon(this.workingRegion, this.polygons[this.curPolygon]);
-			this.drawingState=false;
+			me.drawingState=false;
 			
 			
 		break;
@@ -1026,6 +1026,27 @@ Zotero.AXE_node = function(img, posX, posY, polygon, num, intRegionID, intNodeNu
 				me.img.clickMode=1;
 			}
 		}, false);
+		this.DOM.addEventListener("mousedown", function(e){
+			if ((me.img.clickMode == 1) && (!me.img.drawingState)) {
+					me.img.clickMode = 5;
+					me.Zotero_Browser.toggleMode(null);
+					_startMove(e, me.document, me, me.DOM, false);
+			}
+			else{
+				//repeated from case 3 above.  Clean up someday.
+				var poly = me.polygon;
+			var start = poly.nodes[poly.nodes.length-1];
+			var end = poly.nodes[0];
+			
+			poly.completed = true;
+			end.enterLine = this.drawLine({x:start.posX,y:start.posY},{x:end.posX,y:end.posY});
+			//this.drawLine({x:lstart.posX,y:lstart.posY},{x:lend.posX,y:lend.posY});
+			start.exitLine = end.enterLine;
+			me.img.drawingState=false;
+			me.recordPolygon(this.workingRegion, this.polygons[this.curPolygon]);
+			}
+		}, false);
+		
 	}
 	else {
 	
