@@ -288,7 +288,7 @@ Zotero.AXEImage.prototype.loadImageFromPage = function(){
 						this.polygons.push(newPoly);
 						this.curPolygon = this.polygons.length-1;
 						this.polygons[this.curPolygon].addNode(arrX[xCount], arrY[xCount], 0, this.workingRegion, this.workingNode, start, end);
-						this.drawingState=true;				
+						this.drawingState=false;				
 								
 					//draw the last node
 					} else if (xCount == (arrX.length -1)) {
@@ -1027,7 +1027,8 @@ Zotero.AXE_node = function(img, posX, posY, polygon, num, intRegionID, intNodeNu
 			}
 		}, false);
 		this.DOM.addEventListener("mousedown", function(e){
-			if ((me.img.clickMode == 1) && (!me.img.drawingState)) {
+		
+			if ((me.img.clickMode != 2) && (!me.img.drawingState)) {
 					me.img.clickMode = 5;
 					me.Zotero_Browser.toggleMode(null);
 					_startMove(e, me.document, me, me.DOM, false);
