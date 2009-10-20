@@ -357,37 +357,37 @@
 }
 #zotero-annotate-image-tb-rectangle
 {
-	list-style-image: url('chrome://zotero/skin/icon_rectangle.gif');
+	list-style-image: url('chrome://zotero/skin/icon_squareOff.gif');
 }
 
 #zotero-annotate-image-tb-rectangle[tool-active=true]
 {
-	list-style-image: url('chrome://zotero/skin/icon_rectangle_selected.png');
+	list-style-image: url('chrome://zotero/skin/icon_squareOn.gif');
 }
 
 #zotero-annotate-image-tb-polygon
 {
-	list-style-image: url('chrome://zotero/skin/icon_polygon.gif');
+	list-style-image: url('chrome://zotero/skin/icon_polygonOff.gif');
 	
 }
 
 #zotero-annotate-image-tb-polygon[tool-active=true]
 {
-	list-style-image: url('chrome://zotero/skin/icon_polygon_selected.png');
+	list-style-image: url('chrome://zotero/skin/icon_polygon_polygonOn.png');
 }
 #zotero-annotate-image-tb-zoomIn
 {
-	list-style-image: url('chrome://zotero/skin/icon_zoom_in.gif');
+	list-style-image: url('chrome://zotero/skin/icon_zoomInOff.gif');
 }
 #zotero-annotate-image-tb-zoomIn[tool-active=true]
 {
-	list-style-image: url('chrome://zotero/skin/icon_zoom_in.gif');
+	list-style-image: url('chrome://zotero/skin/icon_zoomInOn.gif');
 }
 #zotero-annotate-image-tb-zoomOut
 {
-	list-style-image: url('chrome://zotero/skin/icon_zoom_out.gif');
+	list-style-image: url('chrome://zotero/skin/icon_zoomOutOff.gif');
 }
 #zotero-annotate-image-tb-zoomOut[tool-active=true]
 {
-	list-style-image: url('chrome://zotero/skin/icon_zoom_out.gif');
+	list-style-image: url('chrome://zotero/skin/icon_zoomOutOn.gif');
 }
