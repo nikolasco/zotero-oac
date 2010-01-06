@@ -108,6 +108,53 @@ for (var i=0; i<rdfXpcomFiles.length; i++) {
 }
 
 
+var libFiles = [
+    'json2',
+    'monomyth',
+    'underscore'
+];
+
+Zotero.Libs = {};
+
+for (var i=0; i<libFiles.length; i++) {
+    try {
+	Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
+	    .getService(Ci.mozIJSSubScriptLoader)
+	    .loadSubScript("chrome://zotero/content/xpcom/libs/" + libFiles[i] + ".js", Zotero.Libs);
+    }
+    catch (e) {
+	Components.utils.reportError("Error loading " + libFiles[i] + ".js: " + e);
+	throw (e);
+    }
+}
+
+Zotero.loadDOMLibs = function (win) {
+    var libFiles = [
+        {file: 'jquery', prop: 'jQuery'},
+        {file: 'raphael', prop: 'Raphael'}
+    ];
+
+    var zl = {};
+
+    for (var i=0; i<libFiles.length; i++) {
+        var l = libFiles[i];
+        var tmp = win[l.prop];
+        try {
+            Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
+                .getService(Ci.mozIJSSubScriptLoader)
+                .loadSubScript("chrome://zotero/content/libs/" + l.file + ".js", this);
+            zl[l.prop] = win[l.prop];
+            win[l.prop] = tmp;
+        } catch (e) {
+            win[l.prop] = tmp;
+            Components.utils.reportError("Error loading " + libFiles[i] + ".js: " + e);
+            throw (e);
+        }
+    }
+    return zl;
+};
+
+
 Cc["@mozilla.org/moz/jssubscript-loader;1"]
 	.getService(Ci.mozIJSSubScriptLoader)
 	.loadSubScript("chrome://global/content/nsTransferable.js");
