@@ -2825,6 +2825,16 @@ Zotero.Schema = new function(){
 					Zotero.DB.query("UPDATE savedSearchConditions SET condition='libraryCatalog' WHERE condition='repository'");
 				}
 				
+				if (i==74) {
+                                    /* XXX: TODO: write schema migration
+                                     * migrate Zotero "annotations"
+                                     * migrate highlights
+                                     * drop annotations and highlights tables
+                                     * create oac tables
+                                     * drop triggers (new ones will be added automatically)
+                                     */
+				}
+				
 				Zotero.wait();
 			}
 			

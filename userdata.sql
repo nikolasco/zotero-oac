@@ -1,4 +1,4 @@
--- 73
+-- 74
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -78,6 +78,16 @@ CREATE TABLE itemNotes (
     FOREIGN KEY (sourceItemID) REFERENCES items(itemID)
 );
 CREATE INDEX itemNotes_sourceItemID ON itemNotes(sourceItemID);
+
+-- Note data for note and attachment items
+CREATE TABLE itemSimpleText (
+    itemID INTEGER PRIMARY KEY,
+    sourceItemID INT,
+    txt TEXT,
+    FOREIGN KEY (itemID) REFERENCES items(itemID),
+    FOREIGN KEY (sourceItemID) REFERENCES items(itemID)
+);
+CREATE INDEX itemSimpleText_sourceItemID ON itemSimpleText(sourceItemID);
 
 -- Metadata for attachment items
 CREATE TABLE itemAttachments (
@@ -294,36 +304,30 @@ CREATE TABLE storageDeleteLog (
 );
 CREATE INDEX storageDeleteLog_timestamp ON storageDeleteLog(timestamp);
 
-CREATE TABLE annotations (
-    annotationID INTEGER PRIMARY KEY,
-    itemID INT,
-    parent TEXT,
-    textNode INT,
-    offset INT,
-    x INT,
-    y INT,
-    cols INT,
-    rows INT,
-    text TEXT,
-    collapsed BOOL,
-    dateModified DATE,
-    FOREIGN KEY (itemID) REFERENCES itemAttachments(itemID)
+CREATE TABLE oacContexts (
+       oacCtxID INTEGER PRIMARY KEY
 );
-CREATE INDEX annotations_itemID ON annotations(itemID);
 
-CREATE TABLE highlights (
-    highlightID INTEGER PRIMARY KEY,
-    itemID INTEGER,
-    startParent TEXT,
-    startTextNode INT,
-    startOffset INT,
-    endParent TEXT,
-    endTextNode INT,
-    endOffset INT,
-    dateModified DATE,
-    FOREIGN KEY (itemID) REFERENCES itemAttachments(itemID)
+CREATE TABLE oacAnnotation (
+   oacAnnotationID INTEGER PRIMARY KEY,
+   targetItemID INTEGER,
+   targetOacCtxID INTEGER,
+   sourceItemID INTEGER,
+   sourceOacCtxID INTEGER,
+   FOREIGN KEY (targetItemID) REFERENCES items(itemID),
+   FOREIGN KEY (targetOacCtxID) REFERENCES oacContexts(oacCtxID),
+   FOREIGN KEY (sourceItemID) REFERENCES items(itemID),
+   FOREIGN KEY (sourceOacCtxID) REFERENCES oacContexts(oacCtxID)
 );
-CREATE INDEX highlights_itemID ON highlights(itemID);
+
+CREATE TABLE oacSegments (
+   oacSegmentID INTEGER PRIMARY KEY,
+   oacCtxID INTEGER,
+   json TEXT,
+   className TEXT,
+   classVersion,
+   FOREIGN KEY (oacCtxID) REFERENCES oacContexts(oacCtxID)
+);
 
 CREATE TABLE proxies (
     proxyID INTEGER PRIMARY KEY,

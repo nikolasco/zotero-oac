@@ -1,4 +1,4 @@
--- 17
+-- 18
 
 -- Copyright (c) 2009 Center for History and New Media
 --                    George Mason University, Fairfax, Virginia, USA
@@ -68,38 +68,7 @@ CREATE TRIGGER update_creatorData BEFORE UPDATE ON creatorData
 -- Fake foreign key constraint checks using triggers
 --
 
--- annotations/itemID
-DROP TRIGGER IF EXISTS fki_annotations_itemID_itemAttachments_itemID;
-CREATE TRIGGER fki_annotations_itemID_itemAttachments_itemID
-  BEFORE INSERT ON annotations
-  FOR EACH ROW BEGIN
-    SELECT RAISE(ABORT, 'insert on table "annotations" violates foreign key constraint "fki_annotations_itemID_itemAttachments_itemID"')
-    WHERE NEW.itemID IS NOT NULL AND (SELECT COUNT(*) FROM itemAttachments WHERE itemID = NEW.itemID) = 0;
-  END;
-
-DROP TRIGGER IF EXISTS fku_annotations_itemID_itemAttachments_itemID;
-CREATE TRIGGER fku_annotations_itemID_itemAttachments_itemID
-  BEFORE UPDATE OF itemID ON annotations
-  FOR EACH ROW
-  BEGIN
-    SELECT RAISE(ABORT, 'update on table "annotations" violates foreign key constraint "fku_annotations_itemID_itemAttachments_itemID"')
-    WHERE NEW.itemID IS NOT NULL AND (SELECT COUNT(*) FROM itemAttachments WHERE itemID = NEW.itemID) = 0;
-  END;
-
-DROP TRIGGER IF EXISTS fkd_annotations_itemID_itemAttachments_itemID;
-CREATE TRIGGER fkd_annotations_itemID_itemAttachments_itemID
-  BEFORE DELETE ON itemAttachments
-  FOR EACH ROW BEGIN
-    SELECT RAISE(ABORT, 'delete on table "itemAttachments" violates foreign key constraint "fkd_annotations_itemID_itemAttachments_itemID"')
-    WHERE (SELECT COUNT(*) FROM annotations WHERE itemID = OLD.itemID) > 0;
-  END;
-
-DROP TRIGGER IF EXISTS fku_itemAttachments_itemID_annotations_itemID;
-CREATE TRIGGER fku_itemAttachments_itemID_annotations_itemID
-  AFTER UPDATE OF itemID ON itemAttachments
-  FOR EACH ROW BEGIN
-    UPDATE annotations SET itemID=NEW.itemID WHERE itemID=OLD.itemID;
-  END;
+-- XXX: TODO: handle oacAnnotations and whatnot
 
 -- collections/parentCollectionID
 DROP TRIGGER IF EXISTS fki_collections_parentCollectionID_collections_collectionID;
@@ -698,38 +667,6 @@ CREATE TRIGGER fku_users_userID_groupItems_lastModifiedByUserID
   AFTER UPDATE OF userID ON users
   FOR EACH ROW BEGIN
     UPDATE groupItems SET lastModifiedByUserID=NEW.userID WHERE lastModifiedByUserID=OLD.userID;
-  END;
-
--- highlights/itemID
-DROP TRIGGER IF EXISTS fki_highlights_itemID_itemAttachments_itemID;
-CREATE TRIGGER fki_highlights_itemID_itemAttachments_itemID
-  BEFORE INSERT ON highlights
-  FOR EACH ROW BEGIN
-    SELECT RAISE(ABORT, 'insert on table "highlights" violates foreign key constraint "fki_highlights_itemID_itemAttachments_itemID"')
-    WHERE NEW.itemID IS NOT NULL AND (SELECT COUNT(*) FROM itemAttachments WHERE itemID = NEW.itemID) = 0;
-  END;
-
-DROP TRIGGER IF EXISTS fku_highlights_itemID_itemAttachments_itemID;
-CREATE TRIGGER fku_highlights_itemID_itemAttachments_itemID
-  BEFORE UPDATE OF itemID ON highlights
-  FOR EACH ROW BEGIN
-    SELECT RAISE(ABORT, 'update on table "highlights" violates foreign key constraint "fku_highlights_itemID_itemAttachments_itemID"')
-    WHERE NEW.itemID IS NOT NULL AND (SELECT COUNT(*) FROM itemAttachments WHERE itemID = NEW.itemID) = 0;
-  END;
-
-DROP TRIGGER IF EXISTS fkd_highlights_itemID_itemAttachments_itemID;
-CREATE TRIGGER fkd_highlights_itemID_itemAttachments_itemID
-  BEFORE DELETE ON itemAttachments
-  FOR EACH ROW BEGIN
-    SELECT RAISE(ABORT, 'delete on table "itemAttachments" violates foreign key constraint "fkd_highlights_itemID_itemAttachments_itemID"')
-    WHERE (SELECT COUNT(*) FROM highlights WHERE itemID = OLD.itemID) > 0;
-  END;
-
-DROP TRIGGER IF EXISTS fku_itemAttachments_itemID_highlights_itemID;
-CREATE TRIGGER fku_itemAttachments_itemID_highlights_itemID
-  AFTER UPDATE OF itemID ON itemAttachments
-  FOR EACH ROW BEGIN
-    UPDATE highlights SET itemID=NEW.itemID WHERE itemID=OLD.itemID;
   END;
 
 -- itemAttachments/itemID
