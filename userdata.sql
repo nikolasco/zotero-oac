@@ -308,7 +308,7 @@ CREATE TABLE oacContexts (
        oacCtxID INTEGER PRIMARY KEY
 );
 
-CREATE TABLE oacAnnotation (
+CREATE TABLE oacAnnotations (
    oacAnnotationID INTEGER PRIMARY KEY,
    targetItemID INTEGER,
    targetOacCtxID INTEGER,
