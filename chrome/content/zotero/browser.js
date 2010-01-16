@@ -39,11 +39,10 @@
 // Class to interface with the browser when ingesting data
 
 var Zotero_Browser = new function() {
+    var _ = Zotero.Libs._;
+
 	this.init = init;
 	this.scrapeThisPage = scrapeThisPage;
-	this.annotatePage = annotatePage;
-	this.toggleMode = toggleMode;
-	this.toggleCollapsed = toggleCollapsed;
 	this.chromeLoad = chromeLoad;
 	this.chromeUnload = chromeUnload;
 	this.contentLoad = contentLoad;
@@ -74,24 +73,10 @@ var Zotero_Browser = new function() {
 	var _locationBlacklist = [
 		"zotero://debug/"
 	];
-	
-	var tools = {
-		'zotero-annotate-tb-add':{
-			cursor:"pointer",
-			event:"click",
-			callback:function(e) { _add("annotation", e) }
-		},
-		'zotero-annotate-tb-highlight':{
-			cursor:"text",
-			event:"mouseup",
-			callback:function(e) { _add("highlight", e) }
-		},
-		'zotero-annotate-tb-unhighlight':{
-			cursor:"text",
-			event:"mouseup",
-			callback:function(e) { _add("unhighlight", e) }
-		}
-	};
+
+    // wait to setup callbacks until we have a full DOM
+    window.addEventListener('load', function() {
+    }, false);
 
 	//////////////////////////////////////////////////////////////////////////////
 	//
@@ -152,60 +137,6 @@ var Zotero_Browser = new function() {
 	}
 	
 	/*
-	 * flags a page for annotation
-	 */
-	function annotatePage(id, browser) {
-		if (browser) {
-			var tab = _getTabObject(browser);
-		}
-		else {
-			var tab = _getTabObject(this.tabbrowser.selectedBrowser);
-		}
-	}
-	
-	/*
-	 * toggles a tool on/off
-	 */
-	function toggleMode(toggleTool, ignoreOtherTools) {
-		// make sure other tools are turned off
-		if(!ignoreOtherTools) {
-			for(var tool in tools) {
-				if(tool != toggleTool && document.getElementById(tool).getAttribute("tool-active")) {
-					toggleMode(tool, true);
-				}
-			}
-		}
-		
-		// make sure annotation action is toggled
-		var tab = _getTabObject(Zotero_Browser.tabbrowser.selectedBrowser);
-		if(tab.page && tab.page.annotations && tab.page.annotations.clearAction) tab.page.annotations.clearAction();
-		
-		if(!toggleTool) return;
-		
-		var body = Zotero_Browser.tabbrowser.selectedBrowser.contentDocument.getElementsByTagName("body")[0];
-		var addElement = document.getElementById(toggleTool);
-		
-		if(addElement.getAttribute("tool-active")) {
-			// turn off
-			body.style.cursor = "auto";
-			addElement.removeAttribute("tool-active");
-			Zotero_Browser.tabbrowser.selectedBrowser.removeEventListener(tools[toggleTool].event, tools[toggleTool].callback, true);
-		} else {
-			body.style.cursor = tools[toggleTool].cursor;
-			addElement.setAttribute("tool-active", "true");
-			Zotero_Browser.tabbrowser.selectedBrowser.addEventListener(tools[toggleTool].event, tools[toggleTool].callback, true);
-		}
-	}
-	
-	/*
-	 * expands all annotations
-	 */
-	function toggleCollapsed() {
-		var tab = _getTabObject(Zotero_Browser.tabbrowser.selectedBrowser);
-		tab.page.annotations.toggleCollapsed();
-	}
-	
-	/*
 	 * called to hide the collection selection popup
 	 */
 	function hidePopup(collectionID) {
@@ -260,6 +191,7 @@ var Zotero_Browser = new function() {
 		this.tabbrowser = document.getElementById("content");
 		this.appcontent = document.getElementById("appcontent");
 		this.statusImage = document.getElementById("zotero-status-image");
+            this.lastAnoObj = null;
 		
 		// this gives us onLocationChange, for updating when tabs are switched/created
 		this.tabbrowser.addEventListener("TabClose",
@@ -322,11 +254,16 @@ var Zotero_Browser = new function() {
 	 * object, and updates the status of the capture icon
 	 */
 	function contentLoad(event) {
-		var isHTML = event.originalTarget instanceof HTMLDocument;
 		var doc = event.originalTarget;
 		var rootDoc = doc;
-		
-		if(isHTML) {
+                var annotaterClass;
+                _.each(Zotero.Annotaters, function(ano){
+                    if (ano.annotatesTypes[doc.contentType.toLowerCase()]) {
+                        annotaterClass = ano;
+                    }
+                });
+
+		if(annotaterClass) {
 			// get the appropriate root document to check which browser we're on
 			while(rootDoc.defaultView.frameElement) {
 				rootDoc = rootDoc.defaultView.frameElement.ownerDocument;
@@ -366,27 +303,31 @@ var Zotero_Browser = new function() {
 		// get data object
 		var tab = _getTabObject(browser);
 		
-		if(isHTML) {
+		if(annotaterClass) {
 			var annotationID = Zotero.Annotate.getAnnotationIDFromURL(browser.currentURI.spec);
 			if(annotationID) {
 				if(Zotero.Annotate.isAnnotated(annotationID)) {
 					window.alert(Zotero.getString("annotations.oneWindowWarning"));
 				} else if(!tab.page.annotations) {
+                                    
+                                            // XXX: TODO: load from the DB
 					// enable annotation
-					tab.page.annotations = new Zotero.Annotations(this, browser, annotationID);
+                                    var oldAnnos = [];
+					tab.page.annotations = new annotaterClass(doc, oldAnnos);
 					var saveAnnotations = function() {
+                                            // XXX: TODO: stuff everything into the DB
 						tab.page.annotations.save();
 						tab.page.annotations = undefined;
 					};
 					browser.contentWindow.addEventListener('beforeunload', saveAnnotations, false);
 					browser.contentWindow.addEventListener('close', saveAnnotations, false);
-					tab.page.annotations.load();
 				}
 			}
 		}
 		
 		// detect translators
 		tab.detectTranslators(rootDoc, doc);
+//            updateStatus();
 	}
 
 	/*
@@ -438,7 +379,6 @@ var Zotero_Browser = new function() {
 		
 		// To execute if document object does not exist
 		_deleteTabObject(event.target.linkedBrowser);
-		toggleMode();
 	}
 	
 	
@@ -449,7 +389,7 @@ var Zotero_Browser = new function() {
 		var tab = _getTabObject(this.tabbrowser.selectedBrowser);
 		if(!tab.page.annotations) return;
 		
-		tab.page.annotations.refresh();
+		tab.page.annotations.resized();
 	}
 	
 	/*
@@ -468,13 +408,22 @@ var Zotero_Browser = new function() {
 			Zotero_Browser.statusImage.hidden = true;
 		}
 		
-		// set annotation bar status
-		if(tab.page.annotations) {
-			document.getElementById('zotero-annotate-tb').hidden = false;
-			toggleMode();
+	    // show/hide annotation bar status
+            var anoObj = tab.page.annotations;
+            if(this.lastAnoObj) this.lastAnoObj.teardownCallbacks(document);
+            if(anoObj) anoObj.setupCallbacks(document);
+            this.lastAnoObj = anoObj;
+            _.each(document.getElementsByTagName("toolbar"), function(el) {
+                // only touch Zotero's annotation toolbars
+                if(!/\bzotero-annotate-tb\b/.test(el.className)) return;
+
+                // if it's the toolbar for the current annotater, show it
+		if(anoObj && el.id == anoObj.klass.toolbarID) {
+		    el.hidden = false;
 		} else {
-			document.getElementById('zotero-annotate-tb').hidden = true;
-		}
+		    el.hidden = true;
+                }
+            });
 	}
 	
 	/*
@@ -571,43 +520,6 @@ var Zotero_Browser = new function() {
 		} finally {}
 		return false;
 	}
-	
-	/*
-	 * adds an annotation
-	 */
-	 function _add(type, e) {
-		var tab = _getTabObject(Zotero_Browser.tabbrowser.selectedBrowser);
-		
-		if(type == "annotation") {
-			// ignore click if it's on an existing annotation
-			if(e.target.getAttribute("zotero-annotation")) return;
-			
-			var annotation = tab.page.annotations.createAnnotation();
-			annotation.initWithEvent(e);
-			
-			// disable add mode, now that we've used it
-			toggleMode();
-		} else {
-			try {
-				var selection = Zotero_Browser.tabbrowser.selectedBrowser.contentWindow.getSelection();
-			} catch(err) {
-				return;
-			}
-			if(selection.isCollapsed) return;
-			
-			if(type == "highlight") {
-	 			tab.page.annotations.highlight(selection.getRangeAt(0));
-			} else if(type == "unhighlight") {
-	 			tab.page.annotations.unhighlight(selection.getRangeAt(0));
-			}
-			
-			selection.removeAllRanges();
-		}
-		
-		// stop propagation
-		e.stopPropagation();
-		e.preventDefault();
-	 }
 }
 
 

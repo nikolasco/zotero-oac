@@ -358,3 +358,18 @@
 {
 	list-style-image: url('chrome://zotero/skin/annotate-unhighlight-selected.png');
 }
+
+#zotero-annotate-tb-vector-drawer-rectangle
+{
+	list-style-image: url('chrome://zotero/skin/annotate-vector-drawer-rectangle.png');
+}
+
+#zotero-annotate-tb-vector-drawer-ellipse
+{
+	list-style-image: url('chrome://zotero/skin/annotate-vector-drawer-ellipse.png');
+}
+
+#zotero-annotate-tb-vector-drawer-polygon
+{
+	list-style-image: url('chrome://zotero/skin/annotate-vector-drawer-polygon.png');
+}
