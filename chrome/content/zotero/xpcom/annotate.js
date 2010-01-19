@@ -27,7 +27,7 @@ Zotero.Annotate = {
 	/**
 	 * Gets the annotation ID from a given URL
 	 */
-	getAnnotationIDFromURL: function(url) {
+	getAttachmentIDFromURL: function(url) {
 		const attachmentRe = /^zotero:\/\/attachment\/([0-9]+)\/$/;
 		var m = attachmentRe.exec(url);
 		return m ? m[1] : false;
@@ -97,7 +97,7 @@ Zotero.Annotaters = {};
              "libs/VectorDrawer.js"];
          this._contentDoc = contentDoc;
          _.each(VECTOR_DRAWER_DEPS, function (dep) {
-                    // TODO: make a content accessible chrom package so we can just use src=
+                    // TODO: make a content accessible chrome package so we can just use src=
                     var s = contentDoc.createElement("script");
                     var ss = contentDoc.createTextNode(getContents("chrome://zotero/content/" + dep));
                     s.appendChild(ss);
@@ -106,9 +106,10 @@ Zotero.Annotaters = {};
 
          var img = this._img = contentDoc.getElementsByTagName("img")[0];
          var initScale = img.clientHeight / img.naturalHeight;
-         // XXX: TODO: pass in old objs to draw
          this._mode = 'r';
-         contentDoc.defaultView.location = "javascript:window.drawer = new VectorDrawer('" + this._mode + "', " + initScale + ", document.getElementsByTagName('img')[0]); undefined";
+         // calling across the security boundry fails miserably :(
+         contentDoc.defaultView.location = "javascript:window.drawer = new VectorDrawer('" + this._mode + "', " + initScale + ", " + encodeURI(JSON.stringify(oldAnnos)) + ", document.getElementsByTagName('img')[0]); undefined";
+         contentDoc.defaultView.location = "javascript:function savable() {return JSON.stringify(drawer.savable());}; undefined";
      };
 
      ZVD.annotatesTypes = {
@@ -125,7 +126,9 @@ Zotero.Annotaters = {};
 
      ZVD.prototype = {
          shouldSave: function() {
-             // XXX: TODO: return objs to save
+             // the stringify+parse round-trip is needed to avoid mangling :/
+             // note that savable() called here is defined by our constructor above
+             return JSON.parse(this._contentDoc.defaultView.wrappedJSObject.savable());
          },
          resized: function() {
              var scale = this._img.clientHeight / this._img.naturalHeight;
@@ -140,15 +143,9 @@ Zotero.Annotaters = {};
                  self._curCallbacks[elID] = function() {
                      self._contentDoc.defaultView.location = "javascript:window.drawer.drawMode('"+ mode + "'); undefined";
                      self._mode = mode;
-                     el.checked = true;
-                     if (self._prevChecked) self._prevChecked.checked = false;
-                     self._prevChecked = el;
                  };
                  el.addEventListener("command", self._curCallbacks[elID], false);
-                 if (mode == self._mode) {
-                     el.checked = true;
-                     self._prevChecked = el;
-                 }
+                 if (mode == self._mode) el.checked = true;
              });
 
              // TODO: add scaling UI

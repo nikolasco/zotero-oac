@@ -324,8 +324,6 @@ CREATE TABLE oacSegments (
    oacSegmentID INTEGER PRIMARY KEY,
    oacCtxID INTEGER,
    json TEXT,
-   className TEXT,
-   classVersion,
    FOREIGN KEY (oacCtxID) REFERENCES oacContexts(oacCtxID)
 );
 

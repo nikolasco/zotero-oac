@@ -304,20 +304,46 @@ var Zotero_Browser = new function() {
 		var tab = _getTabObject(browser);
 		
 		if(annotaterClass) {
-			var annotationID = Zotero.Annotate.getAnnotationIDFromURL(browser.currentURI.spec);
-			if(annotationID) {
-				if(Zotero.Annotate.isAnnotated(annotationID)) {
+			var attachmentID = Zotero.Annotate.getAttachmentIDFromURL(browser.currentURI.spec);
+			if(attachmentID) {
+				if(Zotero.Annotate.isAnnotated(attachmentID)) {
 					window.alert(Zotero.getString("annotations.oneWindowWarning"));
 				} else if(!tab.page.annotations) {
-                                    
-                                            // XXX: TODO: load from the DB
-					// enable annotation
+				    // enable annotation
                                     var oldAnnos = [];
+                                    var oldCtxs = Zotero.DB.query("SELECT sourceOacCtxID FROM oacAnnotations WHERE targetItemID = ?", attachmentID);
+                                    _.each(oldCtxs, function(r){
+                                        // Note: theoretically contexts can have multiple segments associated with them. We're ignoring this for now.
+                                        var json = Zotero.DB.valueQuery("SELECT json FROM oacSegments WHERE oacCtxID = ?", [r.sourceOacCtxID]);
+                                        oldAnnos.push(JSON.parse(json));
+                                    });
 					tab.page.annotations = new annotaterClass(doc, oldAnnos);
 					var saveAnnotations = function() {
-                                            // XXX: TODO: stuff everything into the DB
-						tab.page.annotations.save();
-						tab.page.annotations = undefined;
+                                            var objs = tab.page.annotations.shouldSave();
+                                            try {
+                                                Zotero.DB.beginTransaction();
+
+                                                // TODO: once triggers are in place, simplify this
+                                                var old = Zotero.DB.query("SELECT oacAnnotationID, sourceOacCtxID FROM oacAnnotations WHERE targetItemID = ?", attachmentID);
+                                                _.each(old, function(r){
+                                                    Zotero.DB.query("DELETE FROM oacSegments WHERE oacCtxID = ?", [r.sourceOacCtxID]);
+                                                    Zotero.DB.query("DELETE FROM oacContexts WHERE oacCtxID = ?", [r.sourceOacCtxID]);
+                                                    Zotero.DB.query("DELETE FROM oacAnnotations WHERE oacAnnotationID = ?", [r.oacAnnotationID]);
+                                                });
+
+                                                _.each(objs, function(o){
+                                                    var ctxID = Zotero.DB.query("INSERT INTO oacContexts DEFAULT VALUES");
+                                                    Zotero.DB.query("INSERT INTO oacAnnotations (targetItemID, sourceOacCtxID) VALUES (?, ?)", [attachmentID, ctxID]);
+                                                    Zotero.DB.query("INSERT INTO oacSegments (oacCtxID, json) VALUES (?, ?)", [ctxID, JSON.stringify(o)]);
+                                                });
+
+                                                Zotero.DB.commitTransaction();
+                                            } catch (e) {
+                                                Zotero.DB.rollbackTransaction();
+                                                Components.utils.reportError(e);
+
+                                            }
+					    tab.page.annotations = undefined;
 					};
 					browser.contentWindow.addEventListener('beforeunload', saveAnnotations, false);
 					browser.contentWindow.addEventListener('close', saveAnnotations, false);

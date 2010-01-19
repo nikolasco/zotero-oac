@@ -460,9 +460,9 @@
 		</toolbar>
 
 		<toolbar id="zotero-annotate-tb-vector-drawer" class="zotero-annotate-tb" crop="end" insertbefore="content" hidden="true">
-			<toolbarbutton id="zotero-annotate-tb-vector-drawer-rectangle" tooltiptext="&zotero.annotate.vectordrawer.toolbar.rectangle.label;"/>
-			<toolbarbutton id="zotero-annotate-tb-vector-drawer-ellipse" tooltiptext="&zotero.annotate.vectordrawer.toolbar.ellipse.label;"/>
-			<toolbarbutton id="zotero-annotate-tb-vector-drawer-polygon" tooltiptext="&zotero.annotate.vectordrawer.toolbar.polygon.label;"/>
+			<toolbarbutton id="zotero-annotate-tb-vector-drawer-rectangle" group="zotero-annotate-tb-vector-drawer" type="radio" tooltiptext="&zotero.annotate.vectordrawer.toolbar.rectangle.label;"/>
+			<toolbarbutton id="zotero-annotate-tb-vector-drawer-ellipse" group="zotero-annotate-tb-vector-drawer" type="radio" tooltiptext="&zotero.annotate.vectordrawer.toolbar.ellipse.label;"/>
+			<toolbarbutton id="zotero-annotate-tb-vector-drawer-polygon" group="zotero-annotate-tb-vector-drawer" type="radio" tooltiptext="&zotero.annotate.vectordrawer.toolbar.polygon.label;"/>
                 </toolbar>
 	</vbox>
 	

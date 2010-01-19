@@ -25,12 +25,12 @@
      // initDrawMode should be one of the modes
      // overElm is the element that this VectorDrawer will be laid on top of
      // Note: the VectorDrawer will not move or resize if the element does
-     rootNS.VectorDrawer = function (initDrawMode, initScale, overElm) {
+     rootNS.VectorDrawer = function (initDrawMode, initScale, initObjs, overElm) {
          var self = this;
          // only thing that methods access at the moment
-         self._drawMode = initDrawMode;
-         self._scale = initScale;
-         self._allObjs = [];
+         self._drawMode = initDrawMode || 'r';
+         self._scale = initScale || 1;
+         self._allObjs = initObjs || [];
          self._start = self._obj = self._points = null;
 
          // XXX: should handle wandering out of the area...
@@ -68,6 +68,11 @@
              self._canvas.elm.remove();
              this._buildCanvas();
              return self._scale;
+         },
+         savable: function() {
+             return _.map(this._allObjs, function(o){
+                 return {scale: o.scale, con: o.con, args: o.args};
+             });
          },
          _buildCanvas: function() {
              var self = this;
