@@ -373,3 +373,8 @@
 {
 	list-style-image: url('chrome://zotero/skin/annotate-vector-drawer-polygon.png');
 }
+
+#zotero-annotate-tb-vector-drawer-select
+{
+	list-style-image: url('chrome://zotero/skin/annotate-vector-drawer-select.png');
+}

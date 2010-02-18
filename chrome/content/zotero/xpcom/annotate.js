@@ -106,7 +106,7 @@ Zotero.Annotaters = {};
 
          var img = this._img = contentDoc.getElementsByTagName("img")[0];
          var initScale = img.clientHeight / img.naturalHeight;
-         this._mode = 'r';
+         this._mode = 's';
          // calling across the security boundry fails miserably :(
          contentDoc.defaultView.location = "javascript:window.drawer = new VectorDrawer('" + this._mode + "', " + initScale + ", " + encodeURI(JSON.stringify(oldAnnos)) + ", document.getElementsByTagName('img')[0]); undefined";
          contentDoc.defaultView.location = "javascript:function savable() {return JSON.stringify(drawer.savable());}; undefined";
@@ -121,7 +121,8 @@ Zotero.Annotaters = {};
      const toolCallbacks = {
          'zotero-annotate-tb-vector-drawer-rectangle': 'r',
          'zotero-annotate-tb-vector-drawer-ellipse': 'e',
-         'zotero-annotate-tb-vector-drawer-polygon': 'p'
+         'zotero-annotate-tb-vector-drawer-polygon': 'p',
+         'zotero-annotate-tb-vector-drawer-select': 's'
      };
 
      ZVD.prototype = {

@@ -1,7 +1,9 @@
 (function ($, R, _) {
      var rootNS = this;
+     var TOO_SMALL = 2;
      var CLOSE_ENOUGH = 8;
-     var INIT_ATTRS = {"stroke-width": "1px", "stroke-color": "black"};
+     var INIT_ATTRS = {"stroke-width": "1px", "stroke": "black"};
+     var SELECTED_ATTRS = {"stroke-width": "1px", "stroke": "#ff6666"};
 
      function makePathStr(ps) {
          return "M " + _.map(ps, function(p) {return p.x + " " + p.y;}).join(" L ");
@@ -20,6 +22,34 @@
              interY > _.min([a1.y,a2.y]) && interY < _.max([a1.y,a2.y]) &&
              interX > _.min([b1.x,b2.x]) && interX < _.max([b1.x,b2.x]) &&
              interY > _.min([b1.y,b2.y]) && interY < _.max([b1.y,b2.y]);
+     }
+
+     function eachPoint(path, func) {
+         // copy without the beginning "M " or ending " z", then split on " L "
+         var parts = path.substr(2, path.length-4).split(" L ");
+         var np = makePathStr(_.map(parts, function(p){
+             var xy = p.split(" ");
+             return func({x: xy[0]*1, y: xy[1]*1});
+         }));
+         return np + " z";
+         
+     }
+
+     function shiftArgs(con, args, shift) {
+         shift = {x: shift.x, y: shift.y};
+         if (con == "rect" || con == "ellipse") {
+             return [args[0]+shift.x, args[1]+shift.y, args[2], args[3]];
+         } else if (con == "path") {
+             return [eachPoint(args[0], function(p){
+                 return {x: p.x+shift.x, y: p.y+shift.y};
+             })];
+         } else {
+             throw "should not be reached";
+         }
+     }
+
+     function relScale(vd, o) {
+         return vd._scale/o.scale;
      }
 
      // initDrawMode should be one of the modes
@@ -46,6 +76,7 @@
      jQuery.extend(rootNS.VectorDrawer.prototype, {
          drawMode: function(newMode) {
              if (newMode != null) {
+                 if (self._obj) self._obj.cur.attr(INIT_ATTRS);
                  this._drawMode = newMode;
              }
              return this._drawMode;
@@ -84,8 +115,8 @@
              self._installHandlers();
              _.each(self._allObjs, function (o) {
                  o.cur = self._paper[o.con].apply(self._paper, o.args);
-                 var relScale = self._scale/o.scale;
-                 o.cur.scale(relScale, relScale, 0, 0);
+                 var rs = relScale(self, o);
+                 o.cur.scale(rs, rs, 0, 0);
              });
          },
          // given an event e, figure out where it is relative to the canvas
@@ -101,6 +132,7 @@
 
              self._canvas.elm.mousedown(function(e) {
                  if (1 != e.which) return;
+                 e.preventDefault();
 
                  var cur = self._getCanvasXY(e);
                  if (self._drawMode == 'r') {
@@ -141,12 +173,16 @@
                              self._points.pop();
                              var path = makePathStr(self._points) + " z";
                              self._obj.attr({"path": path});
-                             self._allObjs.push({
-                                 cur: self._obj,
-                                 con: "path",
-                                 args: [path],
-                                 scale: self._scale
-                             });
+                             var bbox = self._obj.getBBox();
+                             if (bbox.width > TOO_SMALL && bbox.height > TOO_SMALL) {
+                         
+                                 self._allObjs.push({
+                                     cur: self._obj,
+                                     con: "path",
+                                     args: [path],
+                                     scale: self._scale
+                                 });
+                             }
                              self._obj = self._points = null;
                              return; // done!
                          }
@@ -156,11 +192,21 @@
                          self._obj.attr(INIT_ATTRS);
                      }
                      self._points.push({x: cur.x, y: cur.y});
+                 } else if (self._drawMode == 's') {
+                     if (self._obj) self._obj.cur.attr(INIT_ATTRS);
+                     self._obj = null;
+                     var targetObj = _.first(_.select(self._allObjs,
+                         function(o){return o.cur && o.cur.node == e.target;}));
+                     if (!targetObj) return;
+                     targetObj.cur.attr(SELECTED_ATTRS);
+                     self._obj = targetObj;
+                     self._start = cur;
                  } else {
                      throw "should not be reached";
                  }
              }).mouseup(function (e) {
                  if (1 != e.which) return;
+                 e.preventDefault();
 
                  if (self._drawMode == 'r' || self._drawMode == 'e') {
                      if (!self._obj) return;
@@ -183,18 +229,26 @@
                      } else {
                          throw "should not be reached";
                      }
-                     self._allObjs.push(metaObj);
+                     var bbox = metaObj.cur.getBBox();
+                     if (bbox.width > TOO_SMALL && bbox.height > TOO_SMALL) self._allObjs.push(metaObj);
                      self._start = self._obj = null;
                  } else if (self._drawMode == 'p') {
                      // do nothing
+                 } else if (self._drawMode == 's') {
+                     self._start = null; // stop moving
+                     var o = self._obj;
+                     if (o && o.newArgs) o.args = o.newArgs;
                  } else {
                      throw "should not be reached";
                  }
              }).mousemove(function (e) {
                  if (!self._obj) return;
+                 e.preventDefault();
 
                  var cur = self._getCanvasXY(e);
                  if (self._drawMode == 'r' || self._drawMode == 'e') {
+                     if (!self._obj) return;
+
                      var tl = {x: _.min([cur.x, self._start.x]), y: _.min([cur.y, self._start.y])},
                      br = {x: _.max([cur.x, self._start.x]), y: _.max([cur.y, self._start.y])},
                      halfWidth = (br.x-tl.x)/2,
@@ -217,10 +271,31 @@
                          throw "should not be reached";
                      }
                  } else if (self._drawMode == 'p') {
+                     if (!self._points) return;
+
                      var lp = _.last(self._points);
                      lp.x = cur.x;
                      lp.y = cur.y;
                      self._obj.attr({"path": makePathStr(self._points)});
+                 } else if (self._drawMode == 's') {
+                     if (!self._start || !self._obj) return;
+
+                     var st = self._start;
+                     var o = self._obj;
+                     var rs = relScale(self, o);
+                     var shift = {x: (cur.x-st.x)/rs, y: (cur.y-st.y)/rs};
+                     var na = o.newArgs = shiftArgs(self._obj.con, self._obj.args, shift, rs);
+                     if (o.con == "rect") {
+                         o.cur.attr({x: na[0]*rs, y: na[1]*rs});
+                     } else if (self._obj.con == "ellipse") {
+                         o.cur.attr({cx: na[0]*rs, cy: na[1]*rs});
+                     } else if (self._obj.con == "path") {
+                         o.cur.attr({path: eachPoint(na[0], function(p){
+                             return {x: p.x*rs, y: p.y*rs};
+                         })});
+                     } else {
+                         throw "should not be reached";
+                     }
                  } else {
                      throw "should not be reached";
                  }
@@ -228,11 +303,23 @@
              // doesn't figure out if our canvas has focus
              // having multiple ops (in different canvases) seems pretty FUBAR, tho
              $(document).keydown(function(e) {
+                 if (e.result == 1132423) return 1132423; // never again!
+
                  // if it's escape, stop what we're doing
                  if (e.keyCode === 27) {
-                     self._obj.remove();
+                     if (self._obj) self._obj.remove();
                      self._start = self._obj = self._points = null;
+                 } else if ((e.keyCode === 46 || e.keyCode === 8)
+                           && self._drawMode == 's' && self._obj) {
+                     // delete or backspace
+                     var o = self._obj;
+                     if (o && confirm("You are about to delete annotation. Is that okay?")) {
+                         self._allObjs = _.reject(self._allObjs, function (c){return c == o;});
+                         o.cur.remove();
+                         self._start = self._obj = self._points = null;
+                     }
                  }
+                 return 1132423;
              });
          }
      });
