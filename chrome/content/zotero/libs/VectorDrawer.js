@@ -2,6 +2,8 @@
      var rootNS = this;
      var TOO_SMALL = 2;
      var CLOSE_ENOUGH = 8;
+     var EPSILON = 10e-6;
+     // TODO: make these configurable
      var INIT_ATTRS = {"stroke-width": "1px", "stroke": "black"};
      var SELECTED_ATTRS = {"stroke-width": "1px", "stroke": "#ff6666"};
 
@@ -9,24 +11,30 @@
          return "M " + _.map(ps, function(p) {return p.x + " " + p.y;}).join(" L ");
      }
 
-     function lineSegsIntersect(a1, a2, b1, b2) {
+     function whereLinesIntersect(a1, a2, b1, b2) {
          var bXdiff = b1.x-b2.x, bYdiff = b1.y-b2.y;
          var aXdiff = a1.x-a2.x, aYdiff = a1.y-a2.y;
          var aDet = a1.x*a2.y - a1.y*a2.x, bDet = b1.x*b2.y - b1.y*b2.x,
              denom = aXdiff*bYdiff - aYdiff*bXdiff;
          var interX = (aDet*bXdiff - aXdiff*bDet)/denom,
              interY = (aDet*bYdiff - aYdiff*bDet)/denom;
-
-         // check if it's within the segment
-         return interX > _.min([a1.x,a2.x]) && interX < _.max([a1.x,a2.x]) &&
-             interY > _.min([a1.y,a2.y]) && interY < _.max([a1.y,a2.y]) &&
-             interX > _.min([b1.x,b2.x]) && interX < _.max([b1.x,b2.x]) &&
-             interY > _.min([b1.y,b2.y]) && interY < _.max([b1.y,b2.y]);
+         return {x: interX, y: interY};
      }
 
-     function eachPoint(path, func) {
+     // given the endpoints (a1,a2,b1,b2) of two line segments,
+     // determine if they intersect
+     function lineSegsIntersect(a1, a2, b1, b2) {
+         var i = whereLinesIntersect(a1, a2, b1, b2);
+         // check if it's within the segment
+         return i.x > _.min([a1.x,a2.x]) && i.x < _.max([a1.x,a2.x]) &&
+             i.y > _.min([a1.y,a2.y]) && i.y < _.max([a1.y,a2.y]) &&
+             i.x > _.min([b1.x,b2.x]) && i.x < _.max([b1.x,b2.x]) &&
+             i.y > _.min([b1.y,b2.y]) && i.y < _.max([b1.y,b2.y]);
+     }
+
+     function eachPoint(pathStr, func) {
          // copy without the beginning "M " or ending " z", then split on " L "
-         var parts = path.substr(2, path.length-4).split(" L ");
+         var parts = pathStr.substr(2, path.length-4).split(" L ");
          var np = makePathStr(_.map(parts, function(p){
              var xy = p.split(" ");
              return func({x: xy[0]*1, y: xy[1]*1});
@@ -51,6 +59,73 @@
      function relScale(vd, o) {
          return vd._scale/o.scale;
      }
+
+
+     function pointDistSq(a, b) {
+         var dx = a.x-b.x, dy = a.y-b.y;
+         return dx*dx + dy*dy;
+     }
+
+     function pointNearLineSegment(l, p) {
+         // easy case: we're within range of the endpoints
+         if (_.any(l, function (lp) {
+                 return pointDistSq(lp, p) < CLOSE_ENOUGH*CLOSE_ENOUGH;
+             }))
+             return true;
+
+         // calculate nearest point on the line (point such that it
+         // and the queried point form a line segment orthogonal to
+         // the queried line segment)
+         var ldx = l[0].x-l[1].x, ldy = l[0].y-l[1].y;
+         var lslope = ldx/ldy;
+         
+         var dump; // dummy point
+         if (isFinite(lslope)) {
+             dump = (lslope < EPSILON && lslope > -EPSILON) ?
+                 {x: p.x + 10, y: p.y} : {x: p.x - 10*lslope, y: p.y+10};
+         } else {
+             dump = {x: p.x, y: p.y + 10};  
+         }
+
+         var i = whereLinesIntersect(l[0], l[1], dump, p);
+
+         // is this point actually within the queried line segment?
+         if (i.x < _.min([l[0].x, l[1].x]) ||
+             i.x > _.max([l[0].x, l[1].x]) ||
+             i.y < _.min([l[0].y, l[1].y]) ||
+             i.y > _.max([l[0].y, l[1].y]))
+             return false;
+
+         return pointDistSq(i, p) < CLOSE_ENOUGH*CLOSE_ENOUGH;
+     }
+
+     // TODO: object-ify our shapes
+     function isNear(p, o) {
+         if (o.con == "rect") {
+             var farX = o.x+o.width, farY = o.y+o.height;
+             var ul = {x: o.x, y: o.y}, ur = {x: farX, y:o.y},
+                 ll = {x: o.x, y: farY}, lr = {x: farX, y:farY};
+             return _.any([[ul, ur], [ur, lr], [lr, ll], [ll, ul]], function (seg){
+                 return pointNearLineSegment(seg, p);
+             });
+         } else if (o.con == "ellipse") {
+             // XXX: put in correct algorithm
+             return false;
+         } else if (o.con == "path") {
+             // convert list of points into pairs of points for line segments
+             var line_segs = _.map(o.points, function (po, i){
+                 return [i?o.points[i-1] : _.last(o.points), po];
+             });
+             return _.any(line_segs, function (l){
+                 return pointNearLineSegment(l, p);
+             });
+         } else {
+             throw "should not be reached";
+         }
+     }
+
+     // TODO: make this take an object for options instead of a pile of 
+     // order-dependant args
 
      // initDrawMode should be one of the modes
      // overElm is the element that this VectorDrawer will be laid on top of
@@ -102,7 +177,11 @@
          },
          savable: function() {
              return _.map(this._allObjs, function(o){
-                 return {scale: o.scale, con: o.con, args: o.args};
+                 var r = {};
+                 _.each(["scale", "con", "args", "x", "y", "width", "height",
+                     "points", "cx", "cy", "rx", "ry"],
+                     function (p) {if (p in o) r[p] = o[p];});
+                 return r;
              });
          },
          _buildCanvas: function() {
@@ -180,6 +259,7 @@
                                      cur: self._obj,
                                      con: "path",
                                      args: [path],
+                                     points: self._points,
                                      scale: self._scale
                                  });
                              }
@@ -196,7 +276,7 @@
                      if (self._obj) self._obj.cur.attr(INIT_ATTRS);
                      self._obj = null;
                      var targetObj = _.first(_.select(self._allObjs,
-                         function(o){return o.cur && o.cur.node == e.target;}));
+                         function(o){return isNear(cur, o);}));
                      if (!targetObj) return;
                      targetObj.cur.attr(SELECTED_ATTRS);
                      self._obj = targetObj;
@@ -218,13 +298,21 @@
                          var as = self._obj.attr(["x", "y", "width", "height"]);
                          $.extend(metaObj, {
                              con: "rect",
-                             args: [as.x, as.y, as.width, as.height]
+                             args: [as.x, as.y, as.width, as.height],
+                             x: as.x,
+                             y: as.y,
+                             width: as.width,
+                             height: as.height
                          });
                      } else if (self._drawMode == 'e') {
                          var as = self._obj.attr(["cx", "cy", "rx", "ry"]);
                          $.extend(metaObj, {
                              con: "ellipse",
-                             args: [as.cx, as.cy, as.rx, as.ry]
+                             args: [as.cx, as.cy, as.rx, as.ry],
+                             cx: as.cx,
+                             cy: as.cy,
+                             rx: as.rx,
+                             ry: as.ry
                          });
                      } else {
                          throw "should not be reached";
