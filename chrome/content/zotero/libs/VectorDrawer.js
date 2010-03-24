@@ -43,17 +43,29 @@
          
      }
 
-     function shiftArgs(con, args, shift) {
-         shift = {x: shift.x, y: shift.y};
-         if (con == "rect" || con == "ellipse") {
-             return [args[0]+shift.x, args[1]+shift.y, args[2], args[3]];
-         } else if (con == "path") {
-             return [eachPoint(args[0], function(p){
+     function shiftShape(o, shift) {
+         var ret = {con: o.con, scale: o.scale};
+         if (o.con == "rect") {
+             ret.x = o.x + shift.x;
+             ret.y = o.y + shift.y;
+             ret.width = o.width;
+             ret.height = o.height;
+             ret.args = [ret.x, ret.y, ret.width, ret.height];
+         } else if (o.con == "ellipse") {
+             ret.cx = o.cx + shift.x;
+             ret.cy = o.cy + shift.y;
+             ret.rx = o.rx;
+             ret.ry = o.ry;
+             ret.args = [ret.cx, ret.cy, ret.rx, ret.ry];
+         } else if (o.con == "path") {
+             ret.points = _.map(o.points, function (p) {
                  return {x: p.x+shift.x, y: p.y+shift.y};
-             })];
+             });
+             ret.args = makePathStr(ret.points);
          } else {
              throw "should not be reached";
          }
+         return ret;
      }
 
      function relScale(vd, o) {
@@ -99,6 +111,129 @@
          return pointDistSq(i, p) < CLOSE_ENOUGH*CLOSE_ENOUGH;
      }
 
+     function pointDistFromEllipse(po, eo) {
+         // algorithm described in
+         // "Quick computation of the distance between a point and an ellipse"
+         // by L. Maisonobe <luc@spaceroots.org>
+         // September 2003, revised May 2005, minor revision February 2006
+
+         var one_third = 1/3;
+         var cube_root = function(n) {
+             var cube_root_abs_n = Math.pow(Math.abs(n), one_third);
+             return n < 0? -cube_root_abs_n : cube_root_abs_n;
+         };
+
+         // ae = major axis
+         // ap = minor axis
+         // r = distance from center along major axis
+         // z = distance from center along minor axis
+         var ae, ap, r, z;
+         if (eo.rx > eo.ry) {
+             ae = eo.rx;
+             ap = eo.ry;
+             r = po.x-eo.cx;
+             z = po.y-eo.cy;
+         } else {
+             ae = eo.ry;
+             ap = eo.rx;
+             r = po.y-eo.cy;
+             z = po.x-eo.cx;
+         }
+         // by symmetry, we don't care about signs
+         r = Math.abs(r);
+         z = Math.abs(z);
+
+         // f = flattening
+         var f = 1 - ap/ae;
+         var one_minus_f_sq = Math.pow((1-f), 2);
+
+         var p_dist_center = Math.sqrt(r*r + z*z);
+
+         // near center requires special handling
+         if (p_dist_center < EPSILON)
+             return ap;
+
+         var cos_zeta = r/p_dist_center,
+             sin_zeta = z/p_dist_center,
+             t = z/(r + p_dist_center);
+         var a = one_minus_f_sq*cos_zeta*cos_zeta + sin_zeta*sin_zeta,
+             b = one_minus_f_sq*r*cos_zeta + z*sin_zeta,
+             c = one_minus_f_sq*(r*r - ae*ae) + z*z;
+         var k = c/(b + Math.sqrt(b*b - a*c));
+         var phi = Math.atan2(z - k*sin_zeta, one_minus_f_sq*(r-k*cos_zeta));
+         var one_minus_f_sq_times_diff_r_sq_ae_sq_plus_z_sq = c;
+
+         if (Math.abs(k) < EPSILON*p_dist_center) {
+             return k;
+         }
+
+         var inside = one_minus_f_sq_times_diff_r_sq_ae_sq_plus_z_sq <= 0;
+
+         var calc_tilde_phi = function(z_, tilde_t_, r_, k_) {
+             var tilde_t_sq = tilde_t_*tilde_t_;
+             return Math.atan2(z_*(1+tilde_t_sq)-2*k_*tilde_t_,
+                     one_minus_f_sq*(r_*(1+tilde_t_sq) - k_*(1-tilde_t_sq)));
+         };
+
+         var d;
+         for (var iter = 0; iter < 100; iter++) {
+             // paper Java differ on computing a and c. Java works
+             a = one_minus_f_sq_times_diff_r_sq_ae_sq_plus_z_sq + one_minus_f_sq*(2*r + k)*k; 
+             b = -4*k*z/a;
+             c = 2*(one_minus_f_sq_times_diff_r_sq_ae_sq_plus_z_sq + (1 + f*(2-f))*k*k)/a;
+             d = b;
+
+             // paper and Java differ here too. Again, Java works
+             b += t;
+             c += t*b;
+             d += t*c;
+
+             // find the other real root
+             var Q = (3*c - b*b)/9,
+                 R = (b*(9*c - 2*b*b) - 27*d)/54;
+             var D = Q*Q*Q + R*R;
+             var tilde_t, tilde_phi;
+             if (D >= 0) {
+                 var sqrt_D = Math.sqrt(D);
+                 tilde_t = cube_root(R + sqrt_D) + cube_root(R - sqrt_D) - b/3;
+                 tilde_phi = calc_tilde_phi(z, tilde_t, r, k);
+             } else {
+                 Q = -Q;
+                 var sqrt_Q = Math.sqrt(Q);
+                 var theta = Math.acos(R/(Q*sqrt_Q));
+                 tilde_t = 2*sqrt_Q*Math.cos(theta/3) - b/3;
+                 tilde_phi = calc_tilde_phi(z, tilde_t, r, k);
+                 if (tilde_phi*phi < 0) {
+                     tilde_t = 2*sqrt_Q*Math.cos((theta + 2*Math.PI)/3) - b/3;
+                     tilde_phi = calc_tilde_phi(z, tilde_t, r, k);
+                     if (tilde_phi*phi < 0) {
+                         tilde_t = 2*sqrt_Q*Math.cos((theta + 4*Math.PI)/3) - b/3;
+                         tilde_phi = calc_tilde_phi(z, tilde_t, r, k);
+                     }
+                 }
+             }
+
+             var delta_phi = Math.abs(tilde_phi - phi)/2;
+             phi = Math.abs(tilde_phi + phi)/2;
+
+             var cos_phi = Math.cos(phi), sin_phi = Math.sin(phi);
+             var sin_phi_sq = sin_phi*sin_phi;
+             var sqrt_stuff = Math.sqrt(1 - f*(2-f)*sin_phi_sq);
+             if (delta_phi < EPSILON) {
+                 return r*cos_phi + z*sin_phi - ae*sqrt_stuff;
+             }
+
+             var delta_r = r - (ae*cos_phi)/sqrt_stuff,
+                 delta_z = z - (ae*one_minus_f_sq*sin_phi)/sqrt_stuff;
+             k = Math.sqrt(delta_r*delta_r + delta_z*delta_z);
+             if (inside) k = -k;
+             t = delta_z/(delta_r + k);
+         }
+
+         // instead of emitting an error, return our best
+         return r*cos_phi + z*sin_phi - ae*sqrt_stuff;
+     }
+
      // TODO: object-ify our shapes
      function isNear(p, o) {
          if (o.con == "rect") {
@@ -109,8 +244,7 @@
                  return pointNearLineSegment(seg, p);
              });
          } else if (o.con == "ellipse") {
-             // XXX: put in correct algorithm
-             return false;
+             return Math.abs(pointDistFromEllipse(p, o)) < CLOSE_ENOUGH;
          } else if (o.con == "path") {
              // convert list of points into pairs of points for line segments
              var line_segs = _.map(o.points, function (po, i){
@@ -276,7 +410,9 @@
                      if (self._obj) self._obj.cur.attr(INIT_ATTRS);
                      self._obj = null;
                      var targetObj = _.first(_.select(self._allObjs,
-                         function(o){return isNear(cur, o);}));
+                         function(o){
+                             return isNear(cur, o);
+                         }));
                      if (!targetObj) return;
                      targetObj.cur.attr(SELECTED_ATTRS);
                      self._obj = targetObj;
@@ -325,7 +461,11 @@
                  } else if (self._drawMode == 's') {
                      self._start = null; // stop moving
                      var o = self._obj;
-                     if (o && o.newArgs) o.args = o.newArgs;
+                     if (o && o.newO) {
+                         _.each(["scale", "con", "args", "x", "y", "width", "height",
+                             "points", "cx", "cy", "rx", "ry"],
+                             function (p) {if (p in o) o[p] = o.newO[p];});
+                     }
                  } else {
                      throw "should not be reached";
                  }
@@ -372,15 +512,15 @@
                      var o = self._obj;
                      var rs = relScale(self, o);
                      var shift = {x: (cur.x-st.x)/rs, y: (cur.y-st.y)/rs};
-                     var na = o.newArgs = shiftArgs(self._obj.con, self._obj.args, shift, rs);
+                     o.newO = shiftShape(o, shift);
                      if (o.con == "rect") {
-                         o.cur.attr({x: na[0]*rs, y: na[1]*rs});
+                         o.cur.attr({x: o.newO.x*rs, y: o.newO.y*rs*rs});
                      } else if (self._obj.con == "ellipse") {
-                         o.cur.attr({cx: na[0]*rs, cy: na[1]*rs});
+                         o.cur.attr({cx: o.newO.cx*rs, cy: o.newO.cy*rs});
                      } else if (self._obj.con == "path") {
-                         o.cur.attr({path: eachPoint(na[0], function(p){
+                         o.cur.attr({path: makePathStr(_.each(o.newO.points, function(p){
                              return {x: p.x*rs, y: p.y*rs};
-                         })});
+                         })) + " z"});
                      } else {
                          throw "should not be reached";
                      }
