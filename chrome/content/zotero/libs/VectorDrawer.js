@@ -264,10 +264,27 @@
      // initDrawMode should be one of the modes
      // overElm is the element that this VectorDrawer will be laid on top of
      // Note: the VectorDrawer will not move or resize if the element does
-     rootNS.VectorDrawer = function (initDrawMode, initScale, initObjs, overElm) {
+
+     /**
+      * Class: VectorDrawer
+      */
+     /**
+      * Constructor: VectorDrawer
+      * Constructor for a new VectorDrawer
+      * 
+      * Parameters:
+      * initDrawMode - {String} Initial draw mode. Should be one of 'r', 'p', 'e',
+      *   or 's' (for rectangle, polygon, ellipse, and select respectively).
+      *   Defaults to 's'.
+      * initScale - {Number} Initial scale of the image. Defaults to 1.
+      * initObjs - {Array} An initial set of objects (from VectorDrawer.savable). Defaults to []
+      * overElem - {jQuerySelector} The element to overlay with this VectorDrawer.
+      *   Can be a DOM element, string, etc. Defaults to "img" (the first image in the page)
+      */
+     var VectorDrawer = function (initDrawMode, initScale, initObjs, overElm) {
          var self = this;
          // only thing that methods access at the moment
-         self._drawMode = initDrawMode || 'r';
+         self._drawMode = initDrawMode || 's';
          self._scale = initScale || 1;
          self._allObjs = initObjs || [];
          self._start = self._obj = self._points = null;
@@ -281,8 +298,17 @@
              origHeight: overElm.height()/initScale};
          self._buildCanvas();
      };
-     rootNS.VectorDrawer.prototype = {};
-     jQuery.extend(rootNS.VectorDrawer.prototype, {
+     VectorDrawer.prototype = {};
+     VectorDrawer.constructor = VectorDrawer;
+     jQuery.extend(VectorDrawer.prototype, {
+         /**
+          * Method: drawMode
+          * Sets or gets the current drawMode. If no argument is given,
+          * returns the current drawMode.
+          * 
+          * Parameters:
+          * drawMode - {String} the drawMode to set
+          */
          drawMode: function(newMode) {
              if (newMode != null) {
                  if (self._obj) self._obj.cur.attr(INIT_ATTRS);
@@ -290,6 +316,15 @@
              }
              return this._drawMode;
          },
+         /**
+          * Method: scale
+          * Sets or gets the current scale. If no argument is given,
+          * returns the current scale. This will attempt to resize the element
+          * that this VectorDrawer overlays.
+          * 
+          * Parameters:
+          * scale - {Number} the scale to set
+          */
          scale: function(newScale) {
              var self = this;
              if (newScale == null || newScale < 0) {
@@ -309,6 +344,12 @@
              this._buildCanvas();
              return self._scale;
          },
+         /**
+          * Method: savable
+          * Returns an array representing all the shapes/objects currently drawn
+          * by this VectorDrawer. These should not be fiddled with if you plan
+          * to pass them to the constructor as its initObjs argument.
+          */
          savable: function() {
              return _.map(this._allObjs, function(o){
                  var r = {};
@@ -551,6 +592,8 @@
              });
          }
      });
+
+     rootNS.VectorDrawer = VectorDrawer;
 })(jQuery, Raphael, _);
 
 /* XXX revive overlayed objects for contrast
