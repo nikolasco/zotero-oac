@@ -170,6 +170,9 @@
 <!ENTITY zotero.annotate.vectordrawer.toolbar.polygon.label "Draw a polygon">
 <!ENTITY zotero.annotate.vectordrawer.toolbar.select.label "Select a shape">
 
+<!ENTITY zotero.annotate.audiotimemarker.toolbar.mark.label "Mark a moment">
+<!ENTITY zotero.annotate.audiotimemarker.toolbar.range.label "Mark a range">
+
 <!ENTITY zotero.integration.prefs.displayAs.label		"Display Citations As:">
 <!ENTITY zotero.integration.prefs.footnotes.label		"Footnotes">
 <!ENTITY zotero.integration.prefs.endnotes.label		"Endnotes">

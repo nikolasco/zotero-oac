@@ -378,3 +378,13 @@
 {
 	list-style-image: url('chrome://zotero/skin/annotate-vector-drawer-select.png');
 }
+
+#zotero-annotate-tb-audio-time-marker-mark
+{
+	list-style-image: url('chrome://zotero/skin/annotate-time-mark-moment.png');
+}
+
+#zotero-annotate-tb-audio-time-marker-range
+{
+	list-style-image: url('chrome://zotero/skin/annotate-time-mark-range.png');
+}

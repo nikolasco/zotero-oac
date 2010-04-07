@@ -256,14 +256,7 @@ var Zotero_Browser = new function() {
 	function contentLoad(event) {
 		var doc = event.originalTarget;
 		var rootDoc = doc;
-                var annotaterClass;
-                _.each(Zotero.Annotaters, function(ano){
-                    if (ano.annotatesTypes[doc.contentType.toLowerCase()]) {
-                        annotaterClass = ano;
-                    }
-                });
 
-		if(annotaterClass) {
 			// get the appropriate root document to check which browser we're on
 			while(rootDoc.defaultView.frameElement) {
 				rootDoc = rootDoc.defaultView.frameElement.ownerDocument;
@@ -280,15 +273,14 @@ var Zotero_Browser = new function() {
 					}
 				}
 			}
-			catch (e) {}
-		}
+			catch (e) {Components.utils.reportError(e);}
 		
 		try {
 			if (_locationBlacklist.indexOf(doc.location.href) != -1) {
 				return;
 			}
 		}
-		catch (e) {}
+		catch (e) {Components.utils.reportError(e);}
 		
 		// Figure out what browser this contentDocument is associated with
 		var browser;
@@ -302,13 +294,17 @@ var Zotero_Browser = new function() {
 		
 		// get data object
 		var tab = _getTabObject(browser);
-		
-		if(annotaterClass) {
+
+// need to get browser ID
 			var attachmentID = Zotero.Annotate.getAttachmentIDFromURL(browser.currentURI.spec);
-			if(attachmentID) {
-				if(Zotero.Annotate.isAnnotated(attachmentID)) {
-					window.alert(Zotero.getString("annotations.oneWindowWarning"));
-				} else if(!tab.page.annotations) {
+		if(attachmentID) {
+			if(Zotero.Annotate.isAnnotated(attachmentID)) {
+				window.alert(Zotero.getString("annotations.oneWindowWarning"));
+			} else if(!tab.page.annotations) {
+				var item = Zotero.Items.get(attachmentID);
+                                if (item) var file = item.getFile();
+                                if (file) var annotaterClass = Zotero.Annotaters.classForFileName(file.leafName);
+                            if (annotaterClass) {
 				    // enable annotation
                                     var oldAnnos = [];
                                     var oldCtxs = Zotero.DB.query("SELECT sourceOacCtxID FROM oacAnnotations WHERE targetItemID = ?", attachmentID);
@@ -415,7 +411,7 @@ var Zotero_Browser = new function() {
 		var tab = _getTabObject(this.tabbrowser.selectedBrowser);
 		if(!tab.page.annotations) return;
 		
-		tab.page.annotations.resized();
+		if (tab.page.annotations.resized) tab.page.annotations.resized();
 	}
 	
 	/*

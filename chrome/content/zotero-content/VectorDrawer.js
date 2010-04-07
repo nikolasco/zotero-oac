@@ -61,7 +61,7 @@
              ret.points = _.map(o.points, function (p) {
                  return {x: p.x+shift.x, y: p.y+shift.y};
              });
-             ret.args = makePathStr(ret.points);
+             ret.args = [makePathStr(ret.points) + " z"];
          } else {
              throw "should not be reached";
          }

@@ -749,7 +749,7 @@ function ChromeExtensionHandler() {
 			var Zotero = Components.classes["@zotero.org/Zotero;1"]
 				.getService(Components.interfaces.nsISupports)
 				.wrappedJSObject;
-			
+
 			try {
 				var errorMsg;
 				var [id, fileName] = uri.path.substr(1).split('/');
@@ -760,10 +760,10 @@ function ChromeExtensionHandler() {
 						var chromeURL = 'chrome://zotero/skin/' + id;
 						var ios = Components.classes["@mozilla.org/network/io-service;1"].
 									getService(Components.interfaces.nsIIOService);
-						var uri = ios.newURI(chromeURL, null, null);
+						var newURI = ios.newURI(chromeURL, null, null);
 						var chromeReg = Components.classes["@mozilla.org/chrome/chrome-registry;1"]
 								.getService(Components.interfaces.nsIChromeRegistry);
-						var fileURI = chromeReg.convertChromeURL(uri);
+						var fileURI = chromeReg.convertChromeURL(newURI);
 					}
 					else {
 						return _errorChannel("Attachment id not an integer");
@@ -780,8 +780,10 @@ function ChromeExtensionHandler() {
 						return _errorChannel("File not found");
 					}
 					if (fileName) {
+						fileName = decodeURIComponent(fileName);
 						file = file.parent;
 						file.append(fileName);
+						var redirected = true;
 						if (!file.exists()) {
 							return _errorChannel("File not found");
 						}
@@ -793,7 +795,24 @@ function ChromeExtensionHandler() {
 				if (!fileURI) {
 					var fileURI = ph.newFileURI(file);
 				}
-				var channel = ioService.newChannelFromURI(fileURI);
+
+				var anno = Zotero.Annotaters.classForFileName(file.leafName);
+                                if (!redirected && anno && anno.getHTMLString) {
+					// we trust ourselves, right?
+					var chromeURI = ioService.newURI("chrome://zotero-content/content/", null, null);
+					var secMan = Components.classes["@mozilla.org/scriptsecuritymanager;1"].
+							getService(Components.interfaces.nsIScriptSecurityManager);
+					var principal = secMan.getCodebasePrincipal(chromeURI);
+
+					var html = anno.getHTMLString(item.getField("title", false, true), uri.spec+encodeURIComponent(file.leafName), fileURI.spec);
+					var dataURI = ioService.newURI("data:text/html," + encodeURIComponent(html), null, null);
+					var channel = ioService.newChannelFromURI(dataURI);
+					channel.originalURI = uri;
+					channel.owner = principal;
+				} else {
+					var channel = ioService.newChannelFromURI(fileURI);
+					channel.originalURI = uri;
+				}
 				return channel;
 			}
 			catch (e) {

@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml"
+                initialize="doInit()" width="400" height="300">
+<mx:Script><![CDATA[
+
+import flash.events.Event;
+import flash.media.Sound;
+import flash.net.URLRequest;
+import flash.external.ExternalInterface;
+import flash.events.IOErrorEvent;
+import flash.system.Security;
+import mx.controls.Alert;
+
+protected const STATE_PLAYING:uint = 1;
+protected const STATE_PAUSED:uint = 2;
+protected const STATE_DONE:uint = 3;
+
+protected var eid:String;
+
+protected var sound:Sound;
+protected var channel:SoundChannel;
+protected var state:uint;
+protected var sought:Number;
+protected var volume:Number;
+
+protected var callbacks:Array = ["play", "pause", "seekTo", "setVolume", "getVolume", "getPosition", "getDuration", "getBytesTotal", "getBytesLoaded"];
+
+protected function errorHandler(e:IOErrorEvent):void {
+    Alert.show("errorHandler: " + e.text);
+}
+
+public function doInit():void {
+    try {
+        Security.allowDomain("*");
+        Security.allowInsecureDomain("*");
+        Security.allowDomain("attachment");
+        Security.allowInsecureDomain("attachment");
+        Alert.show("application URL: " + application.url);
+        state = STATE_DONE;
+        var req:URLRequest = new URLRequest(application.parameters.soundURL);
+        eid = application.parameters.eid;
+
+        sound = new Sound(req);
+        sound.addEventListener(IOErrorEvent.IO_ERROR, errorHandler);
+        sought = 0;
+        volume = 1;
+
+        ExternalInterface.marshallExceptions = true;
+        callbacks.forEach(function (cb:*, index:int, array:Array):void {
+            ExternalInterface.addCallback(cb, this[cb]);
+        }, this);
+
+        ExternalInterface.call("amReady", eid);
+    } catch(e:Error) {
+        Alert.show("init: " + e.toString() + " " + e.message + " " + e.name);
+    }
+}
+
+public function play():void {
+       try {
+              if (STATE_PLAYING == state) return;
+              state = STATE_PLAYING;
+              var trans:SoundTransform = new SoundTransform(volume);
+              channel = sound.play(sought, 0, trans);
+              channel.addEventListener(Event.SOUND_COMPLETE, completed);
+       } catch(e:Error) {
+              Alert.show("play: " + e.toString());
+       }
+}
+
+protected function completed(e:Event):void {
+       state = STATE_DONE;
+       channel = null;
+       sought = 0;
+}
+
+public function pause():void {
+       try {
+         if (channel) {
+            sought = channel.position; // must be before or weirdness happens
+            channel.stop();
+            channel = null;
+         }
+         state = STATE_PAUSED;
+       } catch(e:Error) {
+              Alert.show("pause: " + e.toString());
+       }
+}
+
+public function seekTo(timeS:Number):void {
+       var stateWas:uint = state;
+       pause();
+       sought = timeS*1000; // convert to ms
+       if (STATE_PLAYING == stateWas) play();
+}
+
+public function getPosition():Number {
+    try {
+           return (channel? channel.position : sought)/1000; // convert to seconds
+    } catch (e:Error) {
+        Alert.show("getPosition: " + e.toString());
+    }
+    return -1;// on exception
+}
+
+public function setVolume(v:Number):void {
+       volume = v;
+       if (channel) channel.soundTransform = new SoundTransform(volume);
+}
+
+public function getVolume():Number {
+       return volume;
+}
+
+public function getDuration():Number {
+    try {
+        return sound.length/1000; // convert to seconds
+    } catch (e:Error) {
+        Alert.show("getDuration: " + e.toString());
+    }
+    return -1;// on exception
+}
+
+public function getBytesLoaded():Number {
+       return sound.bytesLoaded;
+}
+
+public function getBytesTotal():Number {
+       return sound.bytesTotal;
+}
+
+]]></mx:Script>
+</mx:Application>

@@ -465,6 +465,11 @@
 			<toolbarbutton id="zotero-annotate-tb-vector-drawer-ellipse" group="zotero-annotate-tb-vector-drawer" type="radio" tooltiptext="&zotero.annotate.vectordrawer.toolbar.ellipse.label;"/>
 			<toolbarbutton id="zotero-annotate-tb-vector-drawer-polygon" group="zotero-annotate-tb-vector-drawer" type="radio" tooltiptext="&zotero.annotate.vectordrawer.toolbar.polygon.label;"/>
                 </toolbar>
+
+		<toolbar id="zotero-annotate-tb-audio-time-marker" class="zotero-annotate-tb" crop="end" insertbefore="content" hidden="true">
+			<toolbarbutton id="zotero-annotate-tb-audio-time-marker-mark" tooltiptext="&zotero.annotate.audiotimemarker.toolbar.mark.label;"/>
+			<toolbarbutton id="zotero-annotate-tb-audio-time-marker-range" type="checkbox" tooltiptext="&zotero.annotate.audiotimemarker.toolbar.range.label;"/>
+                </toolbar>
 	</vbox>
 	
 	<!-- Scrape Code -->

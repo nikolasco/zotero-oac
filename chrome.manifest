@@ -1,5 +1,6 @@
 content	zotero				chrome/content/zotero/
 content	zotero-platform		chrome/content/zotero-platform/		platform
+content	zotero-content		chrome/content/zotero-content/		contentaccessible=yes
 
 locale	zotero	en-US		chrome/locale/en-US/zotero/
 locale	zotero	af-ZA		chrome/locale/af-ZA/zotero/

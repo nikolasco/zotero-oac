@@ -72,13 +72,14 @@ Zotero.Annotaters = {};
 
 (function() {
      const _ = Zotero.Libs._;
+     const Cc = Components.classes;
+     const Ci = Components.interfaces;
 
      function getContents(aURL){
-         var ios = Components.classes["@mozilla.org/network/io-service;1"]
-             .getService(Components.interfaces.nsIIOService);
-         var ss = Components
-             .classes["@mozilla.org/scriptableinputstream;1"]
-             .getService(Components.interfaces.nsIScriptableInputStream);
+         var ios = Cc["@mozilla.org/network/io-service;1"]
+             .getService(Ci.nsIIOService);
+         var ss = Cc["@mozilla.org/scriptableinputstream;1"]
+             .getService(Ci.nsIScriptableInputStream);
 
          var chan = ios.newChannel(aURL,null,null);
          var inp = chan.open();
@@ -89,20 +90,39 @@ Zotero.Annotaters = {};
          return str;
      }
 
-     var ZVD = Zotero.Annotaters.VectorDrawer = function(contentDoc, oldAnnos) {
-         const VECTOR_DRAWER_DEPS = [
-             "libs/jquery.js",
-             "libs/raphael.js",
-             "xpcom/libs/underscore.js",
-             "libs/VectorDrawer.js"];
-         this._contentDoc = contentDoc;
-         _.each(VECTOR_DRAWER_DEPS, function (dep) {
-                    // TODO: make a content accessible chrome package so we can just use src=
-                    var s = contentDoc.createElement("script");
-                    var ss = contentDoc.createTextNode(getContents("chrome://zotero/content/" + dep));
-                    s.appendChild(ss);
-                    contentDoc.body.appendChild(s);
+     Zotero.Annotaters.classForFileName = function (name) {	 
+         var m = /\.([^.]+)$/.exec(name);
+         if (!m)  return null;
+         var ext = m[1].toLowerCase();
+         var classes =  _.select(Zotero.Annotaters, function(ano) {
+             return ano && ano.annotatesExts && ano.annotatesExts.hasOwnProperty(ext);
          });
+
+         return classes.length? classes[0] : null;
+     };
+
+     function escapeHTML(html) {
+         const TO_REPLACE = [
+             {re: /&/g, with: "&amp;"}, // must be first
+             {re: /"/g, with: "&quot;"},
+             {re: /'/g, with: "&apos;"},
+             {re: /</g, with: "&lt;"},
+             {re: />/g, with: "&gt;"}
+         ];
+         var ret = html;
+         _.each(TO_REPLACE, function(o){ret = ret.replace(o.re, o.with);});
+         return ret;
+     }
+
+     function buildScriptDeps(deps) {
+         return _.map(deps, function (d) {
+             return "<script src=\"chrome://zotero-content/content/" +
+                 escapeHTML(encodeURIComponent(d)) + "\"></script>";
+         }).join("\n");
+     }
+
+     var ZVD = Zotero.Annotaters.VectorDrawer = function(contentDoc, oldAnnos) {
+         this._contentDoc = contentDoc;
 
          var img = this._img = contentDoc.getElementsByTagName("img")[0];
          var initScale = img.clientHeight / img.naturalHeight;
@@ -112,17 +132,17 @@ Zotero.Annotaters = {};
          contentDoc.defaultView.location = "javascript:function savable() {return JSON.stringify(drawer.savable());}; undefined";
      };
 
-     ZVD.annotatesTypes = {
-         "image/png": true,
-         "image/jpeg": true,
-         "image/gif": true};
+     ZVD.annotatesExts = {
+         "png": true,
+         "jpg": true,
+         "jpeg": true,
+         "gif": true};
      ZVD.toolbarID = "zotero-annotate-tb-vector-drawer";
-
-     const toolCallbacks = {
-         'zotero-annotate-tb-vector-drawer-rectangle': 'r',
-         'zotero-annotate-tb-vector-drawer-ellipse': 'e',
-         'zotero-annotate-tb-vector-drawer-polygon': 'p',
-         'zotero-annotate-tb-vector-drawer-select': 's'
+     ZVD.getHTMLString = function (title, zoteroURI, fileURI) {
+         return "<html><head><title>" + escapeHTML(title) + "</title></head><body>\n" +
+             "<img src=\"" + escapeHTML(zoteroURI) + "\" />\n" + 
+             buildScriptDeps(["jquery.js", "raphael.js", "underscore.js","VectorDrawer.js"]) +
+             "\n</body></html>";
      };
 
      ZVD.prototype = {
@@ -135,8 +155,13 @@ Zotero.Annotaters = {};
              var scale = this._img.clientHeight / this._img.naturalHeight;
              this._contentDoc.defaultView.location = "javascript:window.drawer.scale(" + scale + "); undefined";
          },
-         klass: ZVD,
          setupCallbacks: function(browserDoc) {
+             const toolCallbacks = {
+                 'zotero-annotate-tb-vector-drawer-rectangle': 'r',
+                 'zotero-annotate-tb-vector-drawer-ellipse': 'e',
+                 'zotero-annotate-tb-vector-drawer-polygon': 'p',
+                 'zotero-annotate-tb-vector-drawer-select': 's'
+             };
              var self = this;
              this._curCallbacks = {};
              _.each(toolCallbacks, function(mode, elID){
@@ -159,7 +184,65 @@ Zotero.Annotaters = {};
              self._curCallbacks = {};
 
              // TODO: add scaling UI
-         }
+         },
+         klass: ZVD,
+         constructor: ZVD
      };
-     ZVD.constructor = ZVD;
+
+     var ZATM = Zotero.Annotaters.AudioTimeMarker = function(contentDoc, oldAnnos) {
+         this._contentDoc = contentDoc;
+         this._curCallbacks = {};
+
+         contentDoc.defaultView.wrappedJSObject.build(oldAnnos);
+     };
+
+     ZATM.annotatesExts = {
+         "mp3": true,
+         "aac": true};
+     ZATM.toolbarID = "zotero-annotate-tb-audio-time-marker";
+     ZATM.getHTMLString = function (title, zoteroURI, fileURI) {
+         var ios = Cc["@mozilla.org/network/io-service;1"]
+             .getService(Ci.nsIIOService);
+         var cr = Cc["@mozilla.org/chrome/chrome-registry;1"].
+             getService(Ci.nsIChromeRegistry);
+         var flashURI = cr.convertChromeURL(ios.newURI("chrome://zotero-content/content/AudioPlayer.swf", null, null));
+
+         return "<html><head><title>" + escapeHTML(title) + "</title></head><body>\n" + 
+             "<div id=\"player-ui-container\"></div>\n" +
+             "<div id=\"time-marker-container\"></div>\n" +
+             "<embed src=\"" + escapeHTML(flashURI.spec) + "\"\n" +
+                 "FlashVars=\"" + escapeHTML("eid=1&soundURL=" + fileURI) + "\" \n" + 
+                 "allowscriptaccess=\"always\"\n"  + 
+                 "id=\"player\" style=\"height: 0; width: 0;\"></embed>\n" +
+             buildScriptDeps(["jquery.js", "underscore.js", "PlayerUI.js","TimeMarker.js", "AudioTimeMarker.js"]) + "\n</body></html>";
+     };
+
+     ZATM.prototype = {
+         shouldSave: function() {
+             // the stringify+parse round-trip is needed to avoid mangling :/
+             return JSON.parse(this._contentDoc.defaultView.wrappedJSObject.savable());
+         },
+         setupCallbacks: function(browserDoc) {
+             var self = this;
+             const toolCallbacks = {
+                 "zotero-annotate-tb-audio-time-marker-mark": "markNow",
+                 "zotero-annotate-tb-audio-time-marker-range": "markStartEnd"
+             };
+             self._curCallbacks = {};
+             _.each(toolCallbacks, function(funcName, elID){
+                 var cb = self._curCallbacks[elID] = function () {
+                     self._contentDoc.defaultView.wrappedJSObject[funcName]();
+                 };
+                 browserDoc.getElementById(elID).addEventListener("command", cb, false);
+             });
+         },
+         teardownCallbacks: function(browserDoc) {
+             _.each(this._curCallbacks, function(cb, elID){
+                 browserDoc.getElementById(elID).removeEventListener("command", cb, false);
+             });
+             this._curCallbacks = {};
+         },
+         klass: ZATM,
+         constructor: ZATM
+     };
 })();
