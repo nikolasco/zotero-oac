@@ -17,7 +17,7 @@ function setupTM() {
 }
 
 function savable() {
-    return JSON.stringify(tm.savable());
+    return tm.savable();
 }
 
 function markNow() {

@@ -121,39 +121,35 @@ Zotero.Annotaters = {};
          }).join("\n");
      }
 
-     var ZVD = Zotero.Annotaters.VectorDrawer = function(contentDoc, oldAnnos) {
+     var ZIVD = Zotero.Annotaters.ImageVectorDrawer = function(contentDoc, oldAnnos) {
          this._contentDoc = contentDoc;
 
          var img = this._img = contentDoc.getElementsByTagName("img")[0];
          var initScale = img.clientHeight / img.naturalHeight;
          this._mode = 's';
-         // calling across the security boundry fails miserably :(
-         contentDoc.defaultView.location = "javascript:window.drawer = new VectorDrawer('" + this._mode + "', " + initScale + ", " + encodeURI(JSON.stringify(oldAnnos)) + ", document.getElementsByTagName('img')[0]); undefined";
-         contentDoc.defaultView.location = "javascript:function savable() {return JSON.stringify(drawer.savable());}; undefined";
+         contentDoc.defaultView.wrappedJSObject.build(this._mode, initScale, oldAnnos);
      };
 
-     ZVD.annotatesExts = {
+     ZIVD.annotatesExts = {
          "png": true,
          "jpg": true,
          "jpeg": true,
          "gif": true};
-     ZVD.toolbarID = "zotero-annotate-tb-vector-drawer";
-     ZVD.getHTMLString = function (title, zoteroURI, fileURI) {
+     ZIVD.toolbarID = "zotero-annotate-tb-vector-drawer";
+     ZIVD.getHTMLString = function (title, zoteroURI, fileURI) {
          return "<html><head><title>" + escapeHTML(title) + "</title></head><body>\n" +
-             "<img src=\"" + escapeHTML(zoteroURI) + "\" />\n" + 
-             buildScriptDeps(["jquery.js", "raphael.js", "underscore.js","VectorDrawer.js"]) +
+             "<img id=\"to-mark\" src=\"" + escapeHTML(zoteroURI) + "\" />\n" + 
+             buildScriptDeps(["jquery.js", "raphael.js", "underscore.js","VectorDrawer.js", "ImageVectorDrawer.js"]) +
              "\n</body></html>";
      };
 
-     ZVD.prototype = {
+     ZIVD.prototype = {
          shouldSave: function() {
-             // the stringify+parse round-trip is needed to avoid mangling :/
-             // note that savable() called here is defined by our constructor above
-             return JSON.parse(this._contentDoc.defaultView.wrappedJSObject.savable());
+             return this._contentDoc.defaultView.wrappedJSObject.savable();
          },
          resized: function() {
              var scale = this._img.clientHeight / this._img.naturalHeight;
-             this._contentDoc.defaultView.location = "javascript:window.drawer.scale(" + scale + "); undefined";
+             this._contentDoc.defaultView.wrappedJSObject.scale(scale);
          },
          setupCallbacks: function(browserDoc) {
              const toolCallbacks = {
@@ -167,7 +163,7 @@ Zotero.Annotaters = {};
              _.each(toolCallbacks, function(mode, elID){
                  var el = browserDoc.getElementById(elID);
                  self._curCallbacks[elID] = function() {
-                     self._contentDoc.defaultView.location = "javascript:window.drawer.drawMode('"+ mode + "'); undefined";
+                     self._contentDoc.defaultView.wrappedJSObject.mode(mode);
                      self._mode = mode;
                  };
                  el.addEventListener("command", self._curCallbacks[elID], false);
@@ -185,8 +181,8 @@ Zotero.Annotaters = {};
 
              // TODO: add scaling UI
          },
-         klass: ZVD,
-         constructor: ZVD
+         klass: ZIVD,
+         constructor: ZIVD
      };
 
      var ZATM = Zotero.Annotaters.AudioTimeMarker = function(contentDoc, oldAnnos) {
@@ -219,8 +215,7 @@ Zotero.Annotaters = {};
 
      ZATM.prototype = {
          shouldSave: function() {
-             // the stringify+parse round-trip is needed to avoid mangling :/
-             return JSON.parse(this._contentDoc.defaultView.wrappedJSObject.savable());
+             return this._contentDoc.defaultView.wrappedJSObject.savable();
          },
          setupCallbacks: function(browserDoc) {
              var self = this;
