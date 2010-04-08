@@ -1,0 +1,25 @@
+.note-container {
+    position: absolute;
+}
+
+.note-container .display {
+    background-color: white;
+    color: black;
+    border-color: black;
+    border-width: 1px;
+    border-style: solid;
+    white-space: pre;
+}
+
+.note-container .edit {
+    display: none;
+}
+
+.note-container textarea {
+    background-color: white;
+    color: black;
+}
+
+.note-container .cancel {
+    margin-left: auto;
+}

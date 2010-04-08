@@ -44,7 +44,8 @@ locale	zotero	vi-VN		chrome/locale/vi-VN/zotero/
 locale	zotero	zh-CN		chrome/locale/zh-CN/zotero/
 locale	zotero	zh-TW		chrome/locale/zh-TW/zotero/
 
-skin		zotero	default		chrome/skin/default/zotero/
+skin		zotero	        default		chrome/skin/default/zotero/
+skin		zotero-content	default		chrome/skin/default/zotero-content/
 
 overlay	chrome://browser/content/browser.xul	chrome://zotero/content/overlay.xul
 overlay	chrome://browser/content/browser.xul	chrome://zotero/content/itemPane.xul

@@ -137,7 +137,9 @@ Zotero.Annotaters = {};
          "gif": true};
      ZIVD.toolbarID = "zotero-annotate-tb-vector-drawer";
      ZIVD.getHTMLString = function (title, zoteroURI, fileURI) {
-         return "<html><head><title>" + escapeHTML(title) + "</title></head><body>\n" +
+         return "<html><head><title>" + escapeHTML(title) + "</title>\n" + 
+                 "<link rel=\"stylesheet\" type=\"text/css\" href=\"chrome://zotero-content/skin/ImageVectorDrawer.css\" />\n" +
+             "</head><body>\n" +
              "<img id=\"to-mark\" src=\"" + escapeHTML(zoteroURI) + "\" />\n" + 
              buildScriptDeps(["jquery.js", "raphael.js", "underscore.js","VectorDrawer.js", "ImageVectorDrawer.js"]) +
              "\n</body></html>";

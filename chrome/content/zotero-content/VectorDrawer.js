@@ -4,7 +4,7 @@
      var CLOSE_ENOUGH = 8;
      var EPSILON = 10e-6;
      // TODO: make these configurable
-     var INIT_ATTRS = {"stroke-width": "1px", "stroke": "black"};
+     var INIT_ATTRS = {"stroke-width": "1px", "stroke": "#a12fae"};
      var SELECTED_ATTRS = {"stroke-width": "1px", "stroke": "#ff6666"};
 
      function makePathStr(ps) {
@@ -71,7 +71,6 @@
      function relScale(vd, o) {
          return vd._scale/o.scale;
      }
-
 
      function pointDistSq(a, b) {
          var dx = a.x-b.x, dy = a.y-b.y;
@@ -281,13 +280,14 @@
       * overElem - {jQuerySelector} The element to overlay with this VectorDrawer.
       *   Can be a DOM element, string, etc. Defaults to "img" (the first image in the page)
       */
-     var VectorDrawer = function (initDrawMode, initScale, initObjs, overElm) {
+     var VectorDrawer = function (initDrawMode, initScale, initObjs, overElm, auxClass) {
          var self = this;
          // only thing that methods access at the moment
          self._drawMode = initDrawMode || 's';
          self._scale = initScale || 1;
          self._allObjs = initObjs || [];
          self._start = self._obj = self._points = null;
+         self._auxClass = auxClass;
 
          // XXX: should handle wandering out of the area...
          overElm = $(overElm || "img");
@@ -354,14 +354,16 @@
              return _.map(this._allObjs, function(o){
                  var r = {};
                  _.each(["scale", "con", "args", "x", "y", "width", "height",
-                     "points", "cx", "cy", "rx", "ry"],
+                     "points", "cx", "cy", "rx", "ry", "auxData"],
                      function (p) {if (p in o) r[p] = o[p];});
                  return r;
              });
          },
          _buildCanvas: function() {
              var self = this;
-             self._paper = R(self._over.offset.left, self._over.offset.top,
+             self._cont = self._cont || $("<div class=\"vd-container\"></div>").appendTo("body");
+             self._cont.css({left: self._over.offset.left, top: self._over.offset.top, position: "absolute"});
+             self._paper = R(self._cont[0],
                  self._over.elm.width(), self._over.elm.height());
              self._canvas = {elm:$(self._paper.canvas)};
              self._canvas.off = self._canvas.elm.offset();
@@ -371,6 +373,7 @@
                  o.cur = self._paper[o.con].apply(self._paper, o.args);
                  var rs = relScale(self, o);
                  o.cur.scale(rs, rs, 0, 0);
+                 o.cur.attr(INIT_ATTRS);
              });
          },
          // given an event e, figure out where it is relative to the canvas
@@ -384,7 +387,7 @@
          _installHandlers: function() {
              var self = this;
 
-             self._canvas.elm.mousedown(function(e) {
+             self._cont.mousedown(function(e) {
                  if (1 != e.which) return;
                  e.preventDefault();
 
@@ -448,7 +451,13 @@
                      }
                      self._points.push({x: cur.x, y: cur.y});
                  } else if (self._drawMode == 's') {
-                     if (self._obj) self._obj.cur.attr(INIT_ATTRS);
+                     if (self._obj) {
+                         self._obj.cur.attr(INIT_ATTRS);
+                         if (self._auxClass && self._obj.curAux) {
+                             self._obj.auxData = self._obj.curAux.close();
+                             delete self._obj.curAux;
+                         }
+                     }
                      self._obj = null;
                      var targetObj = _.first(_.select(self._allObjs,
                          function(o){
@@ -456,6 +465,9 @@
                          }));
                      if (!targetObj) return;
                      targetObj.cur.attr(SELECTED_ATTRS);
+                     if (self._auxClass && !targetObj.curAux) {
+                         targetObj.curAux = new self._auxClass(targetObj.auxData, {x: e.clientX, y: e.clientY});
+                     }
                      self._obj = targetObj;
                      self._start = cur;
                  } else {
