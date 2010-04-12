@@ -165,13 +165,20 @@
 <!ENTITY zotero.annotate.toolbar.highlight.label		"Highlight Text">
 <!ENTITY zotero.annotate.toolbar.unhighlight.label		"Unhighlight Text">
 
+<!ENTITY zotero.annotate.vectordrawer.toolbar.select.label "Select a shape">
 <!ENTITY zotero.annotate.vectordrawer.toolbar.rectangle.label "Draw a rectangle">
 <!ENTITY zotero.annotate.vectordrawer.toolbar.ellipse.label "Draw an ellipse">
 <!ENTITY zotero.annotate.vectordrawer.toolbar.polygon.label "Draw a polygon">
-<!ENTITY zotero.annotate.vectordrawer.toolbar.select.label "Select a shape">
 
 <!ENTITY zotero.annotate.audiotimemarker.toolbar.mark.label "Mark a moment">
 <!ENTITY zotero.annotate.audiotimemarker.toolbar.range.label "Mark a range">
+
+<!ENTITY zotero.annotate.videodrawer.toolbar.select.label "Select a shape">
+<!ENTITY zotero.annotate.videodrawer.toolbar.rectangle.label "Draw a rectangle">
+<!ENTITY zotero.annotate.videodrawer.toolbar.ellipse.label "Draw an ellipse">
+<!ENTITY zotero.annotate.videodrawer.toolbar.polygon.label "Draw a polygon">
+<!ENTITY zotero.annotate.videotimemarker.toolbar.mark.label "Mark a moment">
+<!ENTITY zotero.annotate.videotimemarker.toolbar.range.label "Mark a range">
 
 <!ENTITY zotero.integration.prefs.displayAs.label		"Display Citations As:">
 <!ENTITY zotero.integration.prefs.footnotes.label		"Footnotes">

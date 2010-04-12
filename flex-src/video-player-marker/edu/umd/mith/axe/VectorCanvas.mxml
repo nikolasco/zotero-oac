@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:mx="http://www.adobe.com/2006/mxml" backgroundAlpha="0.0">
+  <mx:Script><![CDATA[
+import flash.display.Graphics;
+import flash.events.MouseEvent;
+import flash.geom.Point;
+import edu.umd.mith.axe.Rect;
+
+public const MODE_RECT:String = 'r';
+public const MODE_ELLIPSE:String = 'e';
+public const MODE_POLY:String = 'p';
+
+private var _mode:String = 'r';
+private var start:Point = null;
+private var points:Array = null;
+private var allShapes:Array = [];
+
+public function get mode():String {
+  return _mode;
+}
+
+public function set mode(m:String):void {
+  if (!(/^[rep]$/).test(m)) throw "Invalid mode";
+  _mode = m;
+}
+
+// clears and sets style
+private function prepCanvas(g:Graphics):void {
+  g.clear();
+  g.lineStyle(2, 0);
+}
+
+private function doInitBack():void {
+  prepCanvas(backCanvas.graphics);
+}
+
+private function doInitFore():void {
+  prepCanvas(foreCanvas.graphics);
+}
+
+private function lastElem(v:Array):Point {
+  return v.length ? v[v.length-1] : null;
+}
+
+private function downHandler(e:MouseEvent):void {
+  var g:Graphics = foreCanvas.graphics;
+  var cur:Point = new Point(e.localX, e.localY);
+  if (MODE_RECT == mode || MODE_ELLIPSE == mode) {
+    start = cur
+  } else if (MODE_POLY == mode) {
+    if (points) {
+    } else {
+      points = [];
+      points.push(cur);
+    }
+  } else {
+    throw "Should not be reached";
+  }
+}
+
+private function upHandler(e:MouseEvent):void {
+  if (!start && !points) return;
+  if (MODE_POLY == mode) return;
+
+  var g:Graphics = backCanvas.graphics;
+  var cur:Point = new Point(e.localX, e.localY);
+  var s:VectorShape;
+
+  if (MODE_RECT == mode) {
+    s = new Rect(start, cur);
+  } else if (MODE_ELLIPSE == mode) {
+    s = new Ellipse(start, cur);
+  } else {
+    throw "Should not be reached";
+  }
+  prepCanvas(foreCanvas.graphics);
+  s.drawSelf(g);
+  allShapes.push(s);
+  start = null;
+}
+
+private function moveHandler(e:MouseEvent):void {
+  if (!start && !points) return;
+
+  var g:Graphics = foreCanvas.graphics;
+  var cur:Point = new Point(e.localX, e.localY);
+
+  prepCanvas(g);
+
+  if (MODE_RECT == mode || MODE_ELLIPSE == mode) {
+    var s:VectorShape;
+    if (MODE_RECT == mode) {
+      s = new Rect(start, cur);
+    } else if (MODE_ELLIPSE == mode) {
+      s = new Ellipse(start, cur);
+    }
+    s.drawSelf(g);
+  } else if (MODE_POLY == mode) {
+  } else {
+    throw "Should not be reached";
+  }
+}
+  ]]></mx:Script>
+  <mx:Canvas id="backCanvas" width="{width}" height="{height}" x="0" y="0"
+             backgroundAlpha="0.0" initialize="doInitBack();" />
+  <mx:Canvas id="foreCanvas" width="{width}" height="{height}" x="0" y="0"
+             initialize="doInitFore();" mouseMove="moveHandler(event);" 
+             mouseUp="upHandler(event);" mouseDown="downHandler(event);"
+             backgroundAlpha="0.0" />
+</mx:Canvas>

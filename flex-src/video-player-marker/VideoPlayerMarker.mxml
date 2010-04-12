@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- TODO: maybe make the video part separate from the vector part -->
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml"
+                xmlns:axe="edu.umd.mith.axe.*"
+                addedToStage="whenAdded()" width="400" height="300"
+                paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0">
+    <mx:Script source="VideoPlayerMarker.as" />
+    <mx:Canvas id="cont" x="0" y="0"
+               paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0">
+        <axe:VectorCanvas id="canvas" width="400" height="300" />
+    </mx:Canvas>
+</mx:Application>

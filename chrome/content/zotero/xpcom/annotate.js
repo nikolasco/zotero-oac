@@ -249,4 +249,76 @@ Zotero.Annotaters = {};
          klass: ZATM,
          constructor: ZATM
      };
+
+     var ZVDM = Zotero.Annotaters.VideoDrawerMarker = function(contentDoc, oldAnnos) {
+         this._contentDoc = contentDoc;
+         this._curCallbacks = {};
+
+         contentDoc.defaultView.wrappedJSObject.build(oldAnnos);
+     };
+
+     ZVDM.annotatesExts = {
+         "flv": true,
+         "mp4": true,
+         "m4v": true};
+     ZVDM.toolbarID = "zotero-annotate-tb-video-drawer-marker";
+     ZVDM.getHTMLString = function (title, zoteroURI, fileURI) {
+         var ios = Cc["@mozilla.org/network/io-service;1"]
+             .getService(Ci.nsIIOService);
+         var cr = Cc["@mozilla.org/chrome/chrome-registry;1"].
+             getService(Ci.nsIChromeRegistry);
+         var flashURI = cr.convertChromeURL(ios.newURI("chrome://zotero-content/content/VideoPlayerMarker.swf", null, null));
+
+         return "<html><head><title>" + escapeHTML(title) + "</title></head><body>\n" +
+             "<embed src=\"" + escapeHTML(flashURI.spec) + "\"\n" +
+                 "FlashVars=\"" + escapeHTML("eid=1&videoURL=" + fileURI) + "\" \n" + 
+                 "allowscriptaccess=\"always\"\n"  + 
+                 "id=\"player\" style=\"height: 0; width: 0;\"></embed>\n" +
+             "<div id=\"player-ui-container\"></div>\n" +
+             "<div id=\"time-marker-container\"></div>\n" +
+             buildScriptDeps(["jquery.js", "underscore.js", "PlayerUI.js","TimeMarker.js", "VideoDrawerMarker.js"]) + "\n</body></html>";
+     };
+
+     ZVDM.prototype = {
+         shouldSave: function() {
+             return this._contentDoc.defaultView.wrappedJSObject.savable();
+         },
+         setupCallbacks: function(browserDoc) {
+             var self = this;
+             const drawToolCallbacks = {
+                 'zotero-annotate-tb-vector-drawer-rectangle': 'r',
+                 'zotero-annotate-tb-vector-drawer-ellipse': 'e',
+                 'zotero-annotate-tb-vector-drawer-polygon': 'p',
+                 'zotero-annotate-tb-vector-drawer-select': 's'
+             };
+             const markToolCallbacks = {
+                 "zotero-annotate-tb-audio-time-marker-mark": "markNow",
+                 "zotero-annotate-tb-audio-time-marker-range": "markStartEnd"
+             };
+             self._curCallbacks = {};
+             _.each(toolCallbacks, function(mode, elID){
+                 var el = browserDoc.getElementById(elID);
+                 var cb = self._curCallbacks[elID] = function() {
+                     self._contentDoc.defaultView.wrappedJSObject.mode(mode);
+                     self._mode = mode;
+                 };
+                 el.addEventListener("command", cb, false);
+                 if (mode == self._mode) el.checked = true;
+             });
+             _.each(markToolCallbacks, function(funcName, elID){
+                 var cb = self._curCallbacks[elID] = function () {
+                     self._contentDoc.defaultView.wrappedJSObject[funcName]();
+                 };
+                 browserDoc.getElementById(elID).addEventListener("command", cb, false);
+             });
+         },
+         teardownCallbacks: function(browserDoc) {
+             _.each(this._curCallbacks, function(cb, elID){
+                 browserDoc.getElementById(elID).removeEventListener("command", cb, false);
+             });
+             this._curCallbacks = {};
+         },
+         klass: ZVDM,
+         constructor: ZVDM
+     };
 })();

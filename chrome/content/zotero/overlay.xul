@@ -470,6 +470,15 @@
 			<toolbarbutton id="zotero-annotate-tb-audio-time-marker-mark" tooltiptext="&zotero.annotate.audiotimemarker.toolbar.mark.label;"/>
 			<toolbarbutton id="zotero-annotate-tb-audio-time-marker-range" type="checkbox" tooltiptext="&zotero.annotate.audiotimemarker.toolbar.range.label;"/>
                 </toolbar>
+
+		<toolbar id="zotero-annotate-tb-video-drawer-marker" class="zotero-annotate-tb" crop="end" insertbefore="content" hidden="true">
+			<toolbarbutton id="zotero-annotate-tb-video-drawer-select" group="zotero-annotate-tb-video-drawer" type="radio" tooltiptext="&zotero.annotate.videodrawer.toolbar.select.label;"/>
+			<toolbarbutton id="zotero-annotate-tb-video-drawer-rectangle" group="zotero-annotate-tb-video-drawer" type="radio" tooltiptext="&zotero.annotate.videodrawer.toolbar.rectangle.label;"/>
+			<toolbarbutton id="zotero-annotate-tb-video-drawer-ellipse" group="zotero-annotate-tb-video-drawer" type="radio" tooltiptext="&zotero.annotate.videodrawer.toolbar.ellipse.label;"/>
+			<toolbarbutton id="zotero-annotate-tb-video-drawer-polygon" group="zotero-annotate-tb-video-drawer" type="radio" tooltiptext="&zotero.annotate.videodrawer.toolbar.polygon.label;"/>
+			<toolbarbutton id="zotero-annotate-tb-video-time-marker-mark" tooltiptext="&zotero.annotate.videotimemarker.toolbar.mark.label;"/>
+			<toolbarbutton id="zotero-annotate-tb-video-time-marker-range" type="checkbox" tooltiptext="&zotero.annotate.videotimemarker.toolbar.range.label;"/>
+                </toolbar>
 	</vbox>
 	
 	<!-- Scrape Code -->
