@@ -80,9 +80,7 @@
             $(".player-ui-loadedPerc", self._container).text(Math.round(loa/len)*100);
             
         }, 100);
-    };
-
-	
+    };	
 	
     $.extend(rootNS.PlayerUI.prototype, {
         formatTime: function (s) {
@@ -100,7 +98,3 @@
     });
 
 })(jQuery, _);
-
-				
-
-	

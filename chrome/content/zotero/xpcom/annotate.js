@@ -276,7 +276,7 @@ Zotero.Annotaters = {};
              "<embed src=\"" + escapeHTML(flashURI.spec) + "\"\n" +
                  "FlashVars=\"" + escapeHTML("eid=1&videoURL=" + fileURI) + "\" \n" + 
                  "allowscriptaccess=\"always\"\n"  + 
-                 "id=\"player\" style=\"height: 0; width: 0;\"></embed>\n" +
+                 "id=\"player\" style=\"height: 300; width: 400;\"></embed>\n" +
              "<div id=\"player-ui-container\"></div>\n" +
              "<div id=\"time-marker-container\"></div>\n" +
              buildScriptDeps(["jquery.js", "underscore.js", "PlayerUI.js","TimeMarker.js", "VideoDrawerMarker.js"]) + "\n</body></html>";
@@ -299,7 +299,7 @@ Zotero.Annotaters = {};
                  "zotero-annotate-tb-audio-time-marker-range": "markStartEnd"
              };
              self._curCallbacks = {};
-             _.each(toolCallbacks, function(mode, elID){
+             _.each(drawToolCallbacks, function(mode, elID){
                  var el = browserDoc.getElementById(elID);
                  var cb = self._curCallbacks[elID] = function() {
                      self._contentDoc.defaultView.wrappedJSObject.mode(mode);

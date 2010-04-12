@@ -37,7 +37,6 @@ var inited = false;
 function amReady() {
     if (inited) return;
     inited = true;
-
     ui = new PlayerUI({container: $("#player-ui-container"), player: p});
     setupTM();
 }

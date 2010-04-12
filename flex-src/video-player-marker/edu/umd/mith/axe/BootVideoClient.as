@@ -4,13 +4,16 @@ import flash.display.DisplayObject;
 import flash.display.DisplayObjectContainer;
 import flash.media.Video;
 import mx.controls.Alert;
+import flash.external.ExternalInterface;
 
-public class VideoClient {
+public class BootVideoClient {
     protected var video:Video;
     protected var other:DisplayObject;
-    public function VideoClient(v:Video, o:DisplayObject) {
+    protected var cont:Function;
+    public function BootVideoClient(v:Video, o:DisplayObject, c:Function) {
         video = v;
         other = o;
+        cont = c;
     }
 
     public function onCuePoint(info:Object):void {
@@ -38,6 +41,7 @@ public class VideoClient {
             other.width = video.width;
             other.height = video.height;
         }
+        cont(info.duration);
     }
     public function onPlayStatus(info:Object):void {
     }

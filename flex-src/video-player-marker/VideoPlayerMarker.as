@@ -7,7 +7,8 @@ import flash.events.IOErrorEvent;
 import flash.system.Security;
 import flash.display.Sprite;
 import mx.controls.Alert;
-import edu.umd.mith.axe.VideoClient;
+import edu.umd.mith.axe.BootVideoClient;
+import edu.umd.mith.axe.EmptyVideoClient;
 
 protected const STATE_PLAYING:uint = 1;
 protected const STATE_PAUSED:uint = 2;
@@ -20,6 +21,7 @@ protected var state:uint;
 
 protected var video:Video;
 protected var stream:NetStream;
+protected var duration:Number;
 
 protected var sought:Number;
 protected var volume:Number;
@@ -48,7 +50,6 @@ public function whenAdded():void {
     conn.connect(null);
     stream = new NetStream(conn);
     video = new Video();
-    stream.client = new VideoClient(video, canvas);
     video.attachNetStream(stream);
 
     cont.rawChildren.addChildAt(video, 0);
@@ -62,20 +63,32 @@ public function whenAdded():void {
     callbacks.forEach(function (cb:*, index:int, array:Array):void {
         ExternalInterface.addCallback(cb, this[cb]);
     }, this);
-    ExternalInterface.call("amReady", eid);
 
     // TODO: play until we get metadata, so that things work even if we start
     // at somewhere other than 0
-    //stream.play(videoURL);
-    //stream.soundTransform = new SoundTransform(0);
+    stream.client = new BootVideoClient(video, canvas, gotMeta);
+    stream.soundTransform = new SoundTransform(0);
+    stream.play(videoURL);
+}
+
+protected function gotMeta(dur:Number):void {
+    duration = dur;
+    stream.seek(dur/3);
+    stream.pause();
+    stream.client = new EmptyVideoClient();
+    stream.soundTransform = new SoundTransform(volume);
+    try {
+      //ExternalInterface.call("amReady", eid);
+    } catch(e:Error) {
+      Alert.show(e.toString());
+    }
 }
 
 public function play():void {
     if (STATE_PLAYING == state) return;
     state = STATE_PLAYING;
-    stream.play(videoURL);
     stream.seek(sought);
-    stream.soundTransform = new SoundTransform(volume);
+    stream.resume();
 }
 
 protected function completed(e:Event):void {
@@ -98,7 +111,13 @@ public function seekTo(time:Number):void {
 }
 
 public function getPosition():Number {
-    return stream.time;
+Alert.show("hi");
+try {
+    return (STATE_PLAYING == state)? stream.time : sought;
+} catch(e:Error) {
+Alert.show(e.toString());
+}
+return 0;
 }
 
 public function setVolume(v:Number):void {
@@ -111,7 +130,7 @@ public function getVolume():Number {
 }
 
 public function getDuration():Number {
-    return 0; // XXX: dummy value. maybe metadata has it?
+    return duration;
 }
 
 public function getBytesLoaded():Number {
