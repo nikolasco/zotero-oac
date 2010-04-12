@@ -34,7 +34,7 @@ body {
 .zotero {
 	margin: 0; 
 	padding: 0; 
-	background: url(chrome://zotero-content/skin/images/header_bar.png) repeat-x;
+	background: url('chrome://zotero-content/skin/images/header_bar.png') repeat-x;
 	height: 40px;
 }
 .logo {
