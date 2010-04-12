@@ -6,8 +6,11 @@ var rootNS = this;
 function makeClasses(formatTime) {
     
     // private class
-    function TimeStamp(t) {
+    function TimeStamp(t,i) {
+    	
         this.t = t;
+        this.id = i;
+        this.note = "Click here to leave a note.";
     }
 
     jQuery.extend(TimeStamp.prototype, {
@@ -16,13 +19,18 @@ function makeClasses(formatTime) {
         },
         toString: function () {
             return formatTime(this.t);
+        },
+        saveNote: function(note){
+        this.note=note;
         }
     });
 
     // private class
-    function TimeRange(s, e) {
+    function TimeRange(s, e, i) {
         this.startT = _.min([s, e]);
         this.endT = _.max([s, e]);
+        this.id = i;
+        this.note="Click here to leave a note.";
     }
 
     jQuery.extend(TimeRange.prototype, {
@@ -31,6 +39,9 @@ function makeClasses(formatTime) {
         },
         toString: function () {
             return "" + formatTime(this.startT) + " to " + formatTime(this.endT);
+        },
+          saveNote: function(note){
+        this.note=note;
         }
     });
 
@@ -42,9 +53,11 @@ function makeClasses(formatTime) {
 
 // inserts o into a, using iter (if present) to compute sort value
 function insertIntoSorted(a, o, iter) {
-    var i = _.sortedIndex(a, o, iter);
+    //var i = _.sortedIndex(a, o, iter);
+    i=iter;
     a.splice(i, 0, o);
 }
+
 
 // player: must return a time (as a Number) when its getPosition method is called
 // container: must be an Element, Document, or jQuery selector
@@ -75,24 +88,78 @@ rootNS.TimeMarker = function (opts) {
     self._TimeRange = tmp.TimeRange;
 
     self._container.html(
-        "<ul class='time-marker-moment-list'></ul>" +
-        "<ul class='time-marker-range-list'></ul>");
+        "<h3>Marked Moments</h3><table class='time-marker-moment-list'>"
+        +"<tr class='time-marker-moment-header'>"
+	    +"             <th>Time range</th>"+
+	    +"             <th>Note</th>"
+	    +"             <th>Edit</th>"
+	    +"             <th>Delete</th>"
+	    +"        </tr>"
+	    +" </table>     "
+	    +" <h3>Time ranges</h3>"  
+       +" <table class='time-marker-range-list'>"
+	   +"         <tr class='time-marker-range-header'>"
+	   +"              <th>Time range</th>"
+	   +"              <th>Note</th>"
+	   +"              <th>Edit</th>"
+	   +"              <th>Delete</th>"
+	   +"         </tr>"
+		+"</table>");
     // TODO: store these individually instead of just using the first element of the array
     self._momentList = $(".time-marker-moment-list", self._container);
-    self._moments = _.map(opts.initState[0].moments, function (m) {
+    self._moments = [];
+    /*_.map(opts.initState[0].moments, function (m) {
         return new self._TimeStamp(m);
-    });
+    });*/
     self.displayMoments();
-
+	$(".time-marker-moment-list").bind("saveNoteEvent",{obj:self},self.saveNote);
+	$(".time-marker-moment-list").bind("deleteNoteEvent",{obj:self},self.deleteNote);
+	$(".time-marker-range-list").bind("saveNoteEvent",{obj:self},self.saveNote);
+	$(".time-marker-range-list").bind("deleteNoteEvent",{obj:self},self.deleteNote);
     self._start = null;
     self._rangeList = $(".time-marker-range-list", self._container);
-    self._ranges = _.map(opts.initState[0].ranges, function (r) {
+    /*self._ranges = _.map(opts.initState[0].ranges, function (r) {
         return new self._TimeRange(r.startT, r.endT);
-    });
+    });*/
+    self._ranges = [];
     self.displayRanges();
 };
 
 jQuery.extend(rootNS.TimeMarker.prototype, {
+	saveNote: function(e,isRange,id,txt){
+	
+		num =0;
+		if (isRange){
+			num = e.data.obj.findNoteById(id,e.data.obj._ranges);
+		e.data.obj._ranges[num].saveNote(txt);
+		}else{
+			
+			num = e.data.obj.findNoteById(id,e.data.obj._moments);
+			
+		e.data.obj._moments[num].saveNote(txt);
+		}
+		
+		
+		
+	},
+	deleteNote: function(e,isRange,id){
+		var num = 0;
+		if (isRange){
+		num = e.data.obj.findNoteById(id,e.data.obj._ranges);
+		e.data.obj._ranges.splice(num,1);
+		}else{
+		num = e.data.obj.findNoteById(id,e.data.obj._moments);
+		e.data.obj._moments.splice(num,1);
+		}
+	},
+	findNoteById: function(id,haystack){
+				for (var i=0;i<haystack.length;i++){
+			if (haystack[i].id==id){
+				return i;
+			}
+		}
+		return null;
+	},
     savable: function() {
         var self = this;
         return [{
@@ -106,17 +173,31 @@ jQuery.extend(rootNS.TimeMarker.prototype, {
     },
     markNow: function() {
         self = this;
-        insertIntoSorted(self._moments,
-            new self._TimeStamp(self._player.getPosition()),
-            function (ts){return ts.sortVal();});
+        var uid = 0;
+        if (self._moments.length>0){
+        	var last = (self._moments.length-1);
+        	        	
+        	uid = parseInt(self._moments[last].id);
+        
+        	uid=uid+1;
+        }	
+        /*insertIntoSorted(self._moments,
+            new self._TimeStamp(self._player.getPosition(),uid),
+            function (ts){return ts.sortVal();});*/
+         self._moments.push(new self._TimeStamp(self._player.getPosition(),uid));   
         self.displayMoments();
     },
     markStartEnd: function() {
         self = this;
+          var uid = 0;
+        if (self._ranges.length>0){
+        	uid = self._ranges[self._ranges.length-1].id+1;
+        }	
         if (self._start !== null) {
-            insertIntoSorted(self._ranges,
-                new self._TimeRange(self._start, self._player.getPosition()),
-                function (tr){return tr.sortVal();});
+            /*insertIntoSorted(self._ranges,
+                new self._TimeRange(self._start, self._player.getPosition(),uid),
+                function (tr){return tr.sortVal();});*/
+            self._ranges.push(new self._TimeRange(self._start,self._player.getPosition(),uid));       
             self.displayRanges();
             self._start = null;
         } else {
@@ -124,11 +205,20 @@ jQuery.extend(rootNS.TimeMarker.prototype, {
         }
     },
     displayMoments: function() {
-        this._momentList.html(this._moments.length ? ("<li>" + this._moments.join("</li><li>") + "</li>") : "");
+    	var output = ""; 
+    	for (var i=0;i<this._moments.length;i++){
+    		output += "<tr class='time-marker-moment'><td>"+this._moments[i]+"</td><td><span onclick='changeNote(this,false,"+this._moments[i].id+")'>"+this._moments[i].note+"</span></td><td><a onclick='changeNote(this.parentNode.previousSibling.firstChild,false,"+this._moments[i].id+")' href='#'><img src='chrome://zotero-content/skin/annotate-audio-edit.png' alt='edit' /></a></td><td><a onclick='deleteNote(this,false,"+this._moments[i].id+")' href='#'><img src='chrome://zotero-content/skin/annotate-audio-delete.png' alt='delete' /></a></td></tr>";
+    	}
+    	
+        this._momentList.html(output);
     },
     displayRanges: function() {
-        this._rangeList.html(this._ranges.length ? ("<li>" + this._ranges.join("</li><li>") + "</li>") : "");
-    }
+        var output="";
+                for (var i=0;i<this._ranges.length;i++){
+    		output += "<tr class='time-marker-range'><td>"+this._ranges[i]+"</td><td><span onclick='changeNote(this,true,"+this._ranges[i].id+")'>"+this._ranges[i].note+"</span></td><td><a onclick='changeNote(this.parentNode.previousSibling.firstChild,true,"+this._ranges[i].id+")' href='#'><img src='chrome://zotero-content/skin/annotate-audio-edit.png' alt='edit' /></a></td><td><a onclick='deleteNote(this,true,"+this._ranges[i].id+")' href='#'><img src='chrome://zotero-content/skin/annotate-audio-delete.png' alt='delete' /></a></td></tr>";
+    	}
+        this._rangeList.html(output);
+             }
 });
 
 })(jQuery, _);

@@ -205,14 +205,21 @@ Zotero.Annotaters = {};
              getService(Ci.nsIChromeRegistry);
          var flashURI = cr.convertChromeURL(ios.newURI("chrome://zotero-content/content/AudioPlayer.swf", null, null));
 
-         return "<html><head><title>" + escapeHTML(title) + "</title></head><body>\n" + 
-             "<div id=\"player-ui-container\"></div>\n" +
-             "<div id=\"time-marker-container\"></div>\n" +
-             "<embed src=\"" + escapeHTML(flashURI.spec) + "\"\n" +
+         return "<html><head><title>" + escapeHTML(title) + "</title>"+
+		 "<link rel='stylesheet' type='text/css' href='chrome://zotero-content/skin/wrapper.css' />"+
+"<link rel='stylesheet' type='text/css' href='chrome://zotero-content/skin/AudioTimeMarker.css' />"+
+	"<link type='text/css' href='chrome://zotero-content/skin/ui.all.css' rel='stylesheet' /> "+
+		 "</head><body>\n" + 
+            "<div class='zotero'><img src='chrome://zotero-content/skin/zotero_logo.png' class='logo'/></div>"+
+			"<div class='audio-container'>"+
+			"<div id='player-ui-container'></div>"+
+			"<div id='time-marker-container'></div>"+
+			        "<embed src=\"" + escapeHTML(flashURI.spec) + "\"\n" +
                  "FlashVars=\"" + escapeHTML("eid=1&soundURL=" + fileURI) + "\" \n" + 
                  "allowscriptaccess=\"always\"\n"  + 
                  "id=\"player\" style=\"height: 0; width: 0;\"></embed>\n" +
-             buildScriptDeps(["jquery.js", "underscore.js", "PlayerUI.js","TimeMarker.js", "AudioTimeMarker.js"]) + "\n</body></html>";
+				 "</div>"+
+				buildScriptDeps(["jquery.js", "underscore.js", "PlayerUI.js","TimeMarker.js", "AudioTimeMarker.js", "jquery-ui-1.7.2.custom.min.js", "ui.core.js", "ui.slider.js", "other.js"]) + "\n</body></html>";
      };
 
      ZATM.prototype = {

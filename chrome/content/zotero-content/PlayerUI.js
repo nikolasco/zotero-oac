@@ -10,6 +10,7 @@
         return ret;
     }
 
+	
     rootNS.PlayerUI = function (opts) {
         var self = this;
         self._container = $(opts.container);
@@ -21,40 +22,68 @@
             "<div>Loaded <span class='player-ui-loaded'></span> out of " +
                 "<span class='player-ui-size'></span>" + 
                 "(<span class='player-ui-loaded-perc'></span>%)</div>" +
-            "<div><form><input class='player-ui-new-volume' type='text'></input> " +
-                "<span class='player-ui-set-volume'>Set Volume!</span></form></div>" +
             "<div>Volume: <span class='player-ui-volume'></span>%</div>" +
-            "<div><form><input class='player-ui-seek-time' type='text'></input> " +
-                "<span class='player-ui-seek'>Seek!</span></form></div>" +
+                        "<div id='player-ui-new-volume'></div>"+
+                  "<div>Playing: <div id='player-ui-seek'></div>" +
             "<div><span class='player-ui-pos'></span> out of " +
-                "<span class='player-ui-length'></span></div>");
-
+                "<span class='player-ui-length'></span></div>"+
+                "<script type='text/JavaScript' language='JavaScript'>"+
+                "volumeSlide=$('#player-ui-new-volume').slider({"+
+			"min:0,max:100,stop:function(e,ui){$(this).trigger('volumeChange',['vol',ui.value]);}});"+
+			  "progressSlide=$('#player-ui-seek').slider({"+
+			"min:0,max:100,start:function(e,ui){p.pause();$(this).trigger('posStartChange',['seek',ui.value]);},stop:function(e,ui){$(this).trigger('slideChange',['seek',ui.value]);}});$('#player-ui-new-volume').slider('option','value',100);"+
+			""+
+			"</script>"
+			
+		);
+		self.changeVolume=function(e,slider,val){
+			var v = val;
+            var m = /\d+/.exec(v);
+            if (m) p.setVolume(m[0]/100);
+		}
+		self.startPosChange=function(e,slider,val){
+			self._isPlaying = false;
+		}
+        self.seekToPos=function(e,slider,val){
+		
+	
+			
+ 			var percent = parseInt((val*p.getDuration())/100);
+ 			
+ 			p.seekTo(parseTime(percent));
+            
+	}     	
+		self._isPlaying = false;
+		
         var p = self._player,
             newVol = $(".player-ui-new-volume", self._container),
             seekTime = $(".player-ui-seek-time", self._container);
-        $(".player-ui-play", self._container).click(function () {p.play();});
-        $(".player-ui-pause", self._container).click(function () {p.pause();});
-        $(".player-ui-seek", self._container).click(function () {
-            p.seekTo(parseTime(seekTime.val()));
-        });
-        $(".player-ui-set-volume", self._container).click(function () {
-            var v = newVol.val();
-            var m = /\d+/.exec(v);
-            if (m) p.setVolume(m[0]/100);
-        });
-        $(".player-ui-pos", self._container).text(self.formatTime(p.getPosition()));
+  $("#player-ui-new-volume").bind("volumeChange",{obj:self},self.changeVolume);
+          $("#player-ui-seek").bind("posStartChange",{obj:self},self.startPosChange); 
+       $("#player-ui-seek").bind("slideChange",{obj:self},self.seekToPos);
+        $(".player-ui-play", self._container).click(function () {self._isPlaying=true;p.play();});
+        $(".player-ui-pause", self._container).click(function () {self._isPlaying=false;p.pause();});
+
+ 
         $("form", self._container).submit(function(e){e.preventDefault();});
-        window.setInterval(function () {
+       window.setInterval(function () {
             $(".player-ui-pos", self._container).text(self.formatTime(p.getPosition()));
+            var percent = parseInt(100*(p.getPosition()/p.getDuration()));
+            if (self._isPlaying){
+            	$( "#player-ui-seek" ).slider( "option", "value", percent );
+            }
             $(".player-ui-length", self._container).text(self.formatTime(p.getDuration()));
             $(".player-ui-volume", self._container).text(Math.round(p.getVolume()*100));
             var loa = p.getBytesLoaded(), len = p.getBytesTotal();
             $(".player-ui-loaded", self._container).text(loa);
             $(".player-ui-size", self._container).text(len);
             $(".player-ui-loadedPerc", self._container).text(Math.round(loa/len)*100);
+            
         }, 100);
     };
 
+	
+	
     $.extend(rootNS.PlayerUI.prototype, {
         formatTime: function (s) {
             var l = p.getDuration();
@@ -71,3 +100,7 @@
     });
 
 })(jQuery, _);
+
+				
+
+	
