@@ -1,0 +1,53 @@
+body {
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:85%;
+}
+.note-container {
+    position: absolute;
+}
+.note-container .display {
+    background-color: white;
+	filter:alpha(opacity=85);
+	-moz-opacity:0.85;
+	-khtml-opacity: 0.85;
+	opacity: 0.85;
+    color: black;
+	border:1px solid #959595;
+	min-width:20px;
+	padding:8px;
+    white-space: pre;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+}
+form.edit textarea {
+	padding:8px;
+	font-family:Arial, Helvetica, sans-serif;
+	font-size:100%;
+}
+.note-container .edit {
+    display: none;
+}
+.note-container textarea {
+    background-color: white;
+	filter:alpha(opacity=90);
+	-moz-opacity:0.9;
+	-khtml-opacity: 0.9;
+	opacity: 0.9;
+    color: #000;
+	border:1px solid #959595;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	overflow:auto;
+	margin-bottom:3px;
+}
+.button-row input {
+	background:#eaeaea;
+	border:1px solid #959595;
+	margin-right:3px;
+	padding:3px;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+}
+.note-container .cancel {
+    margin-left: auto;
+}

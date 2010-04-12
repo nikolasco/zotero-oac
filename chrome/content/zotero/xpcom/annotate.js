@@ -138,8 +138,11 @@ Zotero.Annotaters = {};
      ZIVD.toolbarID = "zotero-annotate-tb-vector-drawer";
      ZIVD.getHTMLString = function (title, zoteroURI, fileURI) {
          return "<html><head><title>" + escapeHTML(title) + "</title>\n" + 
+				"<link rel='stylesheet' type='text/css' href='chrome://zotero-content/skin/wrapper.css' />"+
+				"<link rel='stylesheet' type='text/css' href='chrome://zotero-content/skin/note.css' />"+
                  "<link rel=\"stylesheet\" type=\"text/css\" href=\"chrome://zotero-content/skin/ImageVectorDrawer.css\" />\n" +
              "</head><body>\n" +
+			 "<div class='zotero'><img src='chrome://zotero-content/skin/zotero_logo.png' class='logo'/></div>"+
              "<img id=\"to-mark\" src=\"" + escapeHTML(zoteroURI) + "\" />\n" + 
              buildScriptDeps(["jquery.js", "raphael.js", "underscore.js","VectorDrawer.js", "ImageVectorDrawer.js"]) +
              "\n</body></html>";
@@ -209,7 +212,7 @@ Zotero.Annotaters = {};
 		 "<link rel='stylesheet' type='text/css' href='chrome://zotero-content/skin/wrapper.css' />"+
 "<link rel='stylesheet' type='text/css' href='chrome://zotero-content/skin/AudioTimeMarker.css' />"+
 	"<link type='text/css' href='chrome://zotero-content/skin/ui.all.css' rel='stylesheet' /> "+
-		 "</head><body>\n" + 
+		 "</head><body>\n" +
             "<div class='zotero'><img src='chrome://zotero-content/skin/zotero_logo.png' class='logo'/></div>"+
 			"<div class='audio-container'>"+
 			"<div id='player-ui-container'></div>"+
