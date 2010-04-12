@@ -65,7 +65,7 @@ $.widget("ui.slider", $.extend({}, $.ui.mouse, {
 
 		if (o.values && o.values.length) {
 			while ($(".ui-slider-handle", this.element).length < o.values.length)
-				$('<a href="#">x</a>')
+				$('<a href="#"></a>')
 					.appendTo(this.element)
 					.addClass("ui-slider-handle");
 		}
