@@ -3038,8 +3038,9 @@ var ZoteroPane = new function()
 			var ext = Zotero.File.getExtension(file);
 			var isNative = Zotero.MIME.hasNativeHandler(mimeType, ext);
 			var internal = Zotero.MIME.hasInternalHandler(mimeType, ext);
+			var annoClass = Zotero.Annotaters.classForFileName(file.path);
 			
-			if (isNative ||
+			if (isNative || annoClass ||
 					(internal && !Zotero.Prefs.get('launchNonNativeFiles'))) {
 				
 				var url = 'zotero://attachment/' + itemID + '/';
