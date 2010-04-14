@@ -35,6 +35,8 @@ protected function errorHandler(e:IOErrorEvent):void {
 }
 
 public function whenAdded():void {
+    Security.allowDomain("*");
+    Security.allowInsecureDomain("*");
     cont.height = height = stage.height;
     cont.width = width = stage.width;
     state = STATE_DONE;
@@ -56,6 +58,7 @@ public function whenAdded():void {
 
     // XXX: redo
     //channel.addEventListener(Event.SOUND_COMPLETE, completed);
+    // also error handler
 
     // TODO: add event handler for resize, maybe try to set video size based on new stage size?
 
@@ -78,7 +81,7 @@ protected function gotMeta(dur:Number):void {
     stream.client = new EmptyVideoClient();
     stream.soundTransform = new SoundTransform(volume);
     try {
-      //ExternalInterface.call("amReady", eid);
+      ExternalInterface.call("amReady", eid);
     } catch(e:Error) {
       Alert.show(e.toString());
     }
@@ -111,13 +114,7 @@ public function seekTo(time:Number):void {
 }
 
 public function getPosition():Number {
-Alert.show("hi");
-try {
     return (STATE_PLAYING == state)? stream.time : sought;
-} catch(e:Error) {
-Alert.show(e.toString());
-}
-return 0;
 }
 
 public function setVolume(v:Number):void {

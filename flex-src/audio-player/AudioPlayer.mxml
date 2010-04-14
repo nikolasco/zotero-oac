@@ -33,9 +33,6 @@ public function doInit():void {
     try {
         Security.allowDomain("*");
         Security.allowInsecureDomain("*");
-        Security.allowDomain("attachment");
-        Security.allowInsecureDomain("attachment");
-        Alert.show("application URL: " + application.url);
         state = STATE_DONE;
         var req:URLRequest = new URLRequest(application.parameters.soundURL);
         eid = application.parameters.eid;
