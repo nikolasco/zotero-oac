@@ -361,22 +361,22 @@
 
 #zotero-annotate-tb-vector-drawer-rectangle
 {
-	list-style-image: url('chrome://zotero/skin/annotate-vector-drawer-rectangle.png');
+	list-style-image: url('chrome://zotero/skin/annotate-drawer-rectangle.png');
 }
 
 #zotero-annotate-tb-vector-drawer-ellipse
 {
-	list-style-image: url('chrome://zotero/skin/annotate-vector-drawer-ellipse.png');
+	list-style-image: url('chrome://zotero/skin/annotate-drawer-ellipse.png');
 }
 
 #zotero-annotate-tb-vector-drawer-polygon
 {
-	list-style-image: url('chrome://zotero/skin/annotate-vector-drawer-polygon.png');
+	list-style-image: url('chrome://zotero/skin/annotate-drawer-polygon.png');
 }
 
 #zotero-annotate-tb-vector-drawer-select
 {
-	list-style-image: url('chrome://zotero/skin/annotate-vector-drawer-select.png');
+	list-style-image: url('chrome://zotero/skin/annotate-drawer-select.png');
 }
 
 #zotero-annotate-tb-audio-time-marker-mark
@@ -385,6 +385,36 @@
 }
 
 #zotero-annotate-tb-audio-time-marker-range
+{
+	list-style-image: url('chrome://zotero/skin/annotate-time-mark-range.png');
+}
+
+#zotero-annotate-tb-video-drawer-rectangle
+{
+	list-style-image: url('chrome://zotero/skin/annotate-drawer-rectangle.png');
+}
+
+#zotero-annotate-tb-video-drawer-ellipse
+{
+	list-style-image: url('chrome://zotero/skin/annotate-drawer-ellipse.png');
+}
+
+#zotero-annotate-tb-video-drawer-polygon
+{
+	list-style-image: url('chrome://zotero/skin/annotate-drawer-polygon.png');
+}
+
+#zotero-annotate-tb-video-drawer-select
+{
+	list-style-image: url('chrome://zotero/skin/annotate-drawer-select.png');
+}
+
+#zotero-annotate-tb-video-time-marker-mark
+{
+	list-style-image: url('chrome://zotero/skin/annotate-time-mark-moment.png');
+}
+
+#zotero-annotate-tb-video-time-marker-range
 {
 	list-style-image: url('chrome://zotero/skin/annotate-time-mark-range.png');
 }
