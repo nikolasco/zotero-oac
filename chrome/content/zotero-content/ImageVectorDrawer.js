@@ -56,7 +56,7 @@ function build(mode, scale, old) {
 }
 
 function savable() {
-    return drawer.savable();
+    return JSON.stringify(drawer.savable());
 }
 
 function scale(s) {

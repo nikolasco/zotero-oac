@@ -17,7 +17,7 @@ function setupTM() {
 }
 
 function savable() {
-    return tm.savable();
+    return JSON.stringify(tm.savable());
 }
 
 function mode(s) {

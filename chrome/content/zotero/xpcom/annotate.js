@@ -150,7 +150,7 @@ Zotero.Annotaters = {};
 
      ZIVD.prototype = {
          shouldSave: function() {
-             return this._contentDoc.defaultView.wrappedJSObject.savable();
+             return JSON.parse(this._contentDoc.defaultView.wrappedJSObject.savable());
          },
          resized: function() {
              var scale = this._img.clientHeight / this._img.naturalHeight;
@@ -227,7 +227,10 @@ Zotero.Annotaters = {};
 
      ZATM.prototype = {
          shouldSave: function() {
-             return this._contentDoc.defaultView.wrappedJSObject.savable();
+             //return JSON.parse(this._contentDoc.defaultView.wrappedJSObject.savable());
+             var ret = JSON.parse(this._contentDoc.defaultView.wrappedJSObject.savable());
+Components.utils.reportError("will save " + JSON.stringify(ret));
+             return ret;
          },
          setupCallbacks: function(browserDoc) {
              var self = this;
@@ -284,7 +287,7 @@ Zotero.Annotaters = {};
 
      ZVDM.prototype = {
          shouldSave: function() {
-             return this._contentDoc.defaultView.wrappedJSObject.savable();
+             return JSON.parse(this._contentDoc.defaultView.wrappedJSObject.savable());
          },
          setupCallbacks: function(browserDoc) {
              var self = this;
