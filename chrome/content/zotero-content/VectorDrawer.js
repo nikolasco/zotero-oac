@@ -584,15 +584,19 @@
              // doesn't figure out if our canvas has focus
              // having multiple ops (in different canvases) seems pretty FUBAR, tho
              $(document).keydown(function(e) {
-                 if (e.result == 1132423) return 1132423; // never again!
+                 // we use this to avoid acting on the same event repeatedly
+                 var PREV_VAL = 1132423;
+                 if (e.result == PREV_VAL) return PREV_VAL;
 
                  // if it's escape, stop what we're doing
                  if (e.keyCode === 27) {
                      if (self._obj) self._obj.remove();
                      self._start = self._obj = self._points = null;
                  } else if ((e.keyCode === 46 || e.keyCode === 8)
-                           && self._drawMode == 's' && self._obj) {
+                           && self._drawMode == 's') {
                      // delete or backspace
+                     e.preventDefault();
+                     if (!self._obj) return 1132423;
                      var o = self._obj;
                      if (o && confirm("You are about to delete annotation. Is that okay?")) {
                          self._allObjs = _.reject(self._allObjs, function (c){return c == o;});
