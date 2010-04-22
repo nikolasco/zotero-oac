@@ -3,19 +3,19 @@ body {
 	font-size:85%;
 }
 .note-container {
-    position: absolute;
+	position: absolute;
 }
 .note-container .display {
-    background-color: white;
+	background-color: white;
 	filter:alpha(opacity=85);
 	-moz-opacity:0.85;
 	-khtml-opacity: 0.85;
 	opacity: 0.85;
-    color: black;
+	color: black;
 	border:1px solid #959595;
 	min-width:20px;
 	padding:8px;
-    white-space: pre;
+	white-space: pre;
 	-moz-border-radius: 5px;
 	-webkit-border-radius: 5px;
 }
@@ -25,15 +25,15 @@ form.edit textarea {
 	font-size:100%;
 }
 .note-container .edit {
-    display: none;
+	display: none;
 }
 .note-container textarea {
-    background-color: white;
+	background-color: white;
 	filter:alpha(opacity=90);
 	-moz-opacity:0.9;
 	-khtml-opacity: 0.9;
 	opacity: 0.9;
-    color: #000;
+	color: #000;
 	border:1px solid #959595;
 	-moz-border-radius: 5px;
 	-webkit-border-radius: 5px;
@@ -49,5 +49,5 @@ form.edit textarea {
 	-webkit-border-radius: 5px;
 }
 .note-container .cancel {
-    margin-left: auto;
+	margin-left: auto;
 }

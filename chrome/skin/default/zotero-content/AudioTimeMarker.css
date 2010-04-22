@@ -75,18 +75,18 @@ td {
 }
 /* misc styles --------------------------- */
 #player { /* hide the player */
-	height: 0; 
-	width: 0; 
-	position: absolute; 
-	top: 0; 
+	height: 0;
+	width: 0;
+	position: absolute;
+	top: 0;
 	left: 0;
 }
 #mark-range {
   margin-bottom: 4em;
 }
 #player-ui-new-volume{
-    width: 400px;
+	width: 400px;
 }
 #player-ui-seek{
-    width: 400px;
+	width: 400px;
 }

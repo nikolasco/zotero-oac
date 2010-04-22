@@ -4,9 +4,9 @@
                 xmlns:axe="edu.umd.mith.axe.*"
                 addedToStage="whenAdded()" width="400" height="300"
                 paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0">
-    <mx:Script source="VideoPlayerMarker.as" />
-    <mx:Canvas id="cont" x="0" y="0"
-               paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0">
-        <axe:VectorCanvas id="canvas" width="400" height="300" />
-    </mx:Canvas>
+	<mx:Script source="VideoPlayerMarker.as" />
+	<mx:Canvas id="cont" x="0" y="0"
+	           paddingTop="0" paddingBottom="0" paddingLeft="0" paddingRight="0">
+		<axe:VectorCanvas id="canvas" width="400" height="300" />
+	</mx:Canvas>
 </mx:Application>
