@@ -211,7 +211,7 @@ Zotero.Annotaters = {};
 		 return "<html><head><title>" + escapeHTML(title) + "</title>"+
 		 "<link rel='stylesheet' type='text/css' href='chrome://zotero-content/skin/wrapper.css' />"+
 "<link rel='stylesheet' type='text/css' href='chrome://zotero-content/skin/AudioTimeMarker.css' />"+
-	"<link type='text/css' href='chrome://zotero-content/skin/ui.all.css' rel='stylesheet' /> "+
+	"<link type='text/css' href='chrome://zotero-content/skin/ui.all-slider.css' rel='stylesheet' /> "+
 		 "</head><body>\n" +
 			"<div class='zotero'><img src='chrome://zotero-content/skin/zotero_logo.png' class='logo'/></div>"+
 			"<div class='audio-container'>"+
@@ -222,7 +222,7 @@ Zotero.Annotaters = {};
 				 "allowscriptaccess=\"always\"\n"  +
 				 "id=\"player\" style=\"height: 0; width: 0;\"></embed>\n" +
 				 "</div>"+
-				buildScriptDeps(["jquery.js", "underscore.js", "PlayerUI.js","TimeMarker.js", "AudioTimeMarker.js", "jquery-ui-1.7.2.custom.min.js", "ui.core.js", "ui.slider.js", "other.js"]) + "\n</body></html>";
+				buildScriptDeps(["jquery.js", "underscore.js", "PlayerUI.js","TimeMarker.js", "AudioTimeMarker.js", "jquery.ui.core.js", "jquery.ui.widget.js", "jquery.ui.mouse.js", "jquery.ui.slider.js", "other.js"]) + "\n</body></html>";
 	 };
 
 	 ZATM.prototype = {
