@@ -25,8 +25,8 @@
 
 Zotero.Annotate = {
 	/**
-	 * Gets the annotation ID from a given URL
-	 */
+	* Gets the annotation ID from a given URL
+	*/
 	getAttachmentIDFromURL: function(url) {
 		const attachmentRe = /^zotero:\/\/attachment\/([0-9]+)\/$/;
 		var m = attachmentRe.exec(url);
@@ -71,245 +71,262 @@ Zotero.Annotate = {
 Zotero.Annotaters = {};
 
 (function() {
-	 const _ = Zotero.Libs._;
-	 const Cc = Components.classes;
-	 const Ci = Components.interfaces;
+	const _ = Zotero.Libs._;
+	const Cc = Components.classes;
+	const Ci = Components.interfaces;
 
-	 Zotero.Annotaters.classForFileName = function (name) {
-		 var m = /\.([^.]+)$/.exec(name);
-		 if (!m)  return null;
-		 var ext = m[1].toLowerCase();
-		 var classes =  _.select(Zotero.Annotaters, function(ano) {
-			 return ano && ano.annotatesExts && ano.annotatesExts.hasOwnProperty(ext);
-		 });
+	Zotero.Annotaters.classForFileName = function (name) {
+		var m = /\.([^.]+)$/.exec(name);
+		if (!m)  return null;
+		var ext = m[1].toLowerCase();
+		var classes =  _.select(Zotero.Annotaters, function(ano) {
+			return ano && ano.annotatesExts && ano.annotatesExts.hasOwnProperty(ext);
+		});
 
-		 return classes.length? classes[0] : null;
-	 };
+		return classes.length? classes[0] : null;
+	};
 
-	 function escapeHTML(html) {
-		 const TO_REPLACE = [
-			 {re: /&/g, with: "&amp;"}, // must be first
-			 {re: /"/g, with: "&quot;"},
-			 {re: /'/g, with: "&apos;"},
-			 {re: /</g, with: "&lt;"},
-			 {re: />/g, with: "&gt;"}
-		 ];
-		 var ret = html;
-		 _.each(TO_REPLACE, function(o){ret = ret.replace(o.re, o.with);});
-		 return ret;
-	 }
+	function escapeHTML(html) {
+		const TO_REPLACE = [
+			{re: /&/g, with: "&amp;"}, // must be first
+			{re: /"/g, with: "&quot;"},
+			{re: /'/g, with: "&apos;"},
+			{re: /</g, with: "&lt;"},
+			{re: />/g, with: "&gt;"}
+		];
+		var ret = html;
+		_.each(TO_REPLACE, function(o){ret = ret.replace(o.re, o.with);});
+		return ret;
+	}
 
-	 function buildScriptDeps(deps) {
-		 return _.map(deps, function (d) {
-			 return "<script src=\"chrome://zotero-content/content/" +
-				 escapeHTML(encodeURIComponent(d)) + "\"></script>";
-		 }).join("\n");
-	 }
+	function buildScriptDeps(deps) {
+		var ret = [];
+		_.each(deps, function (fl, dir) {
+			_.each(fl, function(f) {
+				ret.push("<script src=\"chrome://zotero-content/content/" +
+					escapeHTML(encodeURIComponent(dir)) + "/" +
+					escapeHTML(encodeURIComponent(f)) + "\"></script>");
+			});
+		});
+		return ret.join("\n");
+	}
 
-	 var ZIVD = Zotero.Annotaters.ImageVectorDrawer = function(contentDoc, oldAnnos) {
-		 this._contentDoc = contentDoc;
+	var ZIVD = Zotero.Annotaters.ImageVectorDrawer = function(contentDoc, oldAnnos) {
+		this._contentDoc = contentDoc;
 
-		 var img = this._img = contentDoc.getElementsByTagName("img")[0];
-		 var initScale = img.clientHeight / img.naturalHeight;
-		 this._mode = 's';
-		 contentDoc.defaultView.wrappedJSObject.build(this._mode, initScale, oldAnnos);
-	 };
+		var img = this._img = contentDoc.getElementsByTagName("img")[0];
+		var initScale = img.clientHeight / img.naturalHeight;
+		this._mode = 's';
+		contentDoc.defaultView.wrappedJSObject.build(this._mode, initScale, oldAnnos);
+	};
 
-	 ZIVD.annotatesExts = {
-		 "png": true,
-		 "jpg": true,
-		 "jpeg": true,
-		 "gif": true};
-	 ZIVD.toolbarID = "zotero-annotate-tb-vector-drawer";
-	 ZIVD.getHTMLString = function (title, zoteroURI, fileURI) {
-		 return "<html><head><title>" + escapeHTML(title) + "</title>\n" +
+	ZIVD.annotatesExts = {
+		"png": true,
+		"jpg": true,
+		"jpeg": true,
+		"gif": true};
+	ZIVD.toolbarID = "zotero-annotate-tb-vector-drawer";
+	ZIVD.getHTMLString = function (title, zoteroURI, fileURI) {
+		return "<html><head><title>" + escapeHTML(title) + "</title>\n" +
 				"<link rel='stylesheet' type='text/css' href='chrome://zotero-content/skin/wrapper.css' />"+
 				"<link rel='stylesheet' type='text/css' href='chrome://zotero-content/skin/note.css' />"+
-				 "<link rel=\"stylesheet\" type=\"text/css\" href=\"chrome://zotero-content/skin/ImageVectorDrawer.css\" />\n" +
-			 "</head><body>\n" +
-			 "<div class='zotero'><img src='chrome://zotero-content/skin/zotero_logo.png' class='logo'/></div>"+
-			 "<img id=\"to-mark\" src=\"" + escapeHTML(zoteroURI) + "\" />\n" +
-			 buildScriptDeps(["jquery.js", "raphael.js", "underscore.js","VectorDrawer.js", "ImageVectorDrawer.js"]) +
-			 "\n</body></html>";
-	 };
+				"<link rel=\"stylesheet\" type=\"text/css\" href=\"chrome://zotero-content/skin/ImageVectorDrawer.css\" />\n" +
+			"</head><body>\n" +
+			"<div class='zotero'><img src='chrome://zotero-content/skin/zotero_logo.png' class='logo'/></div>"+
+			"<img id=\"to-mark\" src=\"" + escapeHTML(zoteroURI) + "\" />\n" +
+			buildScriptDeps({
+				"libs": ["jquery.js", "raphael.js", "underscore.js"],
+				"annotations": ["VectorDrawer.js", "ImageVectorDrawer.js"]
+			}) +
+			"\n</body></html>";
+	};
 
-	 ZIVD.prototype = {
-		 shouldSave: function() {
-			 return JSON.parse(this._contentDoc.defaultView.wrappedJSObject.savable());
-		 },
-		 resized: function() {
-			 var scale = this._img.clientHeight / this._img.naturalHeight;
-			 this._contentDoc.defaultView.wrappedJSObject.scale(scale);
-		 },
-		 setupCallbacks: function(browserDoc) {
-			 const toolCallbacks = {
-				 'zotero-annotate-tb-vector-drawer-rectangle': 'r',
-				 'zotero-annotate-tb-vector-drawer-ellipse': 'e',
-				 'zotero-annotate-tb-vector-drawer-polygon': 'p',
-				 'zotero-annotate-tb-vector-drawer-select': 's'
-			 };
-			 var self = this;
-			 this._curCallbacks = {};
-			 _.each(toolCallbacks, function(mode, elID){
-				 var el = browserDoc.getElementById(elID);
-				 self._curCallbacks[elID] = function() {
-					 self._contentDoc.defaultView.wrappedJSObject.mode(mode);
-					 self._mode = mode;
-				 };
-				 el.addEventListener("command", self._curCallbacks[elID], false);
-				 if (mode == self._mode) el.checked = true;
-			 });
+	ZIVD.prototype = {
+		shouldSave: function() {
+			return JSON.parse(this._contentDoc.defaultView.wrappedJSObject.savable());
+		},
+		resized: function() {
+			var scale = this._img.clientHeight / this._img.naturalHeight;
+			this._contentDoc.defaultView.wrappedJSObject.scale(scale);
+		},
+		setupCallbacks: function(browserDoc) {
+			const toolCallbacks = {
+				'zotero-annotate-tb-vector-drawer-rectangle': 'r',
+				'zotero-annotate-tb-vector-drawer-ellipse': 'e',
+				'zotero-annotate-tb-vector-drawer-polygon': 'p',
+				'zotero-annotate-tb-vector-drawer-select': 's'
+			};
+			var self = this;
+			this._curCallbacks = {};
+			_.each(toolCallbacks, function(mode, elID){
+				var el = browserDoc.getElementById(elID);
+				self._curCallbacks[elID] = function() {
+					self._contentDoc.defaultView.wrappedJSObject.mode(mode);
+					self._mode = mode;
+				};
+				el.addEventListener("command", self._curCallbacks[elID], false);
+				if (mode == self._mode) el.checked = true;
+			});
 
-			 // TODO: add scaling UI
-		 },
-		 teardownCallbacks: function(browserDoc) {
-			 var self = this;
-			 _.each(self._curCallbacks, function(cb, elID){
-				 browserDoc.getElementById(elID).removeEventListener("command", cb, false);
-			 });
-			 self._curCallbacks = {};
+			// TODO: add scaling UI
+		},
+		teardownCallbacks: function(browserDoc) {
+			var self = this;
+			_.each(self._curCallbacks, function(cb, elID){
+				browserDoc.getElementById(elID).removeEventListener("command", cb, false);
+			});
+			self._curCallbacks = {};
 
-			 // TODO: add scaling UI
-		 },
-		 klass: ZIVD,
-		 constructor: ZIVD
-	 };
+			// TODO: add scaling UI
+		},
+		klass: ZIVD,
+		constructor: ZIVD
+	};
 
-	 var ZATM = Zotero.Annotaters.AudioTimeMarker = function(contentDoc, oldAnnos) {
-		 this._contentDoc = contentDoc;
-		 this._curCallbacks = {};
+	var ZATM = Zotero.Annotaters.AudioTimeMarker = function(contentDoc, oldAnnos) {
+		this._contentDoc = contentDoc;
+		this._curCallbacks = {};
 
-		 contentDoc.defaultView.wrappedJSObject.build(oldAnnos);
-	 };
+		contentDoc.defaultView.wrappedJSObject.build(oldAnnos);
+	};
 
-	 ZATM.annotatesExts = {
-		 "mp3": true,
-		 "aac": true};
-	 ZATM.toolbarID = "zotero-annotate-tb-audio-time-marker";
-	 ZATM.getHTMLString = function (title, zoteroURI, fileURI) {
-		 var ios = Cc["@mozilla.org/network/io-service;1"]
-			 .getService(Ci.nsIIOService);
-		 var cr = Cc["@mozilla.org/chrome/chrome-registry;1"].
-			 getService(Ci.nsIChromeRegistry);
-		 var flashURI = cr.convertChromeURL(ios.newURI("chrome://zotero-content/content/AudioPlayer.swf", null, null));
+	ZATM.annotatesExts = {
+		"mp3": true,
+		"aac": true};
+	ZATM.toolbarID = "zotero-annotate-tb-audio-time-marker";
+	ZATM.getHTMLString = function (title, zoteroURI, fileURI) {
+		var ios = Cc["@mozilla.org/network/io-service;1"]
+			.getService(Ci.nsIIOService);
+		var cr = Cc["@mozilla.org/chrome/chrome-registry;1"].
+			getService(Ci.nsIChromeRegistry);
+		var flashURI = cr.convertChromeURL(ios.newURI("chrome://zotero-content/content/AudioPlayer.swf", null, null));
 
-		 return "<html><head><title>" + escapeHTML(title) + "</title>"+
-		 "<link rel='stylesheet' type='text/css' href='chrome://zotero-content/skin/wrapper.css' />"+
+		return "<html><head><title>" + escapeHTML(title) + "</title>"+
+		"<link rel='stylesheet' type='text/css' href='chrome://zotero-content/skin/wrapper.css' />"+
 "<link rel='stylesheet' type='text/css' href='chrome://zotero-content/skin/AudioTimeMarker.css' />"+
 	"<link type='text/css' href='chrome://zotero-content/skin/ui.all-slider.css' rel='stylesheet' /> "+
-		 "</head><body>\n" +
+		"</head><body>\n" +
 			"<div class='zotero'><img src='chrome://zotero-content/skin/zotero_logo.png' class='logo'/></div>"+
 			"<div class='audio-container'>"+
 			"<div id='player-ui-container'></div>"+
 			"<div id='time-marker-container'></div>"+
 					"<embed src=\"" + escapeHTML(flashURI.spec) + "\"\n" +
-				 "FlashVars=\"" + escapeHTML("eid=1&soundURL=" + fileURI) + "\" \n" +
-				 "allowscriptaccess=\"always\"\n"  +
-				 "id=\"player\" style=\"height: 0; width: 0;\"></embed>\n" +
-				 "</div>"+
-				buildScriptDeps(["jquery.js", "underscore.js", "PlayerUI.js","TimeMarker.js", "AudioTimeMarker.js", "jquery.ui.core.js", "jquery.ui.widget.js", "jquery.ui.mouse.js", "jquery.ui.slider.js", "other.js"]) + "\n</body></html>";
-	 };
+				"FlashVars=\"" + escapeHTML("eid=1&soundURL=" + fileURI) + "\" \n" +
+				"allowscriptaccess=\"always\"\n"  +
+				"id=\"player\" style=\"height: 0; width: 0;\"></embed>\n" +
+				"</div>"+
+				buildScriptDeps({
+					"libs": ["jquery.js", "underscore.js", "jquery.ui.core.js",
+						"jquery.ui.widget.js", "jquery.ui.mouse.js",
+						"jquery.ui.slider.js"],
+					"annotations": ["PlayerUI.js","TimeMarker.js",
+						"AudioTimeMarker.js", "other.js"]
+				}) + "\n</body></html>";
+	};
 
-	 ZATM.prototype = {
-		 shouldSave: function() {
-			 //return JSON.parse(this._contentDoc.defaultView.wrappedJSObject.savable());
-			 var ret = JSON.parse(this._contentDoc.defaultView.wrappedJSObject.savable());
+	ZATM.prototype = {
+		shouldSave: function() {
+			//return JSON.parse(this._contentDoc.defaultView.wrappedJSObject.savable());
+			var ret = JSON.parse(this._contentDoc.defaultView.wrappedJSObject.savable());
 Components.utils.reportError("will save " + JSON.stringify(ret));
-			 return ret;
-		 },
-		 setupCallbacks: function(browserDoc) {
-			 var self = this;
-			 const toolCallbacks = {
-				 "zotero-annotate-tb-audio-time-marker-mark": "markNow",
-				 "zotero-annotate-tb-audio-time-marker-range": "markStartEnd"
-			 };
-			 self._curCallbacks = {};
-			 _.each(toolCallbacks, function(funcName, elID){
-				 var cb = self._curCallbacks[elID] = function () {
-					 self._contentDoc.defaultView.wrappedJSObject[funcName]();
-				 };
-				 browserDoc.getElementById(elID).addEventListener("command", cb, false);
-			 });
-		 },
-		 teardownCallbacks: function(browserDoc) {
-			 _.each(this._curCallbacks, function(cb, elID){
-				 browserDoc.getElementById(elID).removeEventListener("command", cb, false);
-			 });
-			 this._curCallbacks = {};
-		 },
-		 klass: ZATM,
-		 constructor: ZATM
-	 };
+			return ret;
+		},
+		setupCallbacks: function(browserDoc) {
+			var self = this;
+			const toolCallbacks = {
+				"zotero-annotate-tb-audio-time-marker-mark": "markNow",
+				"zotero-annotate-tb-audio-time-marker-range": "markStartEnd"
+			};
+			self._curCallbacks = {};
+			_.each(toolCallbacks, function(funcName, elID){
+				var cb = self._curCallbacks[elID] = function () {
+					self._contentDoc.defaultView.wrappedJSObject[funcName]();
+				};
+				browserDoc.getElementById(elID).addEventListener("command", cb, false);
+			});
+		},
+		teardownCallbacks: function(browserDoc) {
+			_.each(this._curCallbacks, function(cb, elID){
+				browserDoc.getElementById(elID).removeEventListener("command", cb, false);
+			});
+			this._curCallbacks = {};
+		},
+		klass: ZATM,
+		constructor: ZATM
+	};
 
-	 var ZVDM = Zotero.Annotaters.VideoDrawerMarker = function(contentDoc, oldAnnos) {
-		 this._contentDoc = contentDoc;
-		 this._curCallbacks = {};
+	var ZVDM = Zotero.Annotaters.VideoDrawerMarker = function(contentDoc, oldAnnos) {
+		this._contentDoc = contentDoc;
+		this._curCallbacks = {};
 
-		 contentDoc.defaultView.wrappedJSObject.build(oldAnnos);
-	 };
+		contentDoc.defaultView.wrappedJSObject.build(oldAnnos);
+	};
 
-	 ZVDM.annotatesExts = {
-		 "flv": true,
-		 "mp4": true,
-		 "m4v": true};
-	 ZVDM.toolbarID = "zotero-annotate-tb-video-drawer-marker";
-	 ZVDM.getHTMLString = function (title, zoteroURI, fileURI) {
-		 var ios = Cc["@mozilla.org/network/io-service;1"]
-			 .getService(Ci.nsIIOService);
-		 var cr = Cc["@mozilla.org/chrome/chrome-registry;1"].
-			 getService(Ci.nsIChromeRegistry);
-		 var flashURI = cr.convertChromeURL(ios.newURI("chrome://zotero-content/content/VideoPlayerMarker.swf", null, null));
+	ZVDM.annotatesExts = {
+		"flv": true,
+		"mp4": true,
+		"m4v": true};
+	ZVDM.toolbarID = "zotero-annotate-tb-video-drawer-marker";
+	ZVDM.getHTMLString = function (title, zoteroURI, fileURI) {
+		var ios = Cc["@mozilla.org/network/io-service;1"]
+			.getService(Ci.nsIIOService);
+		var cr = Cc["@mozilla.org/chrome/chrome-registry;1"].
+			getService(Ci.nsIChromeRegistry);
+		var flashURI = cr.convertChromeURL(ios.newURI("chrome://zotero-content/content/VideoPlayerMarker.swf", null, null));
 
-		 return "<html><head><title>" + escapeHTML(title) + "</title></head><body>\n" +
-			 "<embed src=\"" + escapeHTML(flashURI.spec) + "\"\n" +
-				 "FlashVars=\"" + escapeHTML("eid=1&videoURL=" + fileURI) + "\" \n" +
-				 "allowscriptaccess=\"always\"\n"  +
-				 "id=\"player\" style=\"height: 300; width: 400;\"></embed>\n" +
-			 "<div id=\"player-ui-container\"></div>\n" +
-			 "<div id=\"time-marker-container\"></div>\n" +
-			 buildScriptDeps(["jquery.js", "underscore.js", "PlayerUI.js","TimeMarker.js", "VideoDrawerMarker.js"]) + "\n</body></html>";
-	 };
+		return "<html><head><title>" + escapeHTML(title) + "</title></head><body>\n" +
+			"<embed src=\"" + escapeHTML(flashURI.spec) + "\"\n" +
+				"FlashVars=\"" + escapeHTML("eid=1&videoURL=" + fileURI) + "\" \n" +
+				"allowscriptaccess=\"always\"\n"  +
+				"id=\"player\" style=\"height: 300; width: 400;\"></embed>\n" +
+			"<div id=\"player-ui-container\"></div>\n" +
+			"<div id=\"time-marker-container\"></div>\n" +
+			buildScriptDeps({
+				"libs": ["jquery.js", "underscore.js"],
+				"annotations": ["PlayerUI.js","TimeMarker.js", "VideoDrawerMarker.js"]
+			}) + "\n</body></html>";
+	};
 
-	 ZVDM.prototype = {
-		 shouldSave: function() {
-			 return JSON.parse(this._contentDoc.defaultView.wrappedJSObject.savable());
-		 },
-		 setupCallbacks: function(browserDoc) {
-			 var self = this;
-			 const drawToolCallbacks = {
-				 'zotero-annotate-tb-vector-drawer-rectangle': 'r',
-				 'zotero-annotate-tb-vector-drawer-ellipse': 'e',
-				 'zotero-annotate-tb-vector-drawer-polygon': 'p',
-				 'zotero-annotate-tb-vector-drawer-select': 's'
-			 };
-			 const markToolCallbacks = {
-				 "zotero-annotate-tb-audio-time-marker-mark": "markNow",
-				 "zotero-annotate-tb-audio-time-marker-range": "markStartEnd"
-			 };
-			 self._curCallbacks = {};
-			 _.each(drawToolCallbacks, function(mode, elID){
-				 var el = browserDoc.getElementById(elID);
-				 var cb = self._curCallbacks[elID] = function() {
-					 self._contentDoc.defaultView.wrappedJSObject.mode(mode);
-					 self._mode = mode;
-				 };
-				 el.addEventListener("command", cb, false);
-				 if (mode == self._mode) el.checked = true;
-			 });
-			 _.each(markToolCallbacks, function(funcName, elID){
-				 var cb = self._curCallbacks[elID] = function () {
-					 self._contentDoc.defaultView.wrappedJSObject[funcName]();
-				 };
-				 browserDoc.getElementById(elID).addEventListener("command", cb, false);
-			 });
-		 },
-		 teardownCallbacks: function(browserDoc) {
-			 _.each(this._curCallbacks, function(cb, elID){
-				 browserDoc.getElementById(elID).removeEventListener("command", cb, false);
-			 });
-			 this._curCallbacks = {};
-		 },
-		 klass: ZVDM,
-		 constructor: ZVDM
-	 };
+	ZVDM.prototype = {
+		shouldSave: function() {
+			return JSON.parse(this._contentDoc.defaultView.wrappedJSObject.savable());
+		},
+		setupCallbacks: function(browserDoc) {
+			var self = this;
+			const drawToolCallbacks = {
+				'zotero-annotate-tb-vector-drawer-rectangle': 'r',
+				'zotero-annotate-tb-vector-drawer-ellipse': 'e',
+				'zotero-annotate-tb-vector-drawer-polygon': 'p',
+				'zotero-annotate-tb-vector-drawer-select': 's'
+			};
+			const markToolCallbacks = {
+				"zotero-annotate-tb-audio-time-marker-mark": "markNow",
+				"zotero-annotate-tb-audio-time-marker-range": "markStartEnd"
+			};
+			self._curCallbacks = {};
+			_.each(drawToolCallbacks, function(mode, elID){
+				var el = browserDoc.getElementById(elID);
+				var cb = self._curCallbacks[elID] = function() {
+					self._contentDoc.defaultView.wrappedJSObject.mode(mode);
+					self._mode = mode;
+				};
+				el.addEventListener("command", cb, false);
+				if (mode == self._mode) el.checked = true;
+			});
+			_.each(markToolCallbacks, function(funcName, elID){
+				var cb = self._curCallbacks[elID] = function () {
+					self._contentDoc.defaultView.wrappedJSObject[funcName]();
+				};
+				browserDoc.getElementById(elID).addEventListener("command", cb, false);
+			});
+		},
+		teardownCallbacks: function(browserDoc) {
+			_.each(this._curCallbacks, function(cb, elID){
+				browserDoc.getElementById(elID).removeEventListener("command", cb, false);
+			});
+			this._curCallbacks = {};
+		},
+		klass: ZVDM,
+		constructor: ZVDM
+	};
 })();

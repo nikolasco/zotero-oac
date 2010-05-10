@@ -819,7 +819,8 @@ function ChromeExtensionHandler() {
 				return channel;
 			}
 			catch (e) {
-				Zotero.debug(e);
+//				Zotero.debug(e);
+				Components.utils.reportError(e);
 				throw (e);
 			}
 		}
