@@ -75,21 +75,6 @@ Zotero.Annotaters = {};
 	 const Cc = Components.classes;
 	 const Ci = Components.interfaces;
 
-	 function getContents(aURL){
-		 var ios = Cc["@mozilla.org/network/io-service;1"]
-			 .getService(Ci.nsIIOService);
-		 var ss = Cc["@mozilla.org/scriptableinputstream;1"]
-			 .getService(Ci.nsIScriptableInputStream);
-
-		 var chan = ios.newChannel(aURL,null,null);
-		 var inp = chan.open();
-		 ss.init(inp);
-		 var str = ss.read(inp.available());
-		 ss.close();
-		 inp.close();
-		 return str;
-	 }
-
 	 Zotero.Annotaters.classForFileName = function (name) {
 		 var m = /\.([^.]+)$/.exec(name);
 		 if (!m)  return null;
