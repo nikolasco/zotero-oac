@@ -16,7 +16,7 @@
 	     throw (e);
          }
      }
-     
+
 
      var _ = Zotero.Libs.exports._;
      _.each(Zotero.Libs.exports, function(libVal, libName) {
