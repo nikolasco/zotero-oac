@@ -128,11 +128,11 @@ Zotero.Annotaters = {};
 	ZIVD.toolbarID = "zotero-annotate-tb-vector-drawer";
 	ZIVD.getHTMLString = function (title, zoteroURI, fileURI) {
 		return "<html><head><title>" + escapeHTML(title) + "</title>\n" +
-				"<link rel='stylesheet' type='text/css' href='chrome://zotero-content/skin/wrapper.css' />"+
-				"<link rel='stylesheet' type='text/css' href='chrome://zotero-content/skin/note.css' />"+
-				"<link rel=\"stylesheet\" type=\"text/css\" href=\"chrome://zotero-content/skin/ImageVectorDrawer.css\" />\n" +
+				"<link rel='stylesheet' type='text/css' href='chrome://zotero-content/skin/annotations/wrapper.css' />"+
+				"<link rel='stylesheet' type='text/css' href='chrome://zotero-content/skin/annotations/note.css' />"+
+				"<link rel=\"stylesheet\" type=\"text/css\" href=\"chrome://zotero-content/skin/annotations/ImageVectorDrawer.css\" />\n" +
 			"</head><body>\n" +
-			"<div class='zotero'><img src='chrome://zotero-content/skin/zotero_logo.png' class='logo'/></div>"+
+			"<div class='zotero'><img src='chrome://zotero-content/skin/annotations/images/zotero_logo.png' class='logo'/></div>"+
 			"<img id=\"to-mark\" src=\"" + escapeHTML(zoteroURI) + "\" />\n" +
 			buildScriptDeps({
 				"libs": ["jquery.js", "raphael.js", "underscore.js"],
@@ -199,14 +199,14 @@ Zotero.Annotaters = {};
 			.getService(Ci.nsIIOService);
 		var cr = Cc["@mozilla.org/chrome/chrome-registry;1"].
 			getService(Ci.nsIChromeRegistry);
-		var flashURI = cr.convertChromeURL(ios.newURI("chrome://zotero-content/content/AudioPlayer.swf", null, null));
+		var flashURI = cr.convertChromeURL(ios.newURI("chrome://zotero-content/content/annotations/AudioPlayer.swf", null, null));
 
 		return "<html><head><title>" + escapeHTML(title) + "</title>"+
-		"<link rel='stylesheet' type='text/css' href='chrome://zotero-content/skin/wrapper.css' />"+
-"<link rel='stylesheet' type='text/css' href='chrome://zotero-content/skin/AudioTimeMarker.css' />"+
-	"<link type='text/css' href='chrome://zotero-content/skin/ui.all-slider.css' rel='stylesheet' /> "+
+		"<link rel='stylesheet' type='text/css' href='chrome://zotero-content/skin/annotations/wrapper.css' />"+
+"<link rel='stylesheet' type='text/css' href='chrome://zotero-content/skin/annotations/AudioTimeMarker.css' />"+
+	"<link type='text/css' href='chrome://zotero-content/skin/libs/ui.all-slider.css' rel='stylesheet' /> "+
 		"</head><body>\n" +
-			"<div class='zotero'><img src='chrome://zotero-content/skin/zotero_logo.png' class='logo'/></div>"+
+			"<div class='zotero'><img src='chrome://zotero-content/skin/annotations/images/zotero_logo.png' class='logo'/></div>"+
 			"<div class='audio-container'>"+
 			"<div id='player-ui-container'></div>"+
 			"<div id='time-marker-container'></div>"+
@@ -272,7 +272,7 @@ Components.utils.reportError("will save " + JSON.stringify(ret));
 			.getService(Ci.nsIIOService);
 		var cr = Cc["@mozilla.org/chrome/chrome-registry;1"].
 			getService(Ci.nsIChromeRegistry);
-		var flashURI = cr.convertChromeURL(ios.newURI("chrome://zotero-content/content/VideoPlayerMarker.swf", null, null));
+		var flashURI = cr.convertChromeURL(ios.newURI("chrome://zotero-content/content/annotations/VideoPlayerMarker.swf", null, null));
 
 		return "<html><head><title>" + escapeHTML(title) + "</title></head><body>\n" +
 			"<embed src=\"" + escapeHTML(flashURI.spec) + "\"\n" +

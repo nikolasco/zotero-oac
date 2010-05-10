@@ -26,21 +26,21 @@ div.player-ui-pause, div.player-ui-play {
 	margin-right:5px;
 }
 .player-ui-pause {
-	background:url('chrome://zotero-content/skin/images/annotate-audio-pause.png') no-repeat;
+	background:url('chrome://zotero-content/skin/annotations/images/annotate-audio-pause.png') no-repeat;
 }
 .player-ui-pause:hover {
-	background:url('chrome://zotero-content/skin/images/annotate-audio-pause-hover.png') no-repeat;
+	background:url('chrome://zotero-content/skin/annotations/images/annotate-audio-pause-hover.png') no-repeat;
 }
 .player-ui-play {
-	background:url('chrome://zotero-content/skin/images/annotate-audio-play.png') no-repeat;
+	background:url('chrome://zotero-content/skin/annotations/images/annotate-audio-play.png') no-repeat;
 }
 .player-ui-play:hover {
-	background:url('chrome://zotero-content/skin/images/annotate-audio-play-hover.png') no-repeat;
+	background:url('chrome://zotero-content/skin/annotations/images/annotate-audio-play-hover.png') no-repeat;
 }
 .player-ui-nowplaying {
 	height:24px;
 	width:500px;
-	background:url('chrome://zotero-content/skin/images/annotate-audio-songnamebkgd.gif') repeat-x;
+	background:url('chrome://zotero-content/skin/annotations/images/annotate-audio-songnamebkgd.gif') repeat-x;
 	float:left;
 }
 .player-ui-song-name {
@@ -68,7 +68,7 @@ table,th, td {
 th {
 	height:20px;
 	padding:2px 4px;
-	background:url('chrome://zotero-content/skin/images/annotate-audio-songnamebkgd.gif') repeat-x;
+	background:url('chrome://zotero-content/skin/annotations/images/annotate-audio-songnamebkgd.gif') repeat-x;
 }
 td {
 	padding:2px 4px;
