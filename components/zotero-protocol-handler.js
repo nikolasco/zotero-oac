@@ -1,29 +1,29 @@
 /*
     ***** BEGIN LICENSE BLOCK *****
-
+    
     Copyright © 2009 Center for History and New Media
                      George Mason University, Fairfax, Virginia, USA
                      http://zotero.org
-
+    
     This file is part of Zotero.
-
+    
     Zotero is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
-
+    
     Zotero is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-
+    
     You should have received a copy of the GNU General Public License
     along with Zotero.  If not, see <http://www.gnu.org/licenses/>.
-
-
+    
+	
 	Based on nsChromeExtensionHandler example code by Ed Anuff at
 	http://kb.mozillazine.org/Dev_:_Extending_the_Chrome_Protocol
-
+	
     ***** END LICENSE BLOCK *****
 */
 
@@ -43,8 +43,8 @@ function ChromeExtensionHandler() {
 	this.wrappedJSObject = this;
 	this._systemPrincipal = null;
 	this._extensions = {};
-
-
+	
+	
 	/*
 	 * Report generation extension for Zotero protocol
 	 *
@@ -62,7 +62,7 @@ function ChromeExtensionHandler() {
 	 *  - defaults to 'html' if not specified
 	 *
 	 * e.g. zotero://report/collection/0_ABCD1234/rtf
-	 *
+	 * 
 	 *
 	 * Sorting:
 	 *
@@ -78,23 +78,23 @@ function ChromeExtensionHandler() {
 	 */
 	var ReportExtension = new function(){
 		this.newChannel = newChannel;
-
+		
 		this.__defineGetter__('loadAsChrome', function () { return false; });
-
+		
 		function newChannel(uri){
 			var ioService = Components.classes["@mozilla.org/network/io-service;1"]
 				.getService(Components.interfaces.nsIIOService);
-
+			
 			var Zotero = Components.classes["@zotero.org/Zotero;1"]
 				.getService(Components.interfaces.nsISupports)
 				.wrappedJSObject;
-
+			
 			generateContent:try {
 				var mimeType, content = '';
-
+				
 				var [path, queryString] = uri.path.substr(1).split('?');
 				var [type, ids, format] = path.split('/');
-
+				
 				// Get query string variables
 				if (queryString) {
 					var queryVars = queryString.split('&');
@@ -107,7 +107,7 @@ function ChromeExtensionHandler() {
 						}
 					}
 				}
-
+				
 				switch (type){
 					case 'collection':
 						var lkh = Zotero.Collections.parseLibraryKeyHash(ids);
@@ -124,7 +124,7 @@ function ChromeExtensionHandler() {
 						}
 						var results = col.getChildItems();
 						break;
-
+					
 					case 'search':
 						var lkh = Zotero.Searches.parseLibraryKeyHash(ids);
 						if (lkh) {
@@ -138,7 +138,7 @@ function ChromeExtensionHandler() {
 							content = 'Invalid search ID or key';
 							break generateContent;
 						}
-
+						
 						// FIXME: Hack to exclude group libraries for now
 						var s2 = new Zotero.Search();
 						s2.setScope(s);
@@ -147,14 +147,14 @@ function ChromeExtensionHandler() {
 							s2.addCondition('libraryID', 'isNot', group.libraryID);
 						}
 						var ids = s2.search();
-
+						
 						var results = Zotero.Items.get(ids);
 						break;
-
+					
 					case 'items':
 					case 'item':
 						ids = ids.split('-');
-
+						
 						// Keys
 						if (Zotero.Items.parseLibraryKeyHash(ids[0])) {
 							var results = [];
@@ -170,14 +170,14 @@ function ChromeExtensionHandler() {
 						else {
 							var results = Zotero.Items.get(ids);
 						}
-
+						
 						if (!results.length) {
 							mimeType = 'text/html';
 							content = 'Invalid ID';
 							break generateContent;
 						}
 						break;
-
+						
 					default:
 						// Proxy CSS files
 						if (type.match(/^detail.*\.css$/)) {
@@ -193,7 +193,7 @@ function ChromeExtensionHandler() {
 							var channel = ioService.newChannelFromURI(fileURI);
 							return channel;
 						}
-
+						
 						// Display all items
 						var type = 'library';
 						var s = new Zotero.Search();
@@ -201,16 +201,16 @@ function ChromeExtensionHandler() {
 						var ids = s.search();
 						var results = Zotero.Items.get(ids);
 				}
-
+				
 				var items = [];
 				var itemsHash = {}; // key = itemID, val = position in |items|
 				var searchItemIDs = {}; // hash of all selected items
 				var searchParentIDs = {}; // hash of parents of selected child items
 				var searchChildIDs = {}; // hash of selected chlid items
-
+				
 				var includeAllChildItems = Zotero.Prefs.get('report.includeAllChildItems');
 				var combineChildItems = Zotero.Prefs.get('report.combineChildItems');
-
+				
 				var unhandledParents = {};
 				for (var i=0; i<results.length; i++) {
 					// Don't add child items directly
@@ -219,7 +219,7 @@ function ChromeExtensionHandler() {
 					if (sourceItemID) {
 						searchParentIDs[sourceItemID] = true;
 						searchChildIDs[results[i].getID()] = true;
-
+						
 						// Don't include all child items if any child
 						// items were selected
 						includeAllChildItems = false;
@@ -237,7 +237,7 @@ function ChromeExtensionHandler() {
 					}
 					searchItemIDs[results[i].getID()] = true;
 				}
-
+				
 				// If including all child items, add children of all matched
 				// parents to the child array
 				if (includeAllChildItems) {
@@ -270,7 +270,7 @@ function ChromeExtensionHandler() {
 						items[items.length - 1].reportSearchMatch = true;
 					}
 				}
-
+				
 				if (combineChildItems) {
 					// Add parents of matches if parents aren't matches themselves
 					for (var id in searchParentIDs) {
@@ -280,7 +280,7 @@ function ChromeExtensionHandler() {
 							items.push(item.toArray(2));
 						}
 					}
-
+					
 					// Add children to reportChildren property of parents
 					for (var id in searchChildIDs) {
 						var item = Zotero.Items.get(id);
@@ -306,7 +306,7 @@ function ChromeExtensionHandler() {
 						var item = Zotero.Items.get(id);
 						var parentID = item.getSource();
 						var parentItem = Zotero.Items.get(parentID);
-
+						
 						if (!itemsHash[parentID]) {
 							// If parent is a search match and not yet added,
 							// add on its own
@@ -319,7 +319,7 @@ function ChromeExtensionHandler() {
 								itemsHash[parentID] = [];
 							}
 						}
-
+						
 						// Now add parent and child
 						itemsHash[parentID].push(items.length);
 						items.push(parentItem.toArray(2));
@@ -337,13 +337,13 @@ function ChromeExtensionHandler() {
 						}
 					}
 				}
-
-
+				
+				
 				// Sort items
 				if (!sortBy) {
 					sortBy = 'title';
 				}
-
+				
 				var sorts = sortBy.split(',');
 				for (var i=0; i<sorts.length; i++) {
 					var [field, order] = sorts[i].split('/');
@@ -356,22 +356,22 @@ function ChromeExtensionHandler() {
 						case 'desc':
 							order = -1;
 							break;
-
+						
 						default:
 							order = 1;
 					}
-
+					
 					sorts[i] = {
 						field: field,
 						order: order
 					};
 				}
-
-
+				
+				
 				var collation = Zotero.getLocaleCollation();
 				var compareFunction = function(a, b) {
 					var index = 0;
-
+					
 					// Multidimensional sort
 					do {
 						// In combineChildItems, use note or attachment as item
@@ -384,7 +384,7 @@ function ChromeExtensionHandler() {
 									a = a.reportChildren.attachments[0];
 								}
 							}
-
+							
 							if (b.reportChildren) {
 								if (b.reportChildren.notes.length) {
 									b = b.reportChildren.notes[0];
@@ -394,25 +394,25 @@ function ChromeExtensionHandler() {
 								}
 							}
 						}
-
+						
 						var valA, valB;
-
+						
 						if (sorts[index].field == 'title') {
 							// For notes, use content for 'title'
 							if (a.itemType == 'note') {
 								valA = a.note;
 							}
 							else {
-								valA = a.title;
+								valA = a.title; 
 							}
-
+							
 							if (b.itemType == 'note') {
 								valB = b.note;
 							}
 							else {
-								valB = b.title;
+								valB = b.title; 
 							}
-
+							
 							valA = Zotero.Items.getSortTitle(valA);
 							valB = Zotero.Items.getSortTitle(valB);
 						}
@@ -420,7 +420,7 @@ function ChromeExtensionHandler() {
 							var valA = a[sorts[index].field];
 							var valB = b[sorts[index].field];
 						}
-
+						
 						// Put empty values last
 						if (!valA && valB) {
 							var cmp = 1;
@@ -431,7 +431,7 @@ function ChromeExtensionHandler() {
 						else {
 							var cmp = collation.compareString(0, valA, valB);
 						}
-
+						
 						var result = 0;
 						if (cmp != 0) {
 							result = cmp * sorts[index].order;
@@ -439,10 +439,10 @@ function ChromeExtensionHandler() {
 						index++;
 					}
 					while (result == 0 && sorts[index]);
-
+					
 					return result;
 				};
-
+				
 				items.sort(compareFunction);
 				for (var i in items) {
 					if (items[i].reportChildren) {
@@ -450,17 +450,17 @@ function ChromeExtensionHandler() {
 						items[i].reportChildren.attachments.sort(compareFunction);
 					}
 				}
-
+				
 				// Pass off to the appropriate handler
 				switch (format){
 					case 'rtf':
 						mimeType = 'text/rtf';
 						break;
-
+						
 					case 'csv':
 						mimeType = 'text/plain';
 						break;
-
+					
 					default:
 						format = 'html';
 						mimeType = 'application/xhtml+xml';
@@ -471,51 +471,51 @@ function ChromeExtensionHandler() {
 				Zotero.debug(e);
 				throw (e);
 			}
-
+			
 			var uri_str = 'data:' + (mimeType ? mimeType + ',' : '') + encodeURIComponent(content);
 			var ext_uri = ioService.newURI(uri_str, null, null);
 			var extChannel = ioService.newChannelFromURI(ext_uri);
-
+			
 			return extChannel;
 		}
 	};
 
 	var TimelineExtension = new function(){
 		this.newChannel = newChannel;
-
+		
 		this.__defineGetter__('loadAsChrome', function () { return true; });
-
+		
 		/*
 		queryString key abbreviations:  intervals = i  |  dateType = t  |  timelineDate = d
-
+		
 		interval abbreviations:  day = d  |  month = m  |  year = y  |  decade = e  |  century = c  |  millennium = i
 		dateType abbreviations:  date = d  |  dateAdded = da  |  dateModified = dm
 		timelineDate format:  shortMonthName.day.year  (year is positive for A.D. and negative for B.C.)
-
-
-
-		zotero://timeline   -----> creates HTML for timeline
+		
+		
+		
+		zotero://timeline   -----> creates HTML for timeline 
 			(defaults:  type = library | intervals = month, year, decade | timelineDate = today's date | dateType = date)
-
-
+			
+			
 		Example URLs:
-
+		
 		zotero://timeline/library?i=yec
 		zotero://timeline/collection/12345?t=da&d=Jul.24.2008
 		zotero://timeline/search/54321?d=Dec.1.-500&i=dmy&t=d
-
-
-
+		
+		
+		
 		zotero://timeline/data    ----->creates XML file
 			(defaults:  type = library  |  dateType = date)
-
-
+		
+		
 		Example URLs:
-
+		
 		zotero://timeline/data/library?t=da
 		zotero://timeline/data/collection/12345
 		zotero://timeline/data/search/54321?t=dm
-
+		
 		*/
 		function newChannel(uri) {
 			var ioService = Components.classes["@mozilla.org/network/io-service;1"]
@@ -527,10 +527,10 @@ function ChromeExtensionHandler() {
 
 			generateContent:try {
 				var mimeType, content = '';
-
+	
 				var [path, queryString] = uri.path.substr(1).split('?');
 				var [intervals, timelineDate, dateType] = ['','',''];
-
+				
 				if (queryString) {
 					var queryVars = queryString.split('&');
 					for (var i in queryVars) {
@@ -550,7 +550,7 @@ function ChromeExtensionHandler() {
 						}
 					}
 				}
-
+				
 				var pathParts = path.split('/');
 				if (pathParts[0] != 'data') {
 					var [type, id] = pathParts;
@@ -558,7 +558,7 @@ function ChromeExtensionHandler() {
 				else {
 					var [, type, id] = pathParts;
 				}
-
+				
 				// Get the collection or search object
 				var collection, search;
 				switch (type) {
@@ -576,7 +576,7 @@ function ChromeExtensionHandler() {
 							break generateContent;
 						}
 						break;
-
+					
 					case 'search':
 						var lkh = Zotero.Searches.parseLibraryKeyHash(id);
 						if (lkh) {
@@ -590,7 +590,7 @@ function ChromeExtensionHandler() {
 							content = 'Invalid search ID or key';
 							break generateContent;
 						}
-
+						
 						// FIXME: Hack to exclude group libraries for now
 						var search = new Zotero.Search();
 						search.setScope(s);
@@ -600,14 +600,14 @@ function ChromeExtensionHandler() {
 						}
 						break;
 				}
-
+				
 				if (pathParts[0] != 'data') {
 					//creates HTML file
 					content = Zotero.File.getContentsFromURL('chrome://zotero/skin/timeline/timeline.html');
 					mimeType = 'text/html';
-
+					
 					var [type, id] = pathParts;
-
+										
 					if(!timelineDate){
 						timelineDate=Date();
 						var dateParts=timelineDate.toString().split(' ');
@@ -616,7 +616,7 @@ function ChromeExtensionHandler() {
 					if (intervals.length < 3) {
 						intervals += "mye".substr(intervals.length);
 					}
-
+					
 					var theIntervals = new Object();
 						theIntervals['d'] = 'Timeline.DateTime.DAY';
 						theIntervals['m'] = 'Timeline.DateTime.MONTH';
@@ -624,14 +624,14 @@ function ChromeExtensionHandler() {
 						theIntervals['e'] = 'Timeline.DateTime.DECADE';
 						theIntervals['c'] = 'Timeline.DateTime.CENTURY';
 						theIntervals['i'] = 'Timeline.DateTime.MILLENNIUM';
-
+					
 					//sets the intervals of the timeline bands
 					var theTemp = '<body onload="onLoad(';
 					var a = (theIntervals[intervals[0]]) ? theIntervals[intervals[0]] : 'Timeline.DateTime.MONTH';
 					var b = (theIntervals[intervals[1]]) ? theIntervals[intervals[1]] : 'Timeline.DateTime.YEAR';
 					var c = (theIntervals[intervals[2]]) ? theIntervals[intervals[2]] : 'Timeline.DateTime.DECADE';
 					content = content.replace(theTemp, theTemp + a + ',' + b + ',' + c + ',\'' + timelineDate + '\'');
-
+					
 					theTemp = 'document.write("<title>';
 					if(type == 'collection') {
 						content = content.replace(theTemp, theTemp + collection.name + ' - ');
@@ -642,7 +642,7 @@ function ChromeExtensionHandler() {
 					else {
 						content = content.replace(theTemp, theTemp + Zotero.getString('pane.collections.library') + ' - ');
 					}
-
+					
 					theTemp = 'Timeline.loadXML("zotero://timeline/data/';
 					var d = '';
 					//passes information (type,ids, dateType) for when the XML is created
@@ -652,14 +652,14 @@ function ChromeExtensionHandler() {
 					else {
 						d += type + '/' + id;
 					}
-
+					
 					if(dateType) {
 						d += '?t=' + dateType;
 					}
-
+					
 					content = content.replace(theTemp, theTemp + d);
-
-
+					
+					
 					var uri_str = 'data:' + (mimeType ? mimeType + ',' : '') + encodeURIComponent(content);
 					var ext_uri = ioService.newURI(uri_str, null, null);
 					var extChannel = ioService.newChannelFromURI(ext_uri);
@@ -672,12 +672,12 @@ function ChromeExtensionHandler() {
 						case 'collection':
 							var results = collection.getChildItems();
 							break;
-
+						
 						case 'search':
 							var ids = search.search();
 							var results = Zotero.Items.get(ids);
 							break;
-
+						
 						default:
 							type = 'library';
 							var s = new Zotero.Search();
@@ -693,37 +693,37 @@ function ChromeExtensionHandler() {
 							items.push(results[i]);
 						}
 					}
-
+					
 					if (!items) {
 						mimeType = 'text/html';
 						content = 'Invalid ID';
 						break generateContent;
 					}
-
+					
 					// Convert item objects to export arrays
 					for (var i = 0; i < items.length; i++) {
 						items[i] = items[i].toArray();
 					}
-
+					
 					mimeType = 'application/xml';
-
+					
 					var theDateTypes = new Object();
 						theDateTypes['d'] = 'date';
 						theDateTypes['da'] = 'dateAdded';
 						theDateTypes['dm'] = 'dateModified';
-
+					
 					//default dateType = date
 					if (!dateType || !theDateTypes[dateType]) {
 						dateType = 'd';
 					}
-
+					
 					content = Zotero.Timeline.generateXMLDetails(items, theDateTypes[dateType]);
 				}
-
+				
 				var uri_str = 'data:' + (mimeType ? mimeType + ',' : '') + encodeURIComponent(content);
 				var ext_uri = ioService.newURI(uri_str, null, null);
 				var extChannel = ioService.newChannelFromURI(ext_uri);
-
+				
 				return extChannel;
 			}
 			catch (e){
@@ -732,20 +732,20 @@ function ChromeExtensionHandler() {
 			}
 		}
 	};
-
-
+	
+	
 	/*
 		zotero://attachment/[id]/
 	*/
 	var AttachmentExtension = new function() {
 		this.newChannel = newChannel;
-
+		
 		this.__defineGetter__('loadAsChrome', function () { return false; });
-
+		
 		function newChannel(uri) {
 			var ioService = Components.classes["@mozilla.org/network/io-service;1"]
 				.getService(Components.interfaces.nsIIOService);
-
+			
 			var Zotero = Components.classes["@zotero.org/Zotero;1"]
 				.getService(Components.interfaces.nsISupports)
 				.wrappedJSObject;
@@ -753,7 +753,7 @@ function ChromeExtensionHandler() {
 			try {
 				var errorMsg;
 				var [id, fileName] = uri.path.substr(1).split('/');
-
+				
 				if (parseInt(id) != id) {
 					// Proxy annotation icons
 					if (id.match(/^annotation.*\.(png|html|css|gif)$/)) {
@@ -769,7 +769,7 @@ function ChromeExtensionHandler() {
 						return _errorChannel("Attachment id not an integer");
 					}
 				}
-
+				
 				if (!fileURI) {
 					var item = Zotero.Items.get(id);
 					if (!item) {
@@ -789,7 +789,7 @@ function ChromeExtensionHandler() {
 						}
 					}
 				}
-
+				
 				var ph = Components.classes["@mozilla.org/network/protocol;1?name=file"].
 						createInstance(Components.interfaces.nsIFileProtocolHandler);
 				if (!fileURI) {
@@ -797,7 +797,7 @@ function ChromeExtensionHandler() {
 				}
 
 				var anno = Zotero.Annotaters.classForFileName(file.leafName);
-								if (!redirected && anno && anno.getHTMLString) {
+                                if (!redirected && anno && anno.getHTMLString) {
 					// we trust ourselves, right?
 					var chromeURI = ioService.newURI("chrome://zotero-content/content/", null, null);
 					var secMan = Components.classes["@mozilla.org/scriptsecuritymanager;1"].
@@ -820,8 +820,8 @@ function ChromeExtensionHandler() {
 				throw (e);
 			}
 		}
-
-
+		
+		
 		function _errorChannel(msg) {
 			var ioService = Components.classes["@mozilla.org/network/io-service;1"]
 				.getService(Components.interfaces.nsIIOService);
@@ -831,15 +831,15 @@ function ChromeExtensionHandler() {
 			return channel;
 		}
 	};
-
-
+	
+	
 	/**
 	 * zotero://select/[type]/0_ABCD1234
 	 * zotero://select/[type]/1234 (not consistent across synced machines)
 	 */
 	var SelectExtension = new function(){
 		this.newChannel = newChannel;
-
+		
 		function newChannel(uri) {
 			var ioService = Components.classes["@mozilla.org/network/io-service;1"]
 				.getService(Components.interfaces.nsIIOService);
@@ -850,19 +850,19 @@ function ChromeExtensionHandler() {
 
 			generateContent:try {
 				var mimeType, content = '';
-
+				
 				var [path, queryString] = uri.path.substr(1).split('?');
 				var [type, id] = path.split('/');
-
+				
 				//currently only able to select one item
 				var wm = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 					.getService(Components.interfaces.nsIWindowMediator);
 				var win = wm.getMostRecentWindow(null);
-
+				
 				if(!win.ZoteroPane.isShowing()){
 					win.ZoteroPane.toggleDisplay();
 				}
-
+				
 				var lkh = Zotero.Items.parseLibraryKeyHash(id);
 				if (lkh) {
 					var item = Zotero.Items.getByLibraryAndKey(lkh.libraryID, lkh.key);
@@ -876,7 +876,7 @@ function ChromeExtensionHandler() {
 					Components.utils.reportError(msg);
 					return;
 				}
-
+				
 				win.ZoteroPane.selectItem(item.id);
 			}
 			catch (e){
@@ -885,43 +885,43 @@ function ChromeExtensionHandler() {
 			}
 		}
 	};
-
+	
 	/*
 		zotero://fullscreen
 	*/
 	var FullscreenExtension = new function() {
 		this.newChannel = newChannel;
-
+		
 		this.__defineGetter__('loadAsChrome', function () { return false; });
-
+		
 		function newChannel(uri) {
 			var Zotero = Components.classes["@zotero.org/Zotero;1"]
 				.getService(Components.interfaces.nsISupports)
 				.wrappedJSObject;
-
+				
 			generateContent: try {
 				var win = Components.classes["@mozilla.org/appshell/window-mediator;1"]
 					.getService(Components.interfaces.nsIWindowMediator)
 					.getMostRecentWindow("navigator:browser");
 				var zp = win.ZoteroPane;
-
+				
 				// When using fullscreen as home page, Zotero pane is reset to
 				// 0 height, so get saved height and set it below
 				var pane = win.document.getElementById('zotero-pane');
 				var height = pane.getAttribute('savedHeight');
-
+				
 				zp.fullScreen(true);
-
+				
 				if(!zp.isShowing()) {
 					zp.toggleDisplay();
 				}
-
+				
 				pane.setAttribute('height', height);
-
+				
 				// FIXME: The above should run in a callback after about:blank
 				// is loaded so that the window title is set correctly, but I
 				// can't get the event handlers to work. - D.S.
-
+				
 				win.loadURI("about:blank");
 			}
 			catch (e) {
@@ -930,27 +930,27 @@ function ChromeExtensionHandler() {
 			}
 		}
 	};
-
-
+	
+	
 	/*
 		zotero://debug/
 	*/
 	var DebugExtension = new function() {
 		this.newChannel = newChannel;
-
+		
 		this.__defineGetter__('loadAsChrome', function () { return false; });
-
+		
 		function newChannel(uri) {
 			var ioService = Components.classes["@mozilla.org/network/io-service;1"]
 				.getService(Components.interfaces.nsIIOService);
-
+			
 			var Zotero = Components.classes["@zotero.org/Zotero;1"]
 				.getService(Components.interfaces.nsISupports)
 				.wrappedJSObject;
-
+			
 			try {
 				var output = Zotero.Debug.get();
-
+				
 				var uriStr = 'data:text/plain,' + encodeURIComponent(output);
 				var extURI = ioService.newURI(uriStr, null, null);
 				return ioService.newChannelFromURI(extURI);
@@ -961,23 +961,23 @@ function ChromeExtensionHandler() {
 			}
 		}
 	};
-
-
+	
+	
 	var ReportExtensionSpec = ZOTERO_SCHEME + "://report"
 	this._extensions[ReportExtensionSpec] = ReportExtension;
-
+	
 	var TimelineExtensionSpec = ZOTERO_SCHEME + "://timeline"
 	this._extensions[TimelineExtensionSpec] = TimelineExtension;
-
+	
 	var AttachmentExtensionSpec = ZOTERO_SCHEME + "://attachment"
 	this._extensions[AttachmentExtensionSpec] = AttachmentExtension;
-
+	
 	var SelectExtensionSpec = ZOTERO_SCHEME + "://select"
 	this._extensions[SelectExtensionSpec] = SelectExtension;
-
+	
 	var FullscreenExtensionSpec = ZOTERO_SCHEME + "://fullscreen"
 	this._extensions[FullscreenExtensionSpec] = FullscreenExtension;
-
+	
 	var DebugExtensionSpec = ZOTERO_SCHEME + "://debug"
 	this._extensions[DebugExtensionSpec] = DebugExtension;
 }
@@ -988,9 +988,9 @@ function ChromeExtensionHandler() {
  */
 ChromeExtensionHandler.prototype = {
 	scheme: ZOTERO_SCHEME,
-
+	
 	defaultPort : -1,
-
+	
 	protocolFlags :
 		Components.interfaces.nsIProtocolHandler.URI_NORELATIVE |
 		Components.interfaces.nsIProtocolHandler.URI_NOAUTH |
@@ -1000,46 +1000,46 @@ ChromeExtensionHandler.prototype = {
 		//
 		//Components.interfaces.nsIProtocolHandler.URI_IS_LOCAL_FILE,
 		Components.interfaces.nsIProtocolHandler.URI_LOADABLE_BY_ANYONE,
-
+		
 	allowPort : function(port, scheme) {
 		return false;
 	},
-
+	
 	newURI : function(spec, charset, baseURI) {
 		var newURL = Components.classes["@mozilla.org/network/standard-url;1"]
 			.createInstance(Components.interfaces.nsIStandardURL);
 		newURL.init(1, -1, spec, charset, baseURI);
 		return newURL.QueryInterface(Components.interfaces.nsIURI);
 	},
-
+	
 	newChannel : function(uri) {
 		var ioService = Components.classes["@mozilla.org/network/io-service;1"]
 			.getService(Components.interfaces.nsIIOService);
-
+		
 		var chromeService = Components.classes["@mozilla.org/network/protocol;1?name=chrome"]
 			.getService(Components.interfaces.nsIProtocolHandler);
-
+		
 		var newChannel = null;
-
+		
 		try {
 			var uriString = uri.spec.toLowerCase();
-
+			
 			for (var extSpec in this._extensions) {
 				var ext = this._extensions[extSpec];
-
+				
 				if (uriString.indexOf(extSpec) == 0) {
 					if (ext.loadAsChrome && this._systemPrincipal == null) {
 						var chromeURI = chromeService.newURI(DUMMY_CHROME_URL, null, null);
 						var chromeChannel = chromeService.newChannel(chromeURI);
-
+						
 						// Cache System Principal from chrome request
 						// so proxied pages load with chrome privileges
 						this._systemPrincipal = chromeChannel.owner;
-
+						
 						var chromeRequest = chromeChannel.QueryInterface(Components.interfaces.nsIRequest);
 						chromeRequest.cancel(0x804b0002); // BINDING_ABORTED
 					}
-
+					
 					var extChannel = ext.newChannel(uri);
 					// Extension returned null, so cancel request
 					if (!extChannel) {
@@ -1048,34 +1048,34 @@ ChromeExtensionHandler.prototype = {
 						var chromeRequest = extChannel.QueryInterface(Components.interfaces.nsIRequest);
 						chromeRequest.cancel(0x804b0002); // BINDING_ABORTED
 					}
-
+					
 					// Apply cached system principal to extension channel
 					if (ext.loadAsChrome) {
 						extChannel.owner = this._systemPrincipal;
 					}
-
+					
 					extChannel.originalURI = uri;
-
+					
 					return extChannel;
 				}
 			}
-
+			
 			// pass request through to ChromeProtocolHandler::newChannel
 			if (uriString.indexOf("chrome") != 0) {
 				uriString = uri.spec;
 				uriString = "chrome" + uriString.substring(uriString.indexOf(":"));
 				uri = chromeService.newURI(uriString, null, null);
 			}
-
+			
 			newChannel = chromeService.newChannel(uri);
 		}
 		catch (e) {
 			throw Components.results.NS_ERROR_FAILURE;
 		}
-
+		
 		return newChannel;
 	},
-
+	
 	QueryInterface : function(iid) {
 		if (!iid.equals(Components.interfaces.nsIProtocolHandler) &&
 				!iid.equals(Components.interfaces.nsISupports)) {
@@ -1092,21 +1092,21 @@ ChromeExtensionHandler.prototype = {
 
 var ChromeExtensionModule = {
 	cid: ZOTERO_PROTOCOL_CID,
-
+	
 	contractId: ZOTERO_PROTOCOL_CONTRACTID,
-
+	
 	registerSelf : function(compMgr, fileSpec, location, type) {
 		compMgr = compMgr.QueryInterface(Components.interfaces.nsIComponentRegistrar);
 		compMgr.registerFactoryLocation(
-			ZOTERO_PROTOCOL_CID,
-			ZOTERO_PROTOCOL_NAME,
-			ZOTERO_PROTOCOL_CONTRACTID,
-			fileSpec,
+			ZOTERO_PROTOCOL_CID, 
+			ZOTERO_PROTOCOL_NAME, 
+			ZOTERO_PROTOCOL_CONTRACTID, 
+			fileSpec, 
 			location,
 			type
 		);
 	},
-
+	
 	getClassObject : function(compMgr, cid, iid) {
 		if (!cid.equals(ZOTERO_PROTOCOL_CID)) {
 			throw Components.results.NS_ERROR_NO_INTERFACE;
@@ -1116,22 +1116,22 @@ var ChromeExtensionModule = {
 		}
 		return this.myFactory;
 	},
-
+	
 	canUnload : function(compMgr) {
 		return true;
 	},
-
+	
 	myFactory : {
 		createInstance : function(outer, iid) {
 			if (outer != null) {
 				throw Components.results.NS_ERROR_NO_AGGREGATION;
 			}
-
+			
 			return new ChromeExtensionHandler().QueryInterface(iid);
 		}
 	}
 };
 
 function NSGetModule(compMgr, fileSpec) {
-	return ChromeExtensionModule;
+    return ChromeExtensionModule;
 }
