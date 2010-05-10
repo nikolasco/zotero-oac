@@ -79,16 +79,6 @@ CREATE TABLE itemNotes (
 );
 CREATE INDEX itemNotes_sourceItemID ON itemNotes(sourceItemID);
 
--- Note data for note and attachment items
-CREATE TABLE itemSimpleText (
-    itemID INTEGER PRIMARY KEY,
-    sourceItemID INT,
-    txt TEXT,
-    FOREIGN KEY (itemID) REFERENCES items(itemID),
-    FOREIGN KEY (sourceItemID) REFERENCES items(itemID)
-);
-CREATE INDEX itemSimpleText_sourceItemID ON itemSimpleText(sourceItemID);
-
 -- Metadata for attachment items
 CREATE TABLE itemAttachments (
     itemID INTEGER PRIMARY KEY,
