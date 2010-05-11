@@ -71,19 +71,27 @@ Zotero.Annotate = {
 Zotero.Annotaters = {};
 
 (function() {
-	const _ = Zotero.Libs._;
 	const Cc = Components.classes;
 	const Ci = Components.interfaces;
+
+	function forEachInObj(o, func) {
+		for (var p in o) {
+			if (o.hasOwnProperty(p)) func(o[p], p);
+		}
+	}
 
 	Zotero.Annotaters.classForFileName = function (name) {
 		var m = /\.([^.]+)$/.exec(name);
 		if (!m)  return null;
 		var ext = m[1].toLowerCase();
-		var classes =  _.select(Zotero.Annotaters, function(ano) {
-			return ano && ano.annotatesExts && ano.annotatesExts.hasOwnProperty(ext);
-		});
-
-		return classes.length? classes[0] : null;
+		for (p in Zotero.Annotaters) {
+			if (!Zotero.Annotaters.hasOwnProperty(p)) continue;
+			var anno = Zotero.Annotaters[p];
+			if (anno.annotatesExts && anno.annotatesExts.hasOwnProperty(ext)) {
+				return anno;
+			}
+		}
+		return null;
 	};
 
 	function escapeHTML(html) {
@@ -95,14 +103,14 @@ Zotero.Annotaters = {};
 			{re: />/g, with: "&gt;"}
 		];
 		var ret = html;
-		_.each(TO_REPLACE, function(o){ret = ret.replace(o.re, o.with);});
+		TO_REPLACE.forEach(function(o){ret = ret.replace(o.re, o.with);});
 		return ret;
 	}
 
 	function buildScriptDeps(deps) {
 		var ret = [];
-		_.each(deps, function (fl, dir) {
-			_.each(fl, function(f) {
+		forEachInObj(deps, function (fl, dir) {
+			fl.forEach(function(f) {
 				ret.push("<script src=\"chrome://zotero-content/content/" +
 					escapeHTML(encodeURIComponent(dir)) + "/" +
 					escapeHTML(encodeURIComponent(f)) + "\"></script>");
@@ -158,7 +166,7 @@ Zotero.Annotaters = {};
 			};
 			var self = this;
 			this._curCallbacks = {};
-			_.each(toolCallbacks, function(mode, elID){
+			forEachInObj(toolCallbacks, function(mode, elID){
 				var el = browserDoc.getElementById(elID);
 				self._curCallbacks[elID] = function() {
 					self._contentDoc.defaultView.wrappedJSObject.mode(mode);
@@ -172,7 +180,7 @@ Zotero.Annotaters = {};
 		},
 		teardownCallbacks: function(browserDoc) {
 			var self = this;
-			_.each(self._curCallbacks, function(cb, elID){
+			forEachInObj(self._curCallbacks, function(cb, elID){
 				browserDoc.getElementById(elID).removeEventListener("command", cb, false);
 			});
 			self._curCallbacks = {};
@@ -228,7 +236,6 @@ Zotero.Annotaters = {};
 		shouldSave: function() {
 			//return JSON.parse(this._contentDoc.defaultView.wrappedJSObject.savable());
 			var ret = JSON.parse(this._contentDoc.defaultView.wrappedJSObject.savable());
-Components.utils.reportError("will save " + JSON.stringify(ret));
 			return ret;
 		},
 		setupCallbacks: function(browserDoc) {
@@ -238,7 +245,7 @@ Components.utils.reportError("will save " + JSON.stringify(ret));
 				"zotero-annotate-tb-audio-time-marker-range": "markStartEnd"
 			};
 			self._curCallbacks = {};
-			_.each(toolCallbacks, function(funcName, elID){
+			forEachInObj(toolCallbacks, function(funcName, elID){
 				var cb = self._curCallbacks[elID] = function () {
 					self._contentDoc.defaultView.wrappedJSObject[funcName]();
 				};
@@ -246,7 +253,7 @@ Components.utils.reportError("will save " + JSON.stringify(ret));
 			});
 		},
 		teardownCallbacks: function(browserDoc) {
-			_.each(this._curCallbacks, function(cb, elID){
+			forEachInObj(this._curCallbacks, function(cb, elID){
 				browserDoc.getElementById(elID).removeEventListener("command", cb, false);
 			});
 			this._curCallbacks = {};
@@ -304,7 +311,7 @@ Components.utils.reportError("will save " + JSON.stringify(ret));
 				"zotero-annotate-tb-audio-time-marker-range": "markStartEnd"
 			};
 			self._curCallbacks = {};
-			_.each(drawToolCallbacks, function(mode, elID){
+			forEachInObj(drawToolCallbacks, function(mode, elID){
 				var el = browserDoc.getElementById(elID);
 				var cb = self._curCallbacks[elID] = function() {
 					self._contentDoc.defaultView.wrappedJSObject.mode(mode);
@@ -313,7 +320,7 @@ Components.utils.reportError("will save " + JSON.stringify(ret));
 				el.addEventListener("command", cb, false);
 				if (mode == self._mode) el.checked = true;
 			});
-			_.each(markToolCallbacks, function(funcName, elID){
+			forEachInObj(markToolCallbacks, function(funcName, elID){
 				var cb = self._curCallbacks[elID] = function () {
 					self._contentDoc.defaultView.wrappedJSObject[funcName]();
 				};
@@ -321,7 +328,7 @@ Components.utils.reportError("will save " + JSON.stringify(ret));
 			});
 		},
 		teardownCallbacks: function(browserDoc) {
-			_.each(this._curCallbacks, function(cb, elID){
+			forEachInObj(this._curCallbacks, function(cb, elID){
 				browserDoc.getElementById(elID).removeEventListener("command", cb, false);
 			});
 			this._curCallbacks = {};

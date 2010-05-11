@@ -39,8 +39,6 @@
 // Class to interface with the browser when ingesting data
 
 var Zotero_Browser = new function() {
-	var _ = Zotero.Libs._;
-
 	this.init = init;
 	this.scrapeThisPage = scrapeThisPage;
 	this.chromeLoad = chromeLoad;
@@ -308,7 +306,7 @@ var Zotero_Browser = new function() {
 					// enable annotation
 									var oldAnnos = [];
 									var oldCtxs = Zotero.DB.query("SELECT sourceOacCtxID FROM oacAnnotations WHERE targetItemID = ?", attachmentID);
-									_.each(oldCtxs, function(r){
+									oldCtxs.forEach(function(r){
 										// Note: theoretically contexts can have multiple segments associated with them. We're ignoring this for now.
 										var json = Zotero.DB.valueQuery("SELECT json FROM oacSegments WHERE oacCtxID = ?", [r.sourceOacCtxID]);
 										oldAnnos.push(JSON.parse(json));
@@ -321,13 +319,13 @@ var Zotero_Browser = new function() {
 
 												// TODO: once triggers are in place, simplify this
 												var old = Zotero.DB.query("SELECT oacAnnotationID, sourceOacCtxID FROM oacAnnotations WHERE targetItemID = ?", attachmentID);
-												_.each(old, function(r){
+												old.forEach(function(r){
 													Zotero.DB.query("DELETE FROM oacSegments WHERE oacCtxID = ?", [r.sourceOacCtxID]);
 													Zotero.DB.query("DELETE FROM oacContexts WHERE oacCtxID = ?", [r.sourceOacCtxID]);
 													Zotero.DB.query("DELETE FROM oacAnnotations WHERE oacAnnotationID = ?", [r.oacAnnotationID]);
 												});
 
-												_.each(objs, function(o){
+												objs.forEach(function(o){
 													var ctxID = Zotero.DB.query("INSERT INTO oacContexts DEFAULT VALUES");
 													Zotero.DB.query("INSERT INTO oacAnnotations (targetItemID, sourceOacCtxID) VALUES (?, ?)", [attachmentID, ctxID]);
 													Zotero.DB.query("INSERT INTO oacSegments (oacCtxID, json) VALUES (?, ?)", [ctxID, JSON.stringify(o)]);
@@ -435,7 +433,7 @@ var Zotero_Browser = new function() {
 			if(this.lastAnoObj) this.lastAnoObj.teardownCallbacks(document);
 			if(anoObj) anoObj.setupCallbacks(document);
 			this.lastAnoObj = anoObj;
-			_.each(document.getElementsByTagName("toolbar"), function(el) {
+			Array.forEach(document.getElementsByTagName("toolbar"), function(el) {
 				// only touch Zotero's annotation toolbars
 				if(!/\bzotero-annotate-tb\b/.test(el.className)) return;
 

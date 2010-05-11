@@ -16,7 +16,6 @@ var ZoteroWrapped = this;
 
 var xpcomFiles = [
 	'zotero',
-        'libs',
 	'annotate',
 	'attachments',
 	'collectionTreeView',
