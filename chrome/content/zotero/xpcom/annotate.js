@@ -75,6 +75,7 @@ Zotero.Annotaters = {};
 	const Ci = Components.interfaces;
 
 	function forEachInObj(o, func) {
+		if (o === null || func === null) return;
 		for (var p in o) {
 			if (o.hasOwnProperty(p)) func(o[p], p);
 		}
@@ -110,7 +111,7 @@ Zotero.Annotaters = {};
 	function buildScriptDeps(deps) {
 		var ret = [];
 		forEachInObj(deps, function (fl, dir) {
-			fl.forEach(function(f) {
+			(fl || []).forEach(function(f) {
 				ret.push("<script src=\"chrome://zotero-content/content/" +
 					escapeHTML(encodeURIComponent(dir)) + "/" +
 					escapeHTML(encodeURIComponent(f)) + "\"></script>");
