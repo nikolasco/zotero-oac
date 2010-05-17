@@ -144,7 +144,8 @@ Zotero.Annotaters = {};
 			"<div class='zotero'><img src='chrome://zotero-content/skin/annotations/images/zotero_logo.png' class='logo'/></div>"+
 			"<img id=\"to-mark\" src=\"" + escapeHTML(zoteroURI) + "\" />\n" +
 			buildScriptDeps({
-				"libs": ["jquery.js", "raphael.js", "underscore.js"],
+				"libs": ["jquery.js", "raphael.js", "underscore.js",
+					"AXE/Namespace.js", "AXE/Geometry.js"],
 				"annotations": ["VectorDrawer.js", "ImageVectorDrawer.js"]
 			}) +
 			"\n</body></html>";

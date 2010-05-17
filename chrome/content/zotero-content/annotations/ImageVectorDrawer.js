@@ -52,7 +52,12 @@ $.extend(Note.prototype, {
 
 var drawer;
 function build(mode, scale, old) {
-	drawer = new VectorDrawer(mode, scale, old, $("#to-mark"), Note);
+	drawer = new VectorDrawer({
+		mode: mode,
+//		scale: scale,
+		objects: old,
+		overElement: $("#to-mark"),
+		auxClass: Note});
 }
 
 function savable() {
